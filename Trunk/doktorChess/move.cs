@@ -10,14 +10,14 @@ namespace doktorChess
         public bool isCapture = false;
         public square capturedSquare;
         private pieceType _type;
-        private readonly string _movingPieceNotation;
+        private readonly square _srcSquare;
 
         public move(square src, square dst)
         {
             srcPos = src.position;
             dstPos = dst.position;
             _type = src.type;
-            _movingPieceNotation = src.ToString();
+            _srcSquare = src;
 
             // If we are capturing, fill in relevant info.
             if (dst.type != pieceType.none)
@@ -51,8 +51,8 @@ namespace doktorChess
             StringBuilder toRet = new StringBuilder();
 
             // Append a letter indicating the piece moving
-            if (_movingPieceNotation != "p")
-                toRet.Append(_movingPieceNotation);
+            if (_srcSquare.type != pieceType.pawn)
+                toRet.Append(_srcSquare.ToString());
             // Now append a chess-style coordinate.
             toRet.Append(dstPos.ToString(moveStringStyle.chessNotation));
 

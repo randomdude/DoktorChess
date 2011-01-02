@@ -12,7 +12,7 @@ namespace doktorChess
 
         public override List<move> getPossibleMoves(Board onThis )
         {
-            List<move> toRet = new List<move>(2);
+            List<move> toRet = new List<move>(4);
 
             // We can capture upward diagonally, if immediate diagonal upward squares 
             // contain an enemy piece.

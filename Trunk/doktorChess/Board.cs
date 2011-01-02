@@ -14,6 +14,19 @@ namespace doktorChess
 
         private readonly square[,] _squares = new square[sizeX, sizeY];
 
+        /// <summary>
+        /// Lookaside list of squares occupied by white pieces
+        /// </summary>
+        private List<square> whitePieceSquares = new List<square>();
+
+        /// <summary>
+        /// Lookaside list of squares occupied by black pieces
+        /// </summary>
+        private List<square> blackPieceSquares = new List<square>();
+
+        // Keep some search stats in here
+        public moveSearchStats stats;
+
         public Board ()
         {
             for (int y = 0; y < sizeY; y++)
@@ -52,6 +65,14 @@ namespace doktorChess
         public square addPiece(int x, int y, pieceType newType, pieceColour newColour)
         {
             _squares[x, y] = square.makeSquare(newType, newColour, new squarePos(x, y));
+
+            if (newColour == pieceColour.white)
+                whitePieceSquares.Add(_squares[x, y]);
+            else if (newColour == pieceColour.black)
+                blackPieceSquares.Add(_squares[x, y]);
+            else
+                throw new ArgumentException();
+
             return _squares[x, y];
         }
 
@@ -83,23 +104,22 @@ namespace doktorChess
 
         public List<square> getPiecesForColour(pieceColour toMoveColour)
         {
-            List<square> occupied = new List<square>(sizeX * sizeY);
-            foreach (square thisSquare in _squares)
-            {
-                if (thisSquare.type != pieceType.none && 
-                    thisSquare.colour == toMoveColour)
-                    occupied.Add(thisSquare);
-            }
-            return occupied;
+            if (toMoveColour == pieceColour.white)
+                return whitePieceSquares;
+            else if (toMoveColour == pieceColour.black)
+                return blackPieceSquares;
+            else
+                throw new ArgumentException();
+
         }
 
         public int getScore(pieceColour myPieceColour)
         {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
             List<square> myPieces = getPiecesForColour(myPieceColour);
             List<square> enemyPieces = getPiecesForColour(getOtherSide(myPieceColour));
 
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
             BoardScorer scorer = new BoardScorer(myPieces, enemyPieces );
             scorer.setGameStatus(getGameStatus(myPieces, enemyPieces));
             int toRet = scorer.getScore();
@@ -158,9 +178,11 @@ namespace doktorChess
                 return gameStatus.drawn;
 
             // The game is won if a pawn has made it to the other side of the board.
-            List<square> allPieces = getPiecesForAllColours();
+            List<square> allPieces = new List<square>( whitePieceSquares.Count + blackPieceSquares.Count );
+            allPieces.AddRange(getPiecesForColour(pieceColour.white));
+            allPieces.AddRange(getPiecesForColour(pieceColour.black));
 
-            foreach (var piece in allPieces)
+            foreach (square piece in allPieces)
             {
                 if (piece.type != pieceType.pawn)
                     continue;
@@ -178,16 +200,6 @@ namespace doktorChess
 
             return gameStatus.inProgress;
         }
-
-        private List<square> getPiecesForAllColours()
-        {
-            List<square> allPieces = getPiecesForColour(pieceColour.white);
-            allPieces.AddRange(getPiecesForColour(pieceColour.black));
-            return allPieces;
-        }
-
-        // Keep some stats
-        public moveSearchStats stats;
 
         public lineAndScore findBestMove(pieceColour playerCol)
         {
@@ -261,7 +273,7 @@ namespace doktorChess
                     {
                         bestLineSoFar.finalScore = thisMove.finalScore;
                         bestLineSoFar.line[searchDepth - depthLeft] = consideredMove;
-                        for (int index = 0; index < thisMove.line.GetUpperBound(0) + 1; index++)
+                        for (int index = 0; index < thisMove.line.Length; index++)
                         {
                             if (thisMove.line[index] != null)
                                 bestLineSoFar.line[index] = thisMove.line[index];
@@ -275,6 +287,29 @@ namespace doktorChess
             return bestLineSoFar;
         }
 
+        public void doMove(move move)
+        {
+            square src = this[move.srcPos];
+            square dst = this[move.dstPos];
+
+            square tmp = dst;
+            this[move.dstPos] = this[move.srcPos];
+            this[move.srcPos] = tmp;
+
+            this[move.dstPos].position = move.dstPos;
+            this[move.srcPos] = new square(move.srcPos);
+
+            if (move.isCapture)
+            {
+                if (dst.colour == pieceColour.white)
+                    whitePieceSquares.Remove(dst);
+                else if (dst.colour == pieceColour.black)
+                    blackPieceSquares.Remove(dst);
+            }
+
+            src.movedCount++;
+        }
+
         private void undoMove(move move)
         {
             this[move.srcPos] = this[move.dstPos];
@@ -283,6 +318,11 @@ namespace doktorChess
             if (move.isCapture)
             {
                 this[move.dstPos] = move.capturedSquare;
+
+                if (move.capturedSquare.colour == pieceColour.white)
+                    whitePieceSquares.Add(move.capturedSquare);
+                else if (move.capturedSquare.colour == pieceColour.black)
+                    blackPieceSquares.Add(move.capturedSquare);
             }
             else
             {
@@ -292,20 +332,6 @@ namespace doktorChess
             this[move.dstPos].movedCount--;
         }
 
-        public void doMove(move move)
-        {
-            square src = this[move.srcPos] ;
-            square dst = this[move.dstPos] ;
-
-            square tmp = dst;
-            this[move.dstPos] = this[move.srcPos];
-            this[move.srcPos] = tmp;
-
-            this[move.dstPos].position = move.dstPos;
-            this[move.srcPos] = new square(move.srcPos);
-
-            src.movedCount++;
-        }
     }
 
     public class moveSearchStats

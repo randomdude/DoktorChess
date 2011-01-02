@@ -37,7 +37,7 @@ namespace Tests
             ourBoard.searchDepth = depth;
             lineAndScore bestLine = ourBoard.findBestMove(pieceColour.white);
 
-            for (int i = 0; i < bestLine.line.GetUpperBound(0); i++)
+            for (int i = 0; i < bestLine.line.Length; i++)
             {
                 if (bestLine.line[i] != null)
                     Debug.WriteLine(bestLine.line[i].ToString());
@@ -61,7 +61,7 @@ namespace Tests
             ourBoard.searchDepth = 0;
             lineAndScore bestLine = ourBoard.findBestMove(pieceColour.white);
 
-            for (int i = 0; i < bestLine.line.GetUpperBound(0); i++)
+            for (int i = 0; i < bestLine.line.Length; i++)
             {
                 if (bestLine.line[i] != null)
                     Debug.WriteLine(bestLine.line[i].ToString());

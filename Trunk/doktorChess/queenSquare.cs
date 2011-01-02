@@ -13,7 +13,7 @@ namespace doktorChess
 
         public override List<move> getPossibleMoves(Board onThis)
         {
-            List<move> toRet = new List<move>(20);
+            List<move> toRet = new List<move>(35);
 
             toRet.AddRange(getMovesForVector(onThis, vectorDirection.left));
             toRet.AddRange(getMovesForVector(onThis, vectorDirection.right));
