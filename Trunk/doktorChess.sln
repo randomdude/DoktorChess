@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{8289FFE2-580D-45DE-89A0-D0EF3790EAE9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3E1E41E4-7F0E-414A-81CB-8B56F943F28D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "doktorChess", "doktorChess\doktorChess.csproj", "{6B583D3F-16E3-4CFB-8B4A-8CE786724534}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8289FFE2-580D-45DE-89A0-D0EF3790EAE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8289FFE2-580D-45DE-89A0-D0EF3790EAE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8289FFE2-580D-45DE-89A0-D0EF3790EAE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8289FFE2-580D-45DE-89A0-D0EF3790EAE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B583D3F-16E3-4CFB-8B4A-8CE786724534}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B583D3F-16E3-4CFB-8B4A-8CE786724534}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B583D3F-16E3-4CFB-8B4A-8CE786724534}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B583D3F-16E3-4CFB-8B4A-8CE786724534}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

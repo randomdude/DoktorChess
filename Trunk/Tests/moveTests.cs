@@ -1,0 +1,27 @@
+﻿using doktorChess;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Tests
+{
+    [TestClass]
+    public class moveTests
+    {
+        [TestMethod]
+        public void verifyMoveConstructorWithCapture()
+        {
+            // Make two occupied squares and construct a move from one to the other. Test
+            // that the capture is correctly propagated to the move.
+            square src = new pawnSquare(new squarePos(1, 1), pieceColour.black);
+            square dst = new pawnSquare(new squarePos(2, 1), pieceColour.white);
+
+            move captureMove = new move(src, dst);
+
+            // First, check that the move has the correct squares associated with it..
+            Assert.IsTrue(captureMove.srcPos.isSameSquareAs(src.position));
+            Assert.IsTrue(captureMove.dstPos.isSameSquareAs(dst.position));
+
+            Assert.IsTrue(captureMove.isCapture);
+            Assert.IsTrue(captureMove.capturedSquare == dst);
+        }
+    }
+}
