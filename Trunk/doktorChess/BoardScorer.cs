@@ -47,16 +47,24 @@ namespace doktorChess
             return toRet;
         }
 
-        private int getMaterialAdvantage(pieceType pieces)
+        private static int getMaterialAdvantage(pieceType pieces)
         {
             switch (pieces)
             {
                 case pieceType.none:
                     return 0;
-                case pieceType.queen:
-                    return 8;
                 case pieceType.pawn:
                     return 1;
+                case pieceType.bishop:
+                    return 3;
+                case pieceType.knight:
+                    return 3;
+                case pieceType.rook:
+                    return 5;
+                case pieceType.queen:
+                    return 8;
+                case pieceType.king:
+                    return int.MaxValue;
                 default:
                     throw new ArgumentOutOfRangeException("Unrecognised piece");
             }

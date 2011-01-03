@@ -10,7 +10,7 @@ namespace Tests
     {
         public void testVectorMovement(List<squarePos> expectedPos, vectorDirection dir)
         {
-            Board ourBoard = new Board();
+            Board ourBoard = new Board(gameType.queenAndPawns);
             squarePos srcSquare = new squarePos(3, 3);
 
             ourBoard.addPiece(srcSquare.x, srcSquare.y, pieceType.queen, pieceColour.white);

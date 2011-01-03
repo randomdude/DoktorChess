@@ -6,24 +6,35 @@ namespace doktorChess
     public class square
     {
         public int movedCount;
-        public pieceType type { get; set; }
-        public pieceColour colour { get; set; }
+        public pieceType type { get; protected set; }
+        public pieceColour colour { get; private set; }
         public squarePos position { get; set; }
-        public string chessNotation { get { return ""; } }
 
         public static square makeSquare(pieceType newType, pieceColour newColour, squarePos newPos)
         {
-            square toRet = null;
+            square toRet ;
             switch (newType)
             {
                 case pieceType.none:
                     toRet = new square(newPos);
                     break;
+                case pieceType.pawn:
+                    toRet = new pawnSquare(newPos, newColour);
+                    break;
+                case pieceType.rook:
+                    toRet = new rookSquare(newPos, newColour);
+                    break;
+                case pieceType.bishop:
+                    toRet = new bishopSquare(newPos, newColour);
+                    break;
+                case pieceType.knight:
+                    toRet = new knightSquare(newPos, newColour);
+                    break;
                 case pieceType.queen:
                     toRet = new queenSquare(newPos, newColour);
                     break;
-                case pieceType.pawn:
-                    toRet = new pawnSquare(newPos, newColour);
+                case pieceType.king:
+                    toRet = new kingSquare(newPos, newColour);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -54,27 +65,17 @@ namespace doktorChess
 
         public new string ToString()
         {
-            string toRet;
-
-            switch (type)
-            {
-                case pieceType.none:
-                    toRet = ".";
-                    break;
-                case pieceType.queen:
-                    toRet = "q";
-                    break;
-                case pieceType.pawn:
-                    toRet = "p";
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            string toRet = getPieceNotation();
 
             if (colour == pieceColour.black)
                 toRet = toRet.ToUpper();
 
             return toRet;
+        }
+
+        public virtual string getPieceNotation()
+        {
+            return ".";
         }
 
         virtual public List<move> getPossibleMoves(Board onThis)
@@ -208,6 +209,50 @@ namespace doktorChess
         public bool containsPieceNotOfColour(pieceColour ourColour)
         {
             return ((type != pieceType.none) && (colour != ourColour));
+        }
+
+        protected List<move> findFreeOrCapturableIfOnBoard(Board onThis, squarePosOffset[] potentialSquareOffsets)
+        {
+            List<move> toRet = new List<move>(potentialSquareOffsets.Length);
+
+            foreach (squarePosOffset potentialSquareOffset in potentialSquareOffsets)
+            {
+                if (potentialSquareOffset.x + position.x > Board.sizeX - 1 ||
+                    potentialSquareOffset.x + position.x < 0  ||
+                    potentialSquareOffset.y + position.y > Board.sizeY - 1||
+                    potentialSquareOffset.y + position.y < 0 )
+                    continue;
+
+                square destSquare = onThis[potentialSquareOffset.x + position.x, potentialSquareOffset.y + position.y];
+
+                if (destSquare.type == pieceType.none)
+                {
+                    // Square is free.
+                    toRet.Add(new move(this, destSquare));
+                }
+                else
+                {
+                    if (destSquare.colour != this.colour)
+                    {
+                        // We can capture.
+                        toRet.Add(new move(this, destSquare));
+                    }
+                }
+            }
+
+            return toRet;
+        }
+    }
+
+    public class squarePosOffset
+    {
+        public readonly int x;
+        public readonly int y;
+
+        public squarePosOffset(int newX, int newY)
+        {
+            x = newX;
+            y = newY;
         }
     }
 }

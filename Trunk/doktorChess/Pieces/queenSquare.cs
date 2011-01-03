@@ -1,14 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace doktorChess
 {
-    public class queenSquare: square
+    public class queenSquare : square
     {
         public queenSquare(squarePos newPos, pieceColour newColour)
             :base(newPos, newColour)
         {
             type = pieceType.queen;
+        }
+
+        public override string getPieceNotation()
+        {
+            return "q";
         }
 
         public override List<move> getPossibleMoves(Board onThis)

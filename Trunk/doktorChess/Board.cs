@@ -10,9 +10,14 @@ namespace doktorChess
         public const int sizeX = 8;
         public const int sizeY = 8;
 
-        public int searchDepth = 4;
+        public int searchDepth = 5;
+
+        private gameType _type;
 
         private readonly square[,] _squares = new square[sizeX, sizeY];
+
+        private bool _whiteKingCaptured = false;
+        private bool _blackKingCaptured = false;
 
         /// <summary>
         /// Lookaside list of squares occupied by white pieces
@@ -27,7 +32,7 @@ namespace doktorChess
         // Keep some search stats in here
         public moveSearchStats stats;
 
-        public Board ()
+        public Board (gameType newType)
         {
             for (int y = 0; y < sizeY; y++)
             {
@@ -35,7 +40,8 @@ namespace doktorChess
                 {
                     _squares[x, y] = new square(new squarePos(x,y));
                 }
-            }            
+            }
+            _type = newType;
         }
 
         public square this[squarePos myPos]
@@ -52,12 +58,41 @@ namespace doktorChess
 
         public static Board makeQueenAndPawnsStartPosition()
         {
-            Board newBoard = new Board();
+            Board newBoard = new Board(gameType.queenAndPawns);
 
             for (int x = 0; x < sizeX; x++)
                 newBoard.addPiece(x, 1, pieceType.pawn, pieceColour.white);
 
             newBoard.addPiece(3, 7, pieceType.queen, pieceColour.black);
+
+            return newBoard;
+        }
+
+        public static Board makeNormalStartPosition()
+        {
+            Board newBoard = new Board(gameType.normal);
+
+            // Apply two rows of pawns
+            for (int x = 0; x < sizeX; x++)
+            {
+                newBoard.addPiece(x, 1, pieceType.pawn, pieceColour.white);
+                newBoard.addPiece(x, 6, pieceType.pawn, pieceColour.black);
+            }
+
+            // And now fill in the two end ranks.
+            foreach (int y in new int[] {0, 7})
+            {
+                pieceColour col = (y == 0 ? pieceColour.white : pieceColour.black);
+
+                newBoard.addPiece(0, y, pieceType.rook, col);
+                newBoard.addPiece(1, y, pieceType.knight, col);
+                newBoard.addPiece(2, y, pieceType.bishop, col);
+                newBoard.addPiece(3, y, pieceType.queen, col);
+                newBoard.addPiece(4, y, pieceType.king, col);
+                newBoard.addPiece(5, y, pieceType.bishop, col);
+                newBoard.addPiece(6, y, pieceType.knight, col);
+                newBoard.addPiece(7, y, pieceType.rook, col);
+            }
 
             return newBoard;
         }
@@ -152,8 +187,49 @@ namespace doktorChess
 
         public gameStatus getGameStatus(List<square> myPieces, List<square> enemyPieces)
         {
-            // For queen-and-pawns, for now.
+            if (_type == gameType.queenAndPawns)
+                return getGameStatusForQueenAndPawns(myPieces, enemyPieces);
+            else if (_type == gameType.normal)
+                return getGameStatusForNormal(myPieces, enemyPieces);
+            else
+                throw  new ArgumentException();
+        }
 
+        private gameStatus getGameStatusForNormal(List<square> myPieces, List<square> enemyPieces)
+        {
+            // The game is over if either side has no pieces left
+            if (myPieces.Count == 0)
+                return gameStatus.lost;
+            if (enemyPieces.Count == 0)
+                return gameStatus.won;
+
+            // Now we are certain we have pieces, we can identify our side.
+            pieceColour myCol = myPieces[0].colour;
+
+            if (_whiteKingCaptured)
+                return myCol == pieceColour.white ? gameStatus.lost : gameStatus.won;
+            else if (_blackKingCaptured)
+                return myCol == pieceColour.black ? gameStatus.lost : gameStatus.won;
+
+            // If the current player cannot move, it is a draw.
+            bool movesFound = false;
+            foreach (square myPiece in myPieces)
+            {
+                if (myPiece.getPossibleMoves(this).Count != 0)
+                {
+                    movesFound = true;
+                    break;
+                }
+            }
+
+            if (!movesFound)
+                return gameStatus.drawn;
+
+            return gameStatus.inProgress;
+        }
+
+        private gameStatus getGameStatusForQueenAndPawns(List<square> myPieces, List<square> enemyPieces)
+        {
             // The game is over if either side has no pieces left
             if (myPieces.Count == 0)
                 return gameStatus.lost;
@@ -187,10 +263,10 @@ namespace doktorChess
                 if (piece.type != pieceType.pawn)
                     continue;
 
-                if ( (piece.position.y == sizeY-1 && piece.colour == pieceColour.white ) ||
+                if ( (piece.position.y == sizeY - 1 && piece.colour == pieceColour.white ) ||
                      (piece.position.y == 0 && piece.colour == pieceColour.black ) )
                 {
-                    // We have won the game if it is ours., or lost if not.
+                    // We have won the game if it is ours, or lost if not.
                     if (myCol == piece.colour )
                         return gameStatus.won;
                     else
@@ -305,6 +381,16 @@ namespace doktorChess
                     whitePieceSquares.Remove(dst);
                 else if (dst.colour == pieceColour.black)
                     blackPieceSquares.Remove(dst);
+
+                if (dst.type == pieceType.king )
+                {
+                    if (dst.colour == pieceColour.black)
+                        _blackKingCaptured = true;
+                    else if (dst.colour == pieceColour.white)
+                        _whiteKingCaptured = true;
+                    else
+                        throw new ArgumentException();
+                }
             }
 
             src.movedCount++;
@@ -323,6 +409,16 @@ namespace doktorChess
                     whitePieceSquares.Add(move.capturedSquare);
                 else if (move.capturedSquare.colour == pieceColour.black)
                     blackPieceSquares.Add(move.capturedSquare);
+
+                if (move.capturedSquare.type == pieceType.king)
+                {
+                    if (move.capturedSquare.colour == pieceColour.black)
+                        _blackKingCaptured = false;
+                    else if (move.capturedSquare.colour == pieceColour.white)
+                        _whiteKingCaptured = false;
+                    else
+                        throw new ArgumentException();
+                }
             }
             else
             {
@@ -332,6 +428,11 @@ namespace doktorChess
             this[move.dstPos].movedCount--;
         }
 
+    }
+
+    public enum gameType
+    {
+        normal, queenAndPawns
     }
 
     public class moveSearchStats

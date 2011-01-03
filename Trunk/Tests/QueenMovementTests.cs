@@ -46,13 +46,13 @@ namespace Tests
         [TestMethod]        
         public void testQueenMovement()
         {
-            Board ourBoard = new Board();
+            Board ourBoard = new Board(gameType.queenAndPawns);
             squarePos srcSquare = new squarePos(3, 3);
 
             ourBoard.addPiece(srcSquare.x, srcSquare.y, pieceType.queen, pieceColour.white);
             queenSquare queenie = (queenSquare) ourBoard[srcSquare];
 
-            List<move> possibleMoves = (List<move>) queenie.getPossibleMoves(ourBoard);
+            List<move> possibleMoves = queenie.getPossibleMoves(ourBoard);
             List<move> expectedmoves = getExpectedMoveSquares(queenie);
 
             VectorMovementTests.testListsAreOfSameMoves(expectedmoves, possibleMoves);
@@ -61,7 +61,7 @@ namespace Tests
         [TestMethod]
         public void testQueenMovementWithCapture()
         {
-            Board ourBoard = new Board();
+            Board ourBoard = new Board(gameType.queenAndPawns);
             squarePos srcSquare = new squarePos(3, 3);
 
             ourBoard.addPiece(srcSquare.x, srcSquare.y, pieceType.queen, pieceColour.white);
@@ -71,7 +71,7 @@ namespace Tests
             // that we cannot move through it.
             ourBoard.addPiece(1, 1, pieceType.pawn, pieceColour.black);
 
-            List<move> possibleMoves = (List<move>)queenie.getPossibleMoves(ourBoard);
+            List<move> possibleMoves = queenie.getPossibleMoves(ourBoard);
             List<move> expectedmoves = getExpectedMoveSquares(queenie);
 
             // We don't expect to be able to move to (0,0), since that square is behind an

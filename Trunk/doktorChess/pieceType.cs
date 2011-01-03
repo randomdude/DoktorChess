@@ -2,6 +2,6 @@
 {
     public enum pieceType
     {
-        none, queen, pawn
+        none, queen, pawn, bishop, rook, king, knight
     }
 }

@@ -51,7 +51,7 @@ namespace Tests
         [TestMethod]
         public void testAsWinningMoveAsWhiteToPlay()
         {
-            Board ourBoard = new Board();
+            Board ourBoard = new Board(gameType.queenAndPawns);
             ourBoard.addPiece(3, 4, pieceType.queen, pieceColour.black);
             ourBoard.addPiece(0, 4, pieceType.pawn, pieceColour.white);
             ourBoard.addPiece(1, 6, pieceType.pawn, pieceColour.white);
@@ -76,7 +76,7 @@ namespace Tests
         public void testSpecificPosition()
         {
             // Test a  specific position which is giving me trouble.
-            Board ourboard = new Board();
+            Board ourboard = new Board(gameType.queenAndPawns);
 
             ourboard.addPiece(0, 4, pieceType.pawn, pieceColour.white).movedCount++;
             ourboard.addPiece(1, 1, pieceType.pawn, pieceColour.white).movedCount++;

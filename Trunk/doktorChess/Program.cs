@@ -6,7 +6,9 @@ namespace doktorChess
     {
         static void Main(string[] args)
         {
-            Board myBoard = Board.makeQueenAndPawnsStartPosition();
+            //Board myBoard = Board.makeQueenAndPawnsStartPosition();
+            Board myBoard = Board.makeNormalStartPosition();
+            myBoard.searchDepth = 4;
 
             pieceColour toPlay = pieceColour.white;
 

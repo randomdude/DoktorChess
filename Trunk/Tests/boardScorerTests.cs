@@ -35,7 +35,7 @@ namespace Tests
         {
             // Generate a board which is lost via the 'no pieces remain' rule, and verify
             // we get the correct score.
-            Board ourboard = new Board();
+            Board ourboard = new Board(gameType.queenAndPawns);
             ourboard.addPiece(1,1,pieceType.pawn, pieceColour.black);
 
             // position is lost for white..
@@ -52,7 +52,7 @@ namespace Tests
         {
             // We make two different boards here to test two different scenarios - if a black
             // pawn is at rank 0 and a white at rank 7.
-            Board pawnAt0 = new Board();
+            Board pawnAt0 = new Board(gameType.queenAndPawns);
             pawnAt0.addPiece(1, 0, pieceType.pawn, pieceColour.black);
 
             // position is lost for white..
@@ -64,7 +64,7 @@ namespace Tests
             Assert.AreEqual(int.MaxValue, blackScorer.getScore());
 
             // Now the white pawn at rank 7.
-            Board pawnAt7 = new Board();
+            Board pawnAt7 = new Board(gameType.queenAndPawns);
             pawnAt7.addPiece(1, 7, pieceType.pawn, pieceColour.white);
 
             whiteScorer = new BoardScorer(pawnAt7, pieceColour.white);
@@ -78,7 +78,7 @@ namespace Tests
         {
             // Generate a board two pawns, deadlocked in front of each other. This should
             // be a draw via stalemate.
-            Board ourboard = new Board();
+            Board ourboard = new Board(gameType.queenAndPawns);
             ourboard.addPiece(1, 1, pieceType.pawn, pieceColour.black);
             ourboard.addPiece(1, 2, pieceType.pawn, pieceColour.white);
 

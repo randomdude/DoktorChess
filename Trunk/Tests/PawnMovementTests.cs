@@ -11,13 +11,13 @@ namespace Tests
         [TestMethod]
         public void testInitialPawnMovement()
         {
-            Board ourBoard = new Board();
-            ourBoard.addPiece(1,1, pieceType.pawn, pieceColour.black);
+            Board ourBoard = new Board(gameType.queenAndPawns);
+            ourBoard.addPiece(1,1, pieceType.pawn, pieceColour.white);
             square ourPawn = ourBoard[1, 1];
 
             List<move> actual = (List<move>) ourPawn.getPossibleMoves(ourBoard);
 
-            // We expect that the pawn can move two spaces forward, or one space foward.
+            // We expect that the pawn can move two spaces forward, or one space forward.
             List<move> expected = new List<move>
                                       {
                                           new move(ourPawn, ourBoard[1, 2]),
@@ -31,16 +31,15 @@ namespace Tests
         public void testNonInitialPawnMovement()
         {
             // Pawns can only move one square after their initial move.
-            Board ourBoard = new Board();
-            ourBoard.addPiece(1, 1, pieceType.pawn, pieceColour.black);
-            square ourPawn = ourBoard[1, 1];
+            Board ourBoard = new Board(gameType.queenAndPawns);
+            square ourPawn = ourBoard.addPiece(1, 1, pieceType.pawn, pieceColour.white );
 
             // Mark pawn as having moved
             ourPawn.movedCount++;
 
             List<move> actual = ourPawn.getPossibleMoves(ourBoard);
 
-            // We expect that the pawn can move one space foward only.
+            // We expect that the pawn can move one space forward only.
             List<move> expected = new List<move>
                                       {
                                           new move(ourPawn, ourBoard[1, 2])
@@ -55,9 +54,9 @@ namespace Tests
             // Spawn a black pawn at 0,3 and a white pawn at 1,4. Verify that the black
             // pawn can capture the white.
 
-            Board ourBoard = new Board();
-            square ourPawn = ourBoard.addPiece(0, 3, pieceType.pawn, pieceColour.black);
-            square enemyPawn = ourBoard.addPiece(1, 4, pieceType.pawn, pieceColour.white);
+            Board ourBoard = new Board(gameType.queenAndPawns);
+            square ourPawn = ourBoard.addPiece(0, 3, pieceType.pawn, pieceColour.white);
+            square enemyPawn = ourBoard.addPiece(1, 4, pieceType.pawn, pieceColour.black);
 
             List<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
 
@@ -68,9 +67,9 @@ namespace Tests
         public void testPawnMovementWithCaptureCol7()
         {
             // Now test the same, at the other end of the board. Test on the edge.
-            Board ourBoard = new Board();
-            square ourPawn = ourBoard.addPiece(6, 3, pieceType.pawn, pieceColour.black);
-            square enemyPawn = ourBoard.addPiece(7, 4, pieceType.pawn, pieceColour.white);
+            Board ourBoard = new Board(gameType.queenAndPawns);
+            square ourPawn = ourBoard.addPiece(6, 3, pieceType.pawn, pieceColour.white);
+            square enemyPawn = ourBoard.addPiece(7, 4, pieceType.pawn, pieceColour.black);
 
             List<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
 

@@ -51,13 +51,17 @@
     <Compile Include="lineAndScore.cs" />
     <Compile Include="move.cs" />
     <Compile Include="moveStringStyle.cs" />
-    <Compile Include="pawnSquare.cs" />
+    <Compile Include="Pieces\bishopSquare.cs" />
+    <Compile Include="Pieces\kingSquare.cs" />
+    <Compile Include="Pieces\knightSquare.cs" />
+    <Compile Include="Pieces\pawnSquare.cs" />
     <Compile Include="pieceColour.cs" />
+    <Compile Include="Pieces\rookSquare.cs" />
     <Compile Include="pieceType.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="queenSquare.cs" />
-    <Compile Include="square.cs" />
+    <Compile Include="Pieces\queenSquare.cs" />
+    <Compile Include="Pieces\square.cs" />
     <Compile Include="squarePos.cs" />
     <Compile Include="vectorDirection.cs" />
   </ItemGroup>
