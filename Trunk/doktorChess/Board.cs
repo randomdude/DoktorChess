@@ -380,7 +380,7 @@ namespace doktorChess
                         }
                         else
                         {
-                            if (max < bestLineSoFar.finalScore)
+                            if (max > bestLineSoFar.finalScore)
                                 max = bestLineSoFar.finalScore;
 
                             if (max <= min)

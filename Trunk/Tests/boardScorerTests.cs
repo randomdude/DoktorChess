@@ -77,10 +77,15 @@ namespace Tests
         public void testFinishedGameScoreStalemate()
         {
             // Generate a board two pawns, deadlocked in front of each other. This should
-            // be a draw via stalemate.
+            // be a draw via stalemate. Add a third pawn to ensure that stalemate is causing
+            // the '0' board score.
             Board ourboard = new Board(gameType.queenAndPawns);
-            ourboard.addPiece(1, 1, pieceType.pawn, pieceColour.black);
+            ourboard.addPiece(1, 1, pieceType.pawn, pieceColour.white);
             ourboard.addPiece(1, 2, pieceType.pawn, pieceColour.white);
+            ourboard.addPiece(1, 3, pieceType.pawn, pieceColour.black);
+
+            Assert.IsTrue(ourboard.getGameStatus(pieceColour.white) == gameStatus.drawn);
+            Assert.IsTrue(ourboard.getGameStatus(pieceColour.black) == gameStatus.drawn);
 
             BoardScorer whiteScorer = new BoardScorer(ourboard, pieceColour.white);
             Assert.AreEqual(0, whiteScorer.getScore());
