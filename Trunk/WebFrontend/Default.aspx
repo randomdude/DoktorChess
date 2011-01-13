@@ -17,7 +17,8 @@
             
             function doMove(moveObject) {
                 var queryString = "moveHandler.ashx?ourMove=" + JSON.stringify(moveObject);
-            
+
+                markBusy();
                 xhr = new XMLHttpRequest();
                 xhr.open("GET", queryString, true);
                 xhr.onreadystatechange = helloWorldCallback;
@@ -44,6 +45,8 @@
                 var srcsq = $("[x = " + parsedJSON.movedPieceSrc.x + "][y = " + parsedJSON.movedPieceSrc.y + "]")[0];
                 var dstsq = $("[x = " + parsedJSON.movedPieceDst.x + "][y = " + parsedJSON.movedPieceDst.y + "]")[0];
 
+                markReady();
+
                 // Do a funky 'capture' animation if this is a capture
                 animateMove(srcsq, dstsq,  table, parsedJSON.newBoardHTML);
             }
@@ -53,10 +56,14 @@
             function animateMove(srcsq, dstsq, table, newTableHTML) {
 
                 var srcImageBox = $(srcsq.children[0])[0];
-                var dstImageBox = $(dstsq.children[0])[0];
-
                 alignImageToTD(srcImageBox, srcsq);
-                alignImageToTD(dstImageBox, dstsq);
+                
+                // The destination box may be empty.
+                var dstImageBox = null; 
+                if ($(dstsq.children[0]).length > 0) {
+                    dstImageBox = $(dstsq.children[0])[0];
+                    alignImageToTD(dstImageBox, dstsq);
+                }
 
                 var newTop = dstsq.getClientRects()[0].top;
                 var newLeft = dstsq.getClientRects()[0].left;
@@ -64,18 +71,23 @@
                 // Start the 'move' animation of the piece
                 $(srcImageBox).animate({ left: newLeft, top: newTop }, 'slow', function() {
                     // Move animation is over. Start to play any 'capture' animation necessary.
-
-                    $(dstImageBox).animate({    left: '-=50',
-                                                width: '+=100',
-                                                top: '-=50',
-                                                height: '+=100',
-                                                opacity: 'toggle'
-                                            }, 'slow', function() {
-                                                // OK, all FX are over. Remove the image from the srcSq and assign it to the dst.
-                                                for (var i = 0; i < dstsq.children.length; i++)
-                                                    dstsq.removeChild(dstsq.children[i]);
-                                                dstsq.appendChild(srcImageBox);
-                    });
+                    if (dstImageBox != null) {
+                        $(dstImageBox).animate({    left: '-=50',
+                                                    width: '+=100',
+                                                    top: '-=50',
+                                                    height: '+=100',
+                                                    opacity: 'toggle'
+                                                }, 'slow', function() {
+                                                    // OK, all FX are over. Remove the image from the srcSq and assign it to the dst.
+                                                    for (var i = 0; i < dstsq.children.length; i++)
+                                                        dstsq.removeChild(dstsq.children[i]);
+                                                    dstsq.appendChild(srcImageBox);
+                        });
+                    } else {
+                        for (var i = 0; i < dstsq.children.length; i++)
+                            dstsq.removeChild(dstsq.children[i]);
+                        dstsq.appendChild(srcImageBox);
+                    }
                 });
             }
 
@@ -112,6 +124,19 @@
                         doMove(toMove);
                     }
                 });
+
+                // OK, we're ready.
+                markReady();
+            }
+
+            function markBusy() {
+                $("#busygif")[0].style.visibility = "block";
+//                $($("#boardDiv")[0]).addClass('dimming');
+            }
+
+            function markReady() {
+                $("#busygif")[0].style.visibility = "hidden";
+                $($("#boardDiv")[0]).removeClass('dimming');
             }
 
             function alignImageToTD(image, td) {
@@ -124,9 +149,10 @@
 
     <body onload=" javascript: initDraggables(); ">
         <div id="ourdiv">
-            <div id="boardDiv" class="board" >
+            <div id="boardDiv" class="board dimming"  >
                 <asp:Table runat="Server" ID="board" > </asp:Table>
             </div>
+            <img src="images/status_anim.gif" id="busygif" style="visibility: block; text-align:center; display:block; " />
         </div>
     </body>
 </html>

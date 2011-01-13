@@ -13,7 +13,7 @@ namespace WebFrontend
             {
                 // Initialise a new board
                 Board newBoard = Board.makeQueenAndPawnsStartPosition();
-                newBoard.searchDepth = 2;
+                newBoard.searchDepth = 4;
 
                 Session["playerCol"] = pieceColour.white;
                 Session["board"] = newBoard;
@@ -26,8 +26,6 @@ namespace WebFrontend
 
                 return;
             }
-
-
         }
 
     }
