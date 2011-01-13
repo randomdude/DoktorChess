@@ -11,6 +11,10 @@ namespace doktorChess
         private int _myMaterialDisadvantage;
         private gameStatus _status;
 
+        // Don't use min and maxval, because they are used by searches. This keeps things clean.
+        public const int lowest = int.MinValue + 1;
+        public const int highest = int.MaxValue - 1;
+
         public BoardScorer(List<square> myPieces, List<square> enemyPieces)
         {
             commonConstructorStuff(myPieces, enemyPieces);
@@ -64,7 +68,7 @@ namespace doktorChess
                 case pieceType.queen:
                     return 8;
                 case pieceType.king:
-                    return int.MaxValue;
+                    return highest;
                 default:
                     throw new ArgumentOutOfRangeException("Unrecognised piece");
             }
@@ -78,11 +82,11 @@ namespace doktorChess
                 case gameStatus.inProgress:
                     break;
                 case gameStatus.won:
-                    return int.MaxValue;
+                    return highest;
                 case gameStatus.drawn:
                     return 0;
                 case gameStatus.lost:
-                    return int.MinValue;
+                    return lowest;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

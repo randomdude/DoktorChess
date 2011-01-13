@@ -10,22 +10,40 @@ namespace Tests
         [TestMethod]
         public void testDepthTwoAsWhiteToPlay()
         {
-            testAsWhiteToPlay(2);
+            testAsWhiteToPlay(2, false);
         }
 
         [TestMethod]
         public void testDepthThreeAsWhiteToPlay()
         {
-            testAsWhiteToPlay(3);
+            testAsWhiteToPlay(3, false);
         }
 
         [TestMethod]
         public void testDepthFourAsWhiteToPlay()
         {
-            testAsWhiteToPlay(4);
+            testAsWhiteToPlay(4, false);
         }
 
-        public static void testAsWhiteToPlay(int depth)
+        [TestMethod]
+        public void testAlphaBetaDepthTwoAsWhiteToPlay()
+        {
+            testAsWhiteToPlay(2, true);
+        }
+
+        [TestMethod]
+        public void testAlphaBetaDepthThreeAsWhiteToPlay()
+        {
+            testAsWhiteToPlay(3, true);
+        }
+
+        [TestMethod]
+        public void testAlphaBetaDepthFourAsWhiteToPlay()
+        {
+            testAsWhiteToPlay(4, true);
+        }
+
+        public static void testAsWhiteToPlay(int depth, bool useAlphaBeta)
         {
             Board ourBoard = Board.makeQueenAndPawnsStartPosition();
 
@@ -35,6 +53,7 @@ namespace Tests
             // D3 QxD3 D4xQ
             // and thus needs a search depth that deep or more.
             ourBoard.searchDepth = depth;
+            ourBoard.alphabeta = useAlphaBeta;
             lineAndScore bestLine = ourBoard.findBestMove(pieceColour.white);
 
             for (int i = 0; i < bestLine.line.Length; i++)
@@ -42,6 +61,8 @@ namespace Tests
                 if (bestLine.line[i] != null)
                     Debug.WriteLine(bestLine.line[i].ToString());
             }
+
+            Debug.WriteLine("Scored boards count: " + ourBoard.stats.boardsScored);
 
             // verify first move is from D1 to D2.
             Assert.IsTrue(bestLine.line[0].srcPos.isSameSquareAs(new squarePos(3, 1)));

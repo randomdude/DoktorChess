@@ -40,11 +40,11 @@ namespace Tests
 
             // position is lost for white..
             BoardScorer whiteScorer = new BoardScorer(ourboard, pieceColour.white);
-            Assert.AreEqual(int.MinValue, whiteScorer.getScore());
+            Assert.AreEqual(BoardScorer.lowest, whiteScorer.getScore());
 
             // and won for black.
             BoardScorer blackScorer = new BoardScorer(ourboard, pieceColour.black);
-            Assert.AreEqual(int.MaxValue, blackScorer.getScore());
+            Assert.AreEqual(BoardScorer.highest, blackScorer.getScore());
         }
 
         [TestMethod]
@@ -57,20 +57,20 @@ namespace Tests
 
             // position is lost for white..
             BoardScorer whiteScorer = new BoardScorer(pawnAt0, pieceColour.white);
-            Assert.AreEqual(int.MinValue, whiteScorer.getScore());
+            Assert.AreEqual(BoardScorer.lowest, whiteScorer.getScore());
 
             // and won for black.
             BoardScorer blackScorer = new BoardScorer(pawnAt0, pieceColour.black);
-            Assert.AreEqual(int.MaxValue, blackScorer.getScore());
+            Assert.AreEqual(BoardScorer.highest, blackScorer.getScore());
 
             // Now the white pawn at rank 7.
             Board pawnAt7 = new Board(gameType.queenAndPawns);
             pawnAt7.addPiece(1, 7, pieceType.pawn, pieceColour.white);
 
             whiteScorer = new BoardScorer(pawnAt7, pieceColour.white);
-            Assert.AreEqual(int.MaxValue, whiteScorer.getScore());
+            Assert.AreEqual(BoardScorer.highest, whiteScorer.getScore());
             blackScorer = new BoardScorer(pawnAt7, pieceColour.black);
-            Assert.AreEqual(int.MinValue, blackScorer.getScore());
+            Assert.AreEqual(BoardScorer.lowest, blackScorer.getScore());
         }
 
         [TestMethod]

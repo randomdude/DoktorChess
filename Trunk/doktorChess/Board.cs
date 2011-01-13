@@ -32,6 +32,8 @@ namespace doktorChess
         /// </summary>
         private List<square> blackPieceSquares = new List<square>();
 
+        public bool alphabeta = true;
+
         // Keep some search stats in here
         public moveSearchStats stats;
 
@@ -286,14 +288,16 @@ namespace doktorChess
             // Assume it is our move.
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            lineAndScore toRet = findBestMove(playerCol, true, searchDepth);
+            int alpha = int.MinValue;
+            int beta = int.MaxValue;
+            lineAndScore toRet = findBestMove(playerCol, true, searchDepth, alpha, beta);
             watch.Stop();
             stats.totalSearchTime = watch.ElapsedMilliseconds;
 
             return toRet;
         }
 
-        private lineAndScore findBestMove(pieceColour playerCol, bool usToPlay, int depthLeft)
+        private lineAndScore findBestMove(pieceColour playerCol, bool usToPlay, int depthLeft, int min, int max)
         {
             pieceColour enemyCol = getOtherSide(playerCol);
             pieceColour toPlay = usToPlay ? playerCol : enemyCol;
@@ -336,8 +340,8 @@ namespace doktorChess
                     stats.boardsScored++;
                     score = getScore(playerCol);
 
-                    if ((usToPlay && (score >= bestLineSoFar.finalScore )) ||
-                         (!usToPlay && (score <= bestLineSoFar.finalScore)))
+                    if ((usToPlay && (score > bestLineSoFar.finalScore)) ||
+                         (!usToPlay && (score < bestLineSoFar.finalScore)))
                     {
                         bestLineSoFar.finalScore = score;
                         bestLineSoFar.line[searchDepth] = consideredMove;
@@ -345,10 +349,10 @@ namespace doktorChess
                 }
                 else
                 {
-                    lineAndScore thisMove = findBestMove(playerCol, !usToPlay, depthLeft - 1);
+                    lineAndScore thisMove = findBestMove(playerCol, !usToPlay, depthLeft - 1, min, max);
 
-                    if ((usToPlay && (thisMove.finalScore >= bestLineSoFar.finalScore)) ||
-                        (!usToPlay && (thisMove.finalScore <= bestLineSoFar.finalScore)))
+                    if ((usToPlay && (thisMove.finalScore > bestLineSoFar.finalScore)) ||
+                        (!usToPlay && (thisMove.finalScore < bestLineSoFar.finalScore)))
                     {
                         bestLineSoFar.finalScore = thisMove.finalScore;
                         bestLineSoFar.line[searchDepth - depthLeft] = consideredMove;
@@ -361,6 +365,29 @@ namespace doktorChess
                 }
 
                 undoMove(consideredMove);
+
+                if (alphabeta)
+                {
+                    if (depthLeft > 0)
+                    {
+                        if (usToPlay)
+                        {
+                            if (min < bestLineSoFar.finalScore)
+                                min = bestLineSoFar.finalScore;
+
+                            if (min >= max)
+                                break;
+                        }
+                        else
+                        {
+                            if (max < bestLineSoFar.finalScore)
+                                max = bestLineSoFar.finalScore;
+
+                            if (max <= min)
+                                break;
+                        }
+                    }
+                }
             }
 
             return bestLineSoFar;
