@@ -1,16 +1,31 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
+using System.Web.Script.Serialization;
 
 namespace doktorChess
 {
     public class move
     {
-        public squarePos srcPos;
-        public squarePos dstPos;
-        public bool isCapture = false;
-        public square capturedSquare;
+        public readonly squarePos srcPos;
+        public readonly squarePos dstPos;
+        public readonly bool isCapture = false;
+        public readonly square capturedSquare;
         private pieceType _type;
         private readonly square _srcSquare;
+
+        public static move fromJSON(string JSON, Board parentBoard)
+        {
+            minimalMove json = new JavaScriptSerializer().Deserialize<minimalMove>(JSON);
+
+            // Don't forget that the board is inverted, as we show it to the user
+            json.srcSquarePos.y = 7 - json.srcSquarePos.y;
+            json.dstSquarePos.y = 7 - json.dstSquarePos.y;
+
+            move toRet = new move( parentBoard[json.srcSquarePos], parentBoard[json.dstSquarePos] );
+
+            return toRet;
+        }
 
         public move(square src, square dst)
         {
@@ -26,6 +41,28 @@ namespace doktorChess
                 capturedSquare = dst;
             }
 
+        }
+
+        /// <summary>
+        /// Is this move legal according to the rules of chess?
+        /// </summary>
+        /// <param name="ourBaord"></param>
+        /// <returns></returns>
+        public bool isLegal(Board ourBoard)
+        {
+            if (_srcSquare.type == pieceType.none)
+                return false;
+
+            List<move> possibleMovesWithMovingPiece = _srcSquare.getPossibleMoves(ourBoard);
+
+            foreach (move possibleMove in possibleMovesWithMovingPiece)
+            {
+                if (possibleMove.srcPos.isSameSquareAs(srcPos) &&
+                    possibleMove.dstPos.isSameSquareAs(dstPos)) 
+                return true;
+            }
+
+            return false;
         }
 
         public override string ToString()

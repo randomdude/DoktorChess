@@ -23,5 +23,29 @@ namespace Tests
             Assert.IsTrue(captureMove.isCapture);
             Assert.IsTrue(captureMove.capturedSquare == dst);
         }
+
+        [TestMethod]
+        public void verifyLegalMoveIsLegal()
+        {
+            Board ourBoard = Board.makeQueenAndPawnsStartPosition();
+            move legalMove = new move( ourBoard[1,1], ourBoard[1,3] );
+            Assert.IsTrue(legalMove.isLegal(ourBoard));
+        }
+
+        [TestMethod]
+        public void verifyIllegalMoveIsIllegal()
+        {
+            Board ourBoard = Board.makeQueenAndPawnsStartPosition();
+            move illegalMove = new move(ourBoard[1, 1], ourBoard[1, 6]);
+            Assert.IsFalse(illegalMove.isLegal(ourBoard));
+        }
+
+        [TestMethod]
+        public void verifyMoveOfEmptySpaceIsIllegal()
+        {
+            Board ourBoard = Board.makeQueenAndPawnsStartPosition();
+            move illegalMove = new move(ourBoard[3, 3], ourBoard[4, 4]);
+            Assert.IsFalse(illegalMove.isLegal(ourBoard));
+        }
     }
 }

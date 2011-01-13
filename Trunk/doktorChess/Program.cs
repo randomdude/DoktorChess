@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace doktorChess
 {
@@ -12,6 +13,8 @@ namespace doktorChess
 
             pieceColour toPlay = pieceColour.white;
 
+            List<move> moves = new List<move>();
+
             while (true)
             {
                 Console.WriteLine(myBoard.ToString());
@@ -22,12 +25,17 @@ namespace doktorChess
                 move bestFirstMove = bestMove.line[0];
                 myBoard.doMove(bestFirstMove);
 
+                moves.Add(bestFirstMove);
+
                 // Check if the game is over
                 gameStatus status = myBoard.getGameStatus(pieceColour.white);
                 if (status != gameStatus.inProgress)
                 {
                     Console.WriteLine("Game over: white has " + status);
                     Console.WriteLine(myBoard.ToString());
+
+                    foreach (move thisMove in moves)
+                        Console.WriteLine(thisMove);
                     break;
                 }
 

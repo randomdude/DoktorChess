@@ -12,7 +12,10 @@ namespace doktorChess
 
         public int searchDepth = 5;
 
-        private gameType _type;
+        /// <summary>
+        /// Rules in effect for this game
+        /// </summary>
+        private readonly gameType _type;
 
         private readonly square[,] _squares = new square[sizeX, sizeY];
 
@@ -197,7 +200,7 @@ namespace doktorChess
 
         private gameStatus getGameStatusForNormal(List<square> myPieces, List<square> enemyPieces)
         {
-            // The game is over if either side has no pieces left
+            // If either side has no pieces, the game is undefined.
             if (myPieces.Count == 0)
                 return gameStatus.lost;
             if (enemyPieces.Count == 0)
@@ -211,7 +214,7 @@ namespace doktorChess
             else if (_blackKingCaptured)
                 return myCol == pieceColour.black ? gameStatus.lost : gameStatus.won;
 
-            // If the current player cannot move, it is a draw.
+            // If the current player cannot move, then the game is a draw.
             bool movesFound = false;
             foreach (square myPiece in myPieces)
             {
@@ -368,6 +371,8 @@ namespace doktorChess
             square src = this[move.srcPos];
             square dst = this[move.dstPos];
 
+            src.movedCount++;
+
             square tmp = dst;
             this[move.dstPos] = this[move.srcPos];
             this[move.srcPos] = tmp;
@@ -393,13 +398,17 @@ namespace doktorChess
                 }
             }
 
-            src.movedCount++;
         }
 
         private void undoMove(move move)
         {
             this[move.srcPos] = this[move.dstPos];
             this[move.srcPos].position = move.srcPos;
+
+            this[move.dstPos].movedCount--;
+
+            if (this[move.dstPos].movedCount < 0)
+                this[move.dstPos].movedCount = this[move.dstPos].movedCount;
 
             if (move.isCapture)
             {
@@ -424,8 +433,6 @@ namespace doktorChess
             {
                 this[move.dstPos] = new square(move.dstPos);
             }
-
-            this[move.dstPos].movedCount--;
         }
 
     }
