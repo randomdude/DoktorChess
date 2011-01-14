@@ -44,6 +44,16 @@ namespace doktorChess
         }
 
         /// <summary>
+        /// Check for the same start and end square co-ordinates
+        /// </summary>
+        /// <param name="toCompare"></param>
+        /// <returns></returns>
+        public bool isSameSquaresAs(move toCompare)
+        {
+            return (toCompare.srcPos.isSameSquareAs(srcPos) && toCompare.dstPos.isSameSquareAs(dstPos));
+        }
+
+        /// <summary>
         /// Is this move legal according to the rules of chess?
         /// </summary>
         /// <param name="ourBaord"></param>

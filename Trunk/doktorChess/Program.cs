@@ -21,12 +21,12 @@ namespace doktorChess
 
                 // Verify alpha-beta against minimax searches
                 myBoard.alphabeta = true;
-                lineAndScore bestMoveAB = myBoard.findBestMove(toPlay);
-                myBoard.alphabeta = false;
+                //lineAndScore bestMoveAB = myBoard.findBestMove(toPlay);
+                //myBoard.alphabeta = false;
                 lineAndScore bestMove = myBoard.findBestMove(toPlay);
 
-                if (bestMoveAB.finalScore != bestMove.finalScore)
-                    throw new Exception("Final score of alpha-beta result differs from that of minimax result");
+                //if (bestMoveAB.finalScore != bestMove.finalScore)
+                //    throw new Exception("Final score of alpha-beta result differs from that of minimax result");
 
                 //for (int index = 0; index < bestMoveAB.line.Length; index++)
                 //{

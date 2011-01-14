@@ -43,6 +43,12 @@ namespace Tests
             testAsWhiteToPlay(4, true);
         }
 
+        [TestMethod]
+        public void testAlphaBetaDepthFiveAsWhiteToPlay()
+        {
+            testAsWhiteToPlay(5, true);
+        }
+
         public static void testAsWhiteToPlay(int depth, bool useAlphaBeta)
         {
             Board ourBoard = Board.makeQueenAndPawnsStartPosition();

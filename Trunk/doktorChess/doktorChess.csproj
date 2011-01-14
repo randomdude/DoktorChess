@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -52,6 +53,7 @@
     <Compile Include="Board.cs" />
     <Compile Include="BoardScorer.cs" />
     <Compile Include="gameStatus.cs" />
+    <Compile Include="moveSearchStats.cs" />
     <Compile Include="serialisationClasses\minimalMove.cs" />
     <Compile Include="lineAndScore.cs" />
     <Compile Include="move.cs" />

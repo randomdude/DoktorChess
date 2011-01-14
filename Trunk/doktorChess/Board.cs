@@ -33,20 +33,22 @@ namespace doktorChess
         private List<square> blackPieceSquares = new List<square>();
 
         public bool alphabeta = true;
+        public bool killerHeuristic = true;
 
         // Keep some search stats in here
         public moveSearchStats stats;
 
         public Board (gameType newType)
         {
+            // Set the game type
+            _type = newType;
+
+            // Spawn all our squares
             for (int y = 0; y < sizeY; y++)
             {
                 for (int x = 0; x < sizeX; x++)
-                {
                     _squares[x, y] = new square(new squarePos(x,y));
-                }
             }
-            _type = newType;
         }
 
         public square this[squarePos myPos]
@@ -102,20 +104,6 @@ namespace doktorChess
             return newBoard;
         }
 
-        public square addPiece(int x, int y, pieceType newType, pieceColour newColour)
-        {
-            _squares[x, y] = square.makeSquare(newType, newColour, new squarePos(x, y));
-
-            if (newColour == pieceColour.white)
-                whitePieceSquares.Add(_squares[x, y]);
-            else if (newColour == pieceColour.black)
-                blackPieceSquares.Add(_squares[x, y]);
-            else
-                throw new ArgumentException();
-
-            return _squares[x, y];
-        }
-
         public override string ToString()
         {
             StringBuilder toRet = new StringBuilder(sizeX * sizeY * 2);
@@ -129,6 +117,20 @@ namespace doktorChess
             toRet.Append(Environment.NewLine);
 
             return toRet.ToString();
+        }
+
+        public square addPiece(int x, int y, pieceType newType, pieceColour newColour)
+        {
+            _squares[x, y] = square.makeSquare(newType, newColour, new squarePos(x, y));
+
+            if (newColour == pieceColour.white)
+                whitePieceSquares.Add(_squares[x, y]);
+            else if (newColour == pieceColour.black)
+                blackPieceSquares.Add(_squares[x, y]);
+            else
+                throw new ArgumentException();
+
+            return _squares[x, y];
         }
 
         public List<move> getMoves(pieceColour toMoveColour)
@@ -288,14 +290,27 @@ namespace doktorChess
             // Assume it is our move.
             Stopwatch watch = new Stopwatch();
             watch.Start();
+
+            if (killerHeuristic)
+            {
+                for (int n = 0; n < searchDepth + 1; n++)
+                    killerMovesAtDepth.Add(n, new List<move>(1000));
+            }
+
             int alpha = int.MinValue;
             int beta = int.MaxValue;
             lineAndScore toRet = findBestMove(playerCol, true, searchDepth, alpha, beta);
+
+            if (killerHeuristic)
+                killerMovesAtDepth.Clear();
+            
             watch.Stop();
             stats.totalSearchTime = watch.ElapsedMilliseconds;
 
             return toRet;
         }
+
+        private readonly Dictionary<int, List<move>> killerMovesAtDepth = new Dictionary<int, List<move>>(10);
 
         private lineAndScore findBestMove(pieceColour playerCol, bool usToPlay, int depthLeft, int min, int max)
         {
@@ -324,6 +339,27 @@ namespace doktorChess
                 // This should totally and absolutely not happen after we've verified that the
                 // game is still in progress.
                 throw new ArgumentException();
+            }
+
+            if (killerHeuristic)
+            {
+                // If one of these moves caused a cutoff last time, consider that move first.
+                List<move> reorderedMovesToConsider = new List<move>(movesToConsider.Count);
+                foreach (move consideredMove in movesToConsider)
+                {
+                    if (killerMovesAtDepth[depthLeft].Find( (a) =>
+                                                            a.isSameSquaresAs(consideredMove) ) != null)
+                        reorderedMovesToConsider.Add(consideredMove);
+                }
+                if (reorderedMovesToConsider.Count > 0)
+                {
+                    foreach (move move in movesToConsider)
+                    {
+                        if (!reorderedMovesToConsider.Contains(move))
+                            reorderedMovesToConsider.Add(move);
+                    }
+                    movesToConsider = reorderedMovesToConsider;
+                }
             }
 
             // As we score each, keep the score in this var. We declare it outside the loop to
@@ -376,7 +412,11 @@ namespace doktorChess
                                 min = bestLineSoFar.finalScore;
 
                             if (min >= max)
+                            {
+                                if (killerHeuristic)
+                                    killerMovesAtDepth[depthLeft].Add(consideredMove);
                                 break;
+                            }
                         }
                         else
                         {
@@ -384,7 +424,11 @@ namespace doktorChess
                                 max = bestLineSoFar.finalScore;
 
                             if (max <= min)
+                            {
+                                if (killerHeuristic)
+                                    killerMovesAtDepth[depthLeft].Add(consideredMove);
                                 break;
+                            }
                         }
                     }
                 }
@@ -467,17 +511,5 @@ namespace doktorChess
     public enum gameType
     {
         normal, queenAndPawns
-    }
-
-    public class moveSearchStats
-    {
-        public int boardsScored;
-        public long totalSearchTime;
-        public long boardScoreTime;
-
-        public double scoredPerSecond
-        {
-            get { return boardsScored/(totalSearchTime/1000.0); }
-        }
     }
 }
