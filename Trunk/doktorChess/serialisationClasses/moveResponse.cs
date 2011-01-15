@@ -12,6 +12,8 @@ namespace doktorChess
         public string newBoardHTML;
         public squarePos movedPieceSrc;
         public squarePos movedPieceDst;
+        public bool gameFinished = false;
+        public string gameResult;
 
         public void loadBoardTable(Table theTable)
         {

@@ -297,9 +297,7 @@ namespace doktorChess
                     killerMovesAtDepth.Add(n, new List<move>(1000));
             }
 
-            int alpha = int.MinValue;
-            int beta = int.MaxValue;
-            lineAndScore toRet = findBestMove(playerCol, true, searchDepth, alpha, beta);
+            lineAndScore toRet = findBestMove(playerCol, true, searchDepth, int.MinValue, int.MaxValue);
 
             if (killerHeuristic)
                 killerMovesAtDepth.Clear();

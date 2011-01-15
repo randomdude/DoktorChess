@@ -7,8 +7,8 @@ namespace doktorChess
     {
         static void Main(string[] args)
         {
-            Board myBoard = Board.makeQueenAndPawnsStartPosition();
-            //Board myBoard = Board.makeNormalStartPosition();
+            //Board myBoard = Board.makeQueenAndPawnsStartPosition();
+            Board myBoard = Board.makeNormalStartPosition();
             myBoard.searchDepth = 4;
 
             pieceColour toPlay = pieceColour.white;
@@ -27,17 +27,6 @@ namespace doktorChess
 
                 //if (bestMoveAB.finalScore != bestMove.finalScore)
                 //    throw new Exception("Final score of alpha-beta result differs from that of minimax result");
-
-                //for (int index = 0; index < bestMoveAB.line.Length; index++)
-                //{
-                //    move moveAB = bestMoveAB.line[index];
-                //    move move = bestMove.line[index];
-                //    if (!moveAB.srcPos.isSameSquareAs(move.srcPos) ||
-                //        !moveAB.dstPos.isSameSquareAs(move.dstPos))
-                //    {
-                //        throw new Exception("Alpha-beta result differs from minimax result");
-                //    }
-                //}
 
                 Console.WriteLine(string.Format("Best line for {0}: {1}", toPlay, bestMove.ToString(moveStringStyle.chessNotation)));
                 Console.WriteLine("{0} boards scored in {1} ms, {2}/sec. {3} ms in board scoring.", myBoard.stats.boardsScored, myBoard.stats.totalSearchTime, myBoard.stats.scoredPerSecond, myBoard.stats.boardScoreTime );

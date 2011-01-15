@@ -14,6 +14,7 @@
         
         <script type="text/javascript">
             var xhr;
+            var gameFinished = false;
             
             function doMove(moveObject) {
                 var queryString = "moveHandler.ashx?ourMove=" + JSON.stringify(moveObject);
@@ -35,10 +36,16 @@
 
                 if (!parsedJSON.isValid) {
                     alert('Illegal move');
+                    
                     // Reload the board table to remove the bad move
                     table.innerHTML = parsedJSON.newBoardHTML;
                     initDraggables();
                     return;
+                }
+
+                if (parsedJSON.gameFinished) {
+                    gameFinished = true;
+                    gameStatus.innerHTML = "the game is " + parsedJSON.gameResult + "!";
                 }
 
                 // find destination and source squares
@@ -103,7 +110,7 @@
 
                 $(".boardSquare").droppable({
                     drop: function(event, ui) {
-                    var fromx = TDBeingDragged.cellIndex;
+                        var fromx = TDBeingDragged.cellIndex;
                         var fromy = TDBeingDragged.parentNode.rowIndex;
                         var tox = this.cellIndex;
                         var toy = this.parentNode.rowIndex;
@@ -115,6 +122,10 @@
 
                         // Align the dragged image nicely
                         alignImageToTD(imageBeingDragged, this);
+
+                        if (gameFinished) {
+                            alert("the game has finished");
+                        }
 
                         // Tell the backend that we are moving a piece from/to these squares
                         var toMove = { "srcSquarePos": { "x": fromx, "y": fromy },
@@ -152,6 +163,7 @@
             <div id="boardDiv" class="board dimming"  >
                 <asp:Table runat="Server" ID="board" > </asp:Table>
             </div>
+            <div id="gameStatus">test</div>
             <img src="images/status_anim.gif" id="busygif" style="visibility: block; text-align:center; display:block; " />
         </div>
     </body>

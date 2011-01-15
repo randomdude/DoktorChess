@@ -15,7 +15,7 @@ namespace Tests
         /// <summary>
         /// Never run a test involving an AB search at deeper than this ply.
         /// </summary>
-        private const int MaxDepthForAB = 7;
+        private const int MaxDepthForAB = 6;
 
         [TestMethod]
         public void findImprovementAlphaBetaDepth()

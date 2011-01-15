@@ -47,7 +47,18 @@ namespace WebFrontend
             }
             resp.isValid = true;
             theBoard.doMove(playersMove);
-                
+            
+            // Check that player has not finished the game
+            gameStatus status = theBoard.getGameStatus(computerCol);
+            if (status != gameStatus.inProgress)
+            {
+                resp.gameFinished = true;
+                resp.gameResult = status.ToString();
+                resp.loadBoardTable(makeTable(theBoard));
+                context.Response.Write(ser.Serialize(resp));
+                return;
+            }
+
             // Now, find our best move, and play it
             move bestMove = theBoard.findBestMove(computerCol).line[0];
             theBoard.doMove(bestMove);
@@ -56,6 +67,14 @@ namespace WebFrontend
             resp.movedPieceSrc = bestMove.srcPos;
             resp.movedPieceDst = bestMove.dstPos;
             resp.loadBoardTable(makeTable(theBoard));
+
+            // IF we have finished the game, let the UI know
+            gameStatus newstatus = theBoard.getGameStatus(computerCol);
+            if (newstatus != gameStatus.inProgress)
+            {
+                resp.gameFinished = true;
+                resp.gameResult = newstatus.ToString();
+            }
 
             context.Response.Write(ser.Serialize(resp));
         }
@@ -122,12 +141,16 @@ namespace WebFrontend
                     url += "pawn";
                     break;
                 case pieceType.bishop:
+                    url += "bishop";
                     break;
                 case pieceType.rook:
+                    url += "rook";
                     break;
                 case pieceType.king:
+                    url += "king";
                     break;
                 case pieceType.knight:
+                    url += "knight";
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("type");
