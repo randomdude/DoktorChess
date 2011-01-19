@@ -156,7 +156,9 @@ namespace WebFrontend
                     throw new ArgumentOutOfRangeException("type");
             }
 
-            url += ".jpg";
+            url += "-" + colour;
+
+            url += ".png";
 
             return url;
         }

@@ -13,7 +13,8 @@
 }
 
 .board
-{
+{	
+	padding: 0px;
 	border-color: #B8860B;
 	border-style: solid;
 	border-width: thick;

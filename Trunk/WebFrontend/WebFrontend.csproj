@@ -70,6 +70,19 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="images\bishop-black.png" />
+    <Content Include="images\bishop-white.png" />
+    <Content Include="images\king-black.png" />
+    <Content Include="images\king-white.png" />
+    <Content Include="images\knight-black.png" />
+    <Content Include="images\knight-white.png" />
+    <Content Include="images\pawn-black.png" />
+    <Content Include="images\pawn-white.png" />
+    <Content Include="images\queen-black.png" />
+    <Content Include="images\queen-white.png" />
+    <Content Include="images\rook-black.png" />
+    <Content Include="images\rook-white.png" />
+    <Content Include="images\status_anim.gif" />
     <Content Include="moveHandler.ashx" />
     <Content Include="js\json.js" />
     <Content Include="style\styles.css" />

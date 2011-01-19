@@ -30,14 +30,13 @@
                 if (xhr.readyState != 4)
                     return;
             
-                var table = document.getElementById("board");
-
                 var parsedJSON = eval( "(" + xhr.responseText + ")" );
 
                 if (!parsedJSON.isValid) {
                     alert('Illegal move');
                     
                     // Reload the board table to remove the bad move
+                    var table = document.getElementById("board"); 
                     table.innerHTML = parsedJSON.newBoardHTML;
                     initDraggables();
                     return;
@@ -55,15 +54,19 @@
                 markReady();
 
                 // Do a funky 'capture' animation if this is a capture
-                animateMove(srcsq, dstsq,  table, parsedJSON.newBoardHTML);
+                animateMove(srcsq, dstsq, true);
             }
 
             var imgid;
             var thedstsq;
-            function animateMove(srcsq, dstsq, table, newTableHTML) {
+            function animateMove(srcsq, dstsq, slidePiece) {
+
+                var table = document.getElementById("board");
 
                 var srcImageBox = $(srcsq.children[0])[0];
-                alignImageToTD(srcImageBox, srcsq);
+                if (slidePiece == true) {
+                    alignImageToTD(srcImageBox, srcsq);
+                }
                 
                 // The destination box may be empty.
                 var dstImageBox = null; 
@@ -76,26 +79,39 @@
                 var newLeft = dstsq.getClientRects()[0].left;
 
                 // Start the 'move' animation of the piece
-                $(srcImageBox).animate({ left: newLeft, top: newTop }, 'slow', function() {
-                    // Move animation is over. Start to play any 'capture' animation necessary.
-                    if (dstImageBox != null) {
-                        $(dstImageBox).animate({    left: '-=50',
-                                                    width: '+=100',
-                                                    top: '-=50',
-                                                    height: '+=100',
-                                                    opacity: 'toggle'
-                                                }, 'slow', function() {
-                                                    // OK, all FX are over. Remove the image from the srcSq and assign it to the dst.
-                                                    for (var i = 0; i < dstsq.children.length; i++)
-                                                        dstsq.removeChild(dstsq.children[i]);
-                                                    dstsq.appendChild(srcImageBox);
-                        });
-                    } else {
-                        for (var i = 0; i < dstsq.children.length; i++)
-                            dstsq.removeChild(dstsq.children[i]);
-                        dstsq.appendChild(srcImageBox);
-                    }
-                });
+                if (slidePiece == true) {
+                    $(srcImageBox).animate({ left: newLeft, top: newTop }, 'slow', function() {
+                        doCaptureAnimIfNeeded(srcImageBox, dstImageBox, dstsq);
+                    });
+                }
+                else {
+                    doCaptureAnimIfNeeded(srcImageBox, dstImageBox, dstsq);
+                }
+            }
+
+            function doCaptureAnimIfNeeded(srcImageBox, dstImageBox, destsq) {
+                // Fade out any captured piece.
+                if (dstImageBox != null) {
+                    $(dstImageBox).animate({ left: '-=50',
+                        width: '+=100',
+                        top: '-=50',
+                        height: '+=100',
+                        opacity: 'toggle'
+                    }, 'slow', function() {
+                        // OK, all FX are over.
+                        finishMoveAnimation(destsq, srcImageBox);
+                    });
+                } else {
+                   finishMoveAnimation(destsq, srcImageBox);
+                }
+            }
+            
+            function finishMoveAnimation(dstsq, srcImageBox) {
+                // All move animations are over. Finish off by removing the moving image from its old TD
+                // to its new TD.
+                for (var i = 0; i < dstsq.children.length; i++)
+                    dstsq.removeChild(dstsq.children[i]);
+                dstsq.appendChild(srcImageBox);
             }
 
             var TDBeingDragged;
@@ -115,17 +131,18 @@
                         var tox = this.cellIndex;
                         var toy = this.parentNode.rowIndex;
 
-                        // remove dragged image from the square it's at, and append it to the square it was dropped
-                        // on.
-                        TDBeingDragged.removeChild(imageBeingDragged);
-                        this.appendChild(imageBeingDragged);
-
                         // Align the dragged image nicely
                         alignImageToTD(imageBeingDragged, this);
 
                         if (gameFinished) {
                             alert("the game has finished");
                         }
+
+                        if (fromx == tox && fromy == toy)
+                            return;
+
+                        // Do any capture animation
+                        animateMove(TDBeingDragged, this, false);
 
                         // Tell the backend that we are moving a piece from/to these squares
                         var toMove = { "srcSquarePos": { "x": fromx, "y": fromy },
