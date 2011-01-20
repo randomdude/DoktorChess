@@ -30,16 +30,30 @@ namespace doktorChess
             if ((position.y + direction < Board.sizeY ) && 
                 (position.y + direction > -1) )
             {
+                // Check the two diagonals
                 if (position.x > 0)
                 {
                     if (onThis[position.up(direction).leftOne()].containsPieceNotOfColour(colour))
                         toRet.Add(new move(onThis[position], onThis[position.up(direction).leftOne()]));
                 }
-
                 if (position.x < Board.sizeX -1 )
                 {
                     if (onThis[position.up(direction).rightOne()].containsPieceNotOfColour(colour))
                         toRet.Add(new move(onThis[position], onThis[position.up(direction).rightOne()]));
+                }
+
+                // Check for en passant
+                if (position.x > 0)
+                {
+                    square adjacentLeft = onThis[position.leftOne()];
+                    if (canEnPassantTo(adjacentLeft, onThis))
+                        toRet.Add(new move(onThis[position], onThis[position.up(direction).leftOne()], adjacentLeft));
+                }
+                if (position.x < Board.sizeX - 1)
+                {
+                    square adjacentRight = onThis[position.rightOne()];
+                    if (canEnPassantTo(adjacentRight, onThis))
+                        toRet.Add(new move(onThis[position], onThis[position.up(direction).rightOne()], adjacentRight));
                 }
 
                 // We can move forward one if that square is empty.
@@ -61,6 +75,25 @@ namespace doktorChess
                 }
             }
             return toRet;
+        }
+
+        private bool canEnPassantTo(square adjacent, Board theBoard)
+        {
+            // We can capture via en passant if:
+            // * An enemy pawn is on our right/left
+            // * The enemy pawn has moved only once
+            // * The enemy pawn moved last move
+            // * The enemy pawn (and us) are on the 4th/5th rank (according to player colour)
+            // * The space behind the enemy pawn is empty.
+            if (        adjacent.containsPieceNotOfColour(colour)          // Is an enemy piece
+                    && adjacent.type == pieceType.pawn                 // Is an enemy pawn
+                    && adjacent.movedCount == 1                        // Has moved only once
+                    && adjacent.moveNumbers.Peek() == theBoard.moveCount-1 // Moved last move
+                    && adjacent.position.y == (colour == pieceColour.white ? 4 : 3) // is on start row
+                    && theBoard[ adjacent.position.up(colour == pieceColour.white ? 1 : -1) ].type == pieceType.none )
+                return true;
+
+            return false;
         }
     }
 }

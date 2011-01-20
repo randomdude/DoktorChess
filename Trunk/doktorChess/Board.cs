@@ -13,6 +13,11 @@ namespace doktorChess
         public int searchDepth = 5;
 
         /// <summary>
+        /// How many moves have been played on this board
+        /// </summary>
+        public int moveCount = 0;
+
+        /// <summary>
         /// Rules in effect for this game
         /// </summary>
         private readonly gameType _type;
@@ -80,13 +85,13 @@ namespace doktorChess
             Board newBoard = new Board(gameType.normal);
 
             // Apply two rows of pawns
-            for (int x = 0; x < sizeX; x++)
+            for (int x = 1; x < sizeX; x++)
             {
                 newBoard.addPiece(x, 1, pieceType.pawn, pieceColour.white);
                 newBoard.addPiece(x, 6, pieceType.pawn, pieceColour.black);
             }
 
-            // And now fill in the two end ranks.
+            // And now fill in the two end ranks.);
             foreach (int y in new int[] {0, 7})
             {
                 pieceColour col = (y == 0 ? pieceColour.white : pieceColour.black);
@@ -440,27 +445,32 @@ namespace doktorChess
             square src = this[move.srcPos];
             square dst = this[move.dstPos];
 
+            src.moveNumbers.Push(moveCount);
             src.movedCount++;
+            moveCount++;
 
-            square tmp = dst;
             this[move.dstPos] = this[move.srcPos];
-            this[move.srcPos] = tmp;
+            this[move.srcPos] = new square(move.srcPos);
 
             this[move.dstPos].position = move.dstPos;
-            this[move.srcPos] = new square(move.srcPos);
 
             if (move.isCapture)
             {
-                if (dst.colour == pieceColour.white)
-                    whitePieceSquares.Remove(dst);
-                else if (dst.colour == pieceColour.black)
-                    blackPieceSquares.Remove(dst);
+                square captured = move.capturedSquare;
 
-                if (dst.type == pieceType.king )
+                if (!captured.position.isSameSquareAs(dst.position))
+                    this[captured.position] = new square(captured.position);
+
+                if (captured.colour == pieceColour.white)
+                    whitePieceSquares.Remove(captured);
+                else if (captured.colour == pieceColour.black)
+                    blackPieceSquares.Remove(captured);
+
+                if (captured.type == pieceType.king)
                 {
-                    if (dst.colour == pieceColour.black)
+                    if (captured.colour == pieceColour.black)
                         _blackKingCaptured = true;
-                    else if (dst.colour == pieceColour.white)
+                    else if (captured.colour == pieceColour.white)
                         _whiteKingCaptured = true;
                     else
                         throw new ArgumentException();
@@ -469,24 +479,30 @@ namespace doktorChess
 
         }
 
-        private void undoMove(move move)
+        public void undoMove(move move)
         {
+            moveCount--;
+            this[move.dstPos].movedCount--;
+            Debug.Assert(this[move.dstPos].moveNumbers.Pop() == moveCount);
+
+            // Move our piece back to its source square
             this[move.srcPos] = this[move.dstPos];
             this[move.srcPos].position = move.srcPos;
 
-            this[move.dstPos].movedCount--;
+            // Erase the old destination
+            this[move.dstPos] = new square(move.dstPos);
 
-            if (this[move.dstPos].movedCount < 0)
-                this[move.dstPos].movedCount = this[move.dstPos].movedCount;
-
+            // Restore any captured piece
             if (move.isCapture)
             {
-                this[move.dstPos] = move.capturedSquare;
+                this[move.capturedSquarePos] = move.capturedSquare;
 
                 if (move.capturedSquare.colour == pieceColour.white)
                     whitePieceSquares.Add(move.capturedSquare);
                 else if (move.capturedSquare.colour == pieceColour.black)
                     blackPieceSquares.Add(move.capturedSquare);
+                else
+                    throw new ArgumentException();
 
                 if (move.capturedSquare.type == pieceType.king)
                 {
@@ -497,10 +513,6 @@ namespace doktorChess
                     else
                         throw new ArgumentException();
                 }
-            }
-            else
-            {
-                this[move.dstPos] = new square(move.dstPos);
             }
         }
 

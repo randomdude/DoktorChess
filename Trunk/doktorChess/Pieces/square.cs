@@ -5,7 +5,16 @@ namespace doktorChess
 {
     public class square
     {
+        /// <summary>
+        /// The amount of times this piece has moved
+        /// </summary>
         public int movedCount;
+
+        /// <summary>
+        /// The moves made by this piece on the parent board
+        /// </summary>
+        public Stack<int> moveNumbers = new Stack<int>(50);
+
         public pieceType type { get; protected set; }
         public pieceColour colour { get; private set; }
         public squarePos position { get; set; }

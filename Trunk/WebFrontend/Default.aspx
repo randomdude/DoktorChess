@@ -22,11 +22,11 @@
                 markBusy();
                 xhr = new XMLHttpRequest();
                 xhr.open("GET", queryString, true);
-                xhr.onreadystatechange = helloWorldCallback;
+                xhr.onreadystatechange = xhrCallback;
                 xhr.send();
             };
 
-            function helloWorldCallback() {
+            function xhrCallback() {
                 if (xhr.readyState != 4)
                     return;
             
@@ -36,30 +36,41 @@
                     alert('Illegal move');
                     
                     // Reload the board table to remove the bad move
-                    var table = document.getElementById("board"); 
-                    table.innerHTML = parsedJSON.newBoardHTML;
+                    $("#board")[0].innerHTML = parsedJSON.newBoardHTML;
                     initDraggables();
                     return;
                 }
 
                 if (parsedJSON.gameFinished) {
                     gameFinished = true;
-                    gameStatus.innerHTML = "the game is " + parsedJSON.gameResult + "!";
+                    $("#gameStatus")[0].innerHTML = "the game is " + parsedJSON.gameResult + "!";
+                    markReady();
+                    return;
                 }
 
                 // find destination and source squares
                 var srcsq = $("[x = " + parsedJSON.movedPieceSrc.x + "][y = " + parsedJSON.movedPieceSrc.y + "]")[0];
                 var dstsq = $("[x = " + parsedJSON.movedPieceDst.x + "][y = " + parsedJSON.movedPieceDst.y + "]")[0];
+                var capturesq = dstsq;
+                if (parsedJSON.hasExtraCaptureSquare) {
+                    var captureSqPos = parsedJSON.extraCaptureSquarePos;
+                    capturesq = $("[x = " + captureSqPos.x + "][y = " + captureSqPos.y + "]")[0];
+                }
 
                 markReady();
 
-                // Do a funky 'capture' animation if this is a capture
-                animateMove(srcsq, dstsq, true);
+                if (parsedJSON.forceBoardReload){
+                    $("#board")[0].innerHTML = parsedJSON.newBoardHTML;
+                    initDraggables();
+                } else {
+                    // Do a funky 'capture' animation if this is a capture
+                    animateMove(srcsq, dstsq, capturesq, true );
+                }
             }
 
             var imgid;
             var thedstsq;
-            function animateMove(srcsq, dstsq, slidePiece) {
+            function animateMove(srcsq, dstsq, capturesq, slidePiece) {
 
                 var table = document.getElementById("board");
 
@@ -68,8 +79,13 @@
                     alignImageToTD(srcImageBox, srcsq);
                 }
                 
-                // The destination box may be empty.
-                var dstImageBox = null; 
+                // The capture and dest boxes may be empty. If not, align them.
+                var captureImageBox = null;
+                if (capturesq != null && $(capturesq.children[0]).length > 0) {
+                    captureImageBox = $(capturesq.children[0])[0];
+                    alignImageToTD(captureImageBox, capturesq);
+                }
+                var dstImageBox = null;
                 if ($(dstsq.children[0]).length > 0) {
                     dstImageBox = $(dstsq.children[0])[0];
                     alignImageToTD(dstImageBox, dstsq);
@@ -81,36 +97,40 @@
                 // Start the 'move' animation of the piece
                 if (slidePiece == true) {
                     $(srcImageBox).animate({ left: newLeft, top: newTop }, 'slow', function() {
-                        doCaptureAnimIfNeeded(srcImageBox, dstImageBox, dstsq);
+                        doCaptureAnimIfNeeded(srcImageBox, dstImageBox, dstsq, captureImageBox, capturesq);
                     });
                 }
                 else {
-                    doCaptureAnimIfNeeded(srcImageBox, dstImageBox, dstsq);
+                    doCaptureAnimIfNeeded(srcImageBox, dstImageBox, dstsq, captureImageBox, capturesq);
                 }
             }
 
-            function doCaptureAnimIfNeeded(srcImageBox, dstImageBox, destsq) {
+            function doCaptureAnimIfNeeded(srcImageBox, dstImageBox, destsq, captureImageBox, capturedsq) {
                 // Fade out any captured piece.
-                if (dstImageBox != null) {
-                    $(dstImageBox).animate({ left: '-=50',
+                if (captureImageBox != null) {
+                    $(captureImageBox).animate({ left: '-=50',
                         width: '+=100',
                         top: '-=50',
                         height: '+=100',
                         opacity: 'toggle'
                     }, 'slow', function() {
                         // OK, all FX are over.
-                        finishMoveAnimation(destsq, srcImageBox);
+                        finishMoveAnimation(destsq, capturedsq, srcImageBox);
                     });
                 } else {
-                   finishMoveAnimation(destsq, srcImageBox);
+                    finishMoveAnimation(destsq, capturedsq, srcImageBox);
                 }
             }
             
-            function finishMoveAnimation(dstsq, srcImageBox) {
+            function finishMoveAnimation(dstsq, capturedsq, srcImageBox) {
                 // All move animations are over. Finish off by removing the moving image from its old TD
                 // to its new TD.
                 for (var i = 0; i < dstsq.children.length; i++)
                     dstsq.removeChild(dstsq.children[i]);
+                if (capturedsq != null) {
+                    for (var i = 0; i < capturedsq.children.length; i++)
+                        capturedsq.removeChild(capturedsq.children[i]);
+                }
                 dstsq.appendChild(srcImageBox);
             }
 
@@ -138,11 +158,12 @@
                             alert("the game has finished");
                         }
 
+                        // If we have dropped the piece on the same square, don't bother POSTing
                         if (fromx == tox && fromy == toy)
                             return;
 
                         // Do any capture animation
-                        animateMove(TDBeingDragged, this, false);
+                        animateMove(TDBeingDragged, this, this, false);
 
                         // Tell the backend that we are moving a piece from/to these squares
                         var toMove = { "srcSquarePos": { "x": fromx, "y": fromy },

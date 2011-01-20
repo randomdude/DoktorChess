@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Web.Script.Serialization;
 
@@ -9,6 +10,7 @@ namespace doktorChess
     {
         public readonly squarePos srcPos;
         public readonly squarePos dstPos;
+        public readonly squarePos capturedSquarePos;
         public readonly bool isCapture = false;
         public readonly square capturedSquare;
         private pieceType _type;
@@ -39,8 +41,25 @@ namespace doktorChess
             {
                 isCapture = true;
                 capturedSquare = dst;
+                capturedSquarePos = dst.position;
             }
+        }
 
+        public move(square src, square dst, square captured)
+        {
+            srcPos = src.position;
+            dstPos = dst.position;
+            _type = src.type;
+            _srcSquare = src;
+
+            Debug.Assert(dst.type == pieceType.none);
+                
+            if (captured.type != pieceType.none)
+            {
+                isCapture = true;
+                capturedSquare = captured;
+                capturedSquarePos = captured.position;
+            }            
         }
 
         /// <summary>
@@ -75,6 +94,26 @@ namespace doktorChess
             return false;
         }
 
+        /// <summary>
+        /// Add any extra data to the move so it makes sense
+        /// </summary>
+        /// <param name="ourBoard"></param>
+        /// <returns>null if move is illegal</returns>
+        public move sanitize(Board ourBoard)
+        {
+            List<move> possibleMovesWithMovingPiece = _srcSquare.getPossibleMoves(ourBoard);
+
+            foreach (move possibleMove in possibleMovesWithMovingPiece)
+            {
+                if (possibleMove.srcPos.isSameSquareAs(srcPos) &&
+                    possibleMove.dstPos.isSameSquareAs(dstPos))
+                {
+                    return  possibleMove;
+                }
+            }
+            return null;
+        }
+
         public override string ToString()
         {
             return ToString(moveStringStyle.coord);
@@ -105,5 +144,6 @@ namespace doktorChess
 
             return toRet.ToString();
         }
+
     }
 }

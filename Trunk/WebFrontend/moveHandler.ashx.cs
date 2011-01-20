@@ -35,9 +35,13 @@ namespace WebFrontend
             string playersMoveString = context.Request["ourMove"];
             move playersMove = move.fromJSON(playersMoveString, theBoard);
 
+            // Some moves - like en passant - do not have enough information coming in from the frontend to represent
+            // properly. Add any data like that.
+            playersMove = playersMove.sanitize(theBoard);
+
             // if the players move is for the wrong side, or is illegal, return 
             // early, otherwise play it.
-            if (!playersMove.isLegal(theBoard) || theBoard[playersMove.srcPos].colour != playerCol )
+            if (playersMove == null  || theBoard[playersMove.srcPos].colour != playerCol )
             {
                 resp.isValid = false;
                 resp.loadBoardTable(makeTable(theBoard));
@@ -47,13 +51,19 @@ namespace WebFrontend
             }
             resp.isValid = true;
             theBoard.doMove(playersMove);
+
+            // If the players move has resulted in an en passant capture, then we need to tell the JS to reload
+            // the board, since it does not detect en passant.
+            if (playersMove.isCapture &&
+                !playersMove.capturedSquarePos.isSameSquareAs(playersMove.dstPos))
+                resp.forceBoardReload = true;
             
             // Check that player has not finished the game
             gameStatus status = theBoard.getGameStatus(computerCol);
             if (status != gameStatus.inProgress)
             {
                 resp.gameFinished = true;
-                resp.gameResult = status.ToString();
+                resp.gameResult = theBoard.getGameStatus(playerCol).ToString();
                 resp.loadBoardTable(makeTable(theBoard));
                 context.Response.Write(ser.Serialize(resp));
                 return;
@@ -64,12 +74,11 @@ namespace WebFrontend
             theBoard.doMove(bestMove);
 
             // and send the move and new board to the client.
-            resp.movedPieceSrc = bestMove.srcPos;
-            resp.movedPieceDst = bestMove.dstPos;
+            resp.initFromMove(bestMove);
             resp.loadBoardTable(makeTable(theBoard));
 
-            // IF we have finished the game, let the UI know
-            gameStatus newstatus = theBoard.getGameStatus(computerCol);
+            // If we have finished the game, let the UI know
+            gameStatus newstatus = theBoard.getGameStatus(playerCol);
             if (newstatus != gameStatus.inProgress)
             {
                 resp.gameFinished = true;
