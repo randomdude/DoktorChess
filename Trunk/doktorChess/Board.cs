@@ -85,7 +85,7 @@ namespace doktorChess
             Board newBoard = new Board(gameType.normal);
 
             // Apply two rows of pawns
-            for (int x = 1; x < sizeX; x++)
+            for (int x = 0; x < sizeX; x++)
             {
                 newBoard.addPiece(x, 1, pieceType.pawn, pieceColour.white);
                 newBoard.addPiece(x, 6, pieceType.pawn, pieceColour.black);
