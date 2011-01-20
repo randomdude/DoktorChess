@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="boardScorerTests.cs" />
+    <Compile Include="boardTests.cs" />
     <Compile Include="moveSearchImprovementMeasures.cs" />
     <Compile Include="moveSearchTests.cs" />
     <Compile Include="moveTests.cs" />

@@ -91,7 +91,7 @@ namespace doktorChess
                 newBoard.addPiece(x, 6, pieceType.pawn, pieceColour.black);
             }
 
-            // And now fill in the two end ranks.);
+            // And now fill in the two end ranks.
             foreach (int y in new int[] {0, 7})
             {
                 pieceColour col = (y == 0 ? pieceColour.white : pieceColour.black);
@@ -516,6 +516,21 @@ namespace doktorChess
             }
         }
 
+        public bool playerIsInCheck(pieceColour playerCol)
+        {
+            List<move> moves = getMoves( getOtherSide(playerCol) );
+
+            return moves.Exists(a => a.isCapture != false && a.capturedSquare.type == pieceType.king);
+        }
+
+        public bool wouldMovePutPlayerInCheck(pieceColour playerCol, move playersMove)
+        {
+            doMove(playersMove);
+            bool toRet = playerIsInCheck(playerCol);
+            undoMove(playersMove);
+
+            return toRet;
+        }
     }
 
     public enum gameType
