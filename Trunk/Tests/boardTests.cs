@@ -8,11 +8,21 @@ namespace Tests
     public class boardTests
     {
         [TestMethod]
-        public void testCheckDetection()
+        public void testCheckDetectionAsBlack()
         {
             Board ourBoard = new Board(gameType.normal);
             ourBoard.addPiece(1, 1, pieceType.rook, pieceColour.white);
             ourBoard.addPiece(3, 1, pieceType.king, pieceColour.black);
+
+            Assert.IsTrue(ourBoard.playerIsInCheck(pieceColour.black));
+        }
+
+        [TestMethod]
+        public void testCheckDetectionAsWhite()
+        {
+            Board ourBoard = new Board(gameType.normal);
+            ourBoard.addPiece(1, 1, pieceType.rook, pieceColour.black);
+            ourBoard.addPiece(3, 1, pieceType.king, pieceColour.white);
 
             Assert.IsTrue(ourBoard.playerIsInCheck(pieceColour.white));
         }
@@ -28,7 +38,7 @@ namespace Tests
 
             ourBoard.doMove(moves[0]);
 
-            if (ourBoard.ToString() == origBoard )
+            if (ourBoard.ToString() == origBoard)
                 throw new AssertFailedException("After a move, the board has not changed");
 
             ourBoard.undoMove(moves[0]);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace doktorChess
 {
@@ -445,14 +446,35 @@ namespace doktorChess
             square src = this[move.srcPos];
             square dst = this[move.dstPos];
 
+            // If this move is a castling, update the rooks movedCount
+            if (move.isACastling())
+            {
+                rookSquare rook = move.findCastlingRook(this);
+                move.castlingRook = rook;
+                rook.movedCount++;
+                rook.moveNumbers.Push(moveCount);                
+            }
+            // Update movedness count for the moving piece
             src.moveNumbers.Push(moveCount);
             src.movedCount++;
             moveCount++;
 
+            // Move our piece from the source to the destination
             this[move.dstPos] = this[move.srcPos];
             this[move.srcPos] = new square(move.srcPos);
-
+            // Update the piece's idea of where it is
             this[move.dstPos].position = move.dstPos;
+
+            // If we're castling, move the rook appropriately
+            if (move.isACastling())
+            {
+                square rook = move.findCastlingRook(this);
+                this[rook.position] = new square(rook.position);
+                squarePos newRookPos = move.findNewPosForCastlingRook();
+
+                this[newRookPos] = rook;
+                this[newRookPos].position = newRookPos;
+            }
 
             if (move.isCapture)
             {
@@ -485,12 +507,36 @@ namespace doktorChess
             this[move.dstPos].movedCount--;
             Debug.Assert(this[move.dstPos].moveNumbers.Pop() == moveCount);
 
+            if (move.isACastling())
+            {
+                square rook = move.castlingRook;
+                rook.movedCount--;
+                Assert.AreEqual(moveCount, rook.moveNumbers.Pop());
+            }
+
             // Move our piece back to its source square
             this[move.srcPos] = this[move.dstPos];
             this[move.srcPos].position = move.srcPos;
 
             // Erase the old destination
             this[move.dstPos] = new square(move.dstPos);
+
+            // If a castling, move the rook back too.
+            if (move.isACastling())
+            {
+                square rook = move.castlingRook;
+                this[rook.position] = new square(rook.position);
+                if (rook.position.x == 4)
+                {
+                    this[0, rook.position.y] = rook;
+                    rook.position = new squarePos(0, rook.position.y);
+                }
+                else
+                {
+                    this[7, rook.position.y] = rook;
+                    rook.position = new squarePos(7, rook.position.y);                    
+                }
+            }
 
             // Restore any captured piece
             if (move.isCapture)
@@ -516,9 +562,9 @@ namespace doktorChess
             }
         }
 
-        public bool playerIsInCheck(pieceColour playerCol)
+        public bool playerIsInCheck(pieceColour playerPossiblyInCheck)
         {
-            List<move> moves = getMoves( getOtherSide(playerCol) );
+            List<move> moves = getMoves(getOtherSide(playerPossiblyInCheck));
 
             return moves.Exists(a => a.isCapture != false && a.capturedSquare.type == pieceType.king);
         }
@@ -530,6 +576,36 @@ namespace doktorChess
             undoMove(playersMove);
 
             return toRet;
+        }
+
+        public int getCoverLevel(square squareToCheck, pieceColour sideToExamine)
+        {
+            List<square> squaresToCheck = getPiecesForColour(sideToExamine);
+            List<move> moves = new List<move>(squaresToCheck.Count * 8);
+
+            // Place a dummy piece in the square to check, and see what can capture it.
+            // This is done to prevent us finding 'moves' as opposed to 'captures' - eg
+            // pawns going forward.
+            this[squareToCheck.position.x, squareToCheck.position.y] = new pawnSquare(squareToCheck.position, getOtherSide(sideToExamine));
+
+            foreach (square thisSq in squaresToCheck)
+            {
+                // We need to be careful here! Because the king square logic calls this function in order to ascertain 
+                // if we can castle, we need to ensure that we do not call it again, to prevent infinite recursion.
+                // This is safe, since a castle cannot 'cover' a square anyway.
+                if (thisSq.type == pieceType.king)
+                    ((kingSquare) thisSq).inhibitCastling = true;
+
+                moves.AddRange(thisSq.getPossibleMoves(this));
+                
+                if (thisSq.type == pieceType.king)
+                    ((kingSquare)thisSq).inhibitCastling = false;
+            }
+
+            // Remove our dummy piece
+            this[squareToCheck.position] = squareToCheck;
+
+            return moves.FindAll(a => (a.isCapture && a.capturedSquare.position.isSameSquareAs(squareToCheck.position)) ).Count;
         }
     }
 

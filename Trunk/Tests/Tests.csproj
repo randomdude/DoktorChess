@@ -40,12 +40,14 @@
   <ItemGroup>
     <Compile Include="boardScorerTests.cs" />
     <Compile Include="boardTests.cs" />
+    <Compile Include="KingsideCastlingMovementTests.cs" />
     <Compile Include="moveSearchImprovementMeasures.cs" />
     <Compile Include="moveSearchTests.cs" />
     <Compile Include="moveTests.cs" />
     <Compile Include="PawnMovementTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueenMovementTests.cs" />
+    <Compile Include="queensideCastlingMovementTests.cs" />
     <Compile Include="VectorMovementTests.cs" />
   </ItemGroup>
   <ItemGroup>

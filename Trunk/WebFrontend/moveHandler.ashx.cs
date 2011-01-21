@@ -59,6 +59,10 @@ namespace WebFrontend
             if (playersMove.isCapture &&
                 !playersMove.capturedSquarePos.isSameSquareAs(playersMove.dstPos))
                 resp.forceBoardReload = true;
+
+            // If the player has castled, force a board reload too, since the JS does not detect this yet.
+            if (playersMove.isACastling())
+                resp.forceBoardReload = true;
             
             // Check that player has not finished the game
             gameStatus status = theBoard.getGameStatus(computerCol);
