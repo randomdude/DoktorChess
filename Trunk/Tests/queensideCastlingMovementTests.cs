@@ -89,5 +89,45 @@ namespace Tests
             if (possibleMoves.Find(a => a.dstPos.isSameSquareAs(new squarePos(2, 0))) != null)
                 throw new AssertFailedException("Castling found through an enemy piece");
         }
+
+        [TestMethod]
+        public void testQueensideCastlingMoveIsExecutedCorrectly()
+        {
+            Board ourBoard = new Board(gameType.normal);
+            square ourKing = ourBoard.addPiece(4, 0, pieceType.king, pieceColour.white);
+            square ourRook = ourBoard.addPiece(0, 0, pieceType.rook, pieceColour.white);
+            ourBoard.addPiece(7, 7, pieceType.king, pieceColour.black);
+
+            // Make our castling move..
+            move castlingMove = new move(ourKing, ourBoard[2, 0]);
+            ourBoard.doMove(castlingMove);
+
+            // Verify that the rook and king have both moved to their correct squares.
+            Assert.IsTrue(ourBoard[2, 0] == ourKing);
+            Assert.IsTrue(ourBoard[3, 0] == ourRook);
+        }
+
+        [TestMethod]
+        public void testQueensideCastlingMoveIsUnExecutedCorrectly()
+        {
+            Board ourBoard = new Board(gameType.normal);
+            square ourKing = ourBoard.addPiece(4, 0, pieceType.king, pieceColour.white);
+            ourBoard.addPiece(0, 0, pieceType.rook, pieceColour.white);
+            ourBoard.addPiece(7, 7, pieceType.king, pieceColour.black);
+
+            string origBoard = ourBoard.ToString();
+
+            // Make out castling move
+            move castlingMove = new move(ourKing, ourBoard[2, 0]);
+            ourBoard.doMove(castlingMove);
+
+            Assert.AreNotEqual(origBoard, ourBoard.ToString(), "Castling did not affect the board");
+
+            // Now undo our castling and verify that we get back to the original position.
+            ourBoard.undoMove(castlingMove);
+
+            Assert.AreEqual(origBoard, ourBoard.ToString(), "Castling and then un-castling did not return the original board");
+        }
+    
     }
 }

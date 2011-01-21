@@ -98,12 +98,12 @@ namespace doktorChess
                 pieceColour col = (y == 0 ? pieceColour.white : pieceColour.black);
 
                 newBoard.addPiece(0, y, pieceType.rook, col);
-                newBoard.addPiece(1, y, pieceType.knight, col);
-                newBoard.addPiece(2, y, pieceType.bishop, col);
-                newBoard.addPiece(3, y, pieceType.queen, col);
+                //newBoard.addPiece(1, y, pieceType.knight, col);
+                //newBoard.addPiece(2, y, pieceType.bishop, col);
+                //newBoard.addPiece(3, y, pieceType.queen, col);
                 newBoard.addPiece(4, y, pieceType.king, col);
-                newBoard.addPiece(5, y, pieceType.bishop, col);
-                newBoard.addPiece(6, y, pieceType.knight, col);
+                //newBoard.addPiece(5, y, pieceType.bishop, col);
+                //newBoard.addPiece(6, y, pieceType.knight, col);
                 newBoard.addPiece(7, y, pieceType.rook, col);
             }
 
@@ -526,16 +526,18 @@ namespace doktorChess
             {
                 square rook = move.castlingRook;
                 this[rook.position] = new square(rook.position);
-                if (rook.position.x == 4)
+                if (rook.position.x == 3)
                 {
                     this[0, rook.position.y] = rook;
                     rook.position = new squarePos(0, rook.position.y);
                 }
-                else
+                else if (rook.position.x == 5)
                 {
                     this[7, rook.position.y] = rook;
                     rook.position = new squarePos(7, rook.position.y);                    
                 }
+                else
+                    Assert.Fail("While uncastling, could not find castled rook");
             }
 
             // Restore any captured piece
