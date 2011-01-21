@@ -41,9 +41,9 @@ namespace WebFrontend
 
             // if the players move is for the wrong side, or is illegal, return 
             // early, otherwise play it.
-            if (theBoard.wouldMovePutPlayerInCheck(playerCol, playersMove) ||
-                playersMove == null  || 
-                theBoard[playersMove.srcPos].colour != playerCol )
+            if (playersMove == null || 
+                theBoard[playersMove.srcPos].colour != playerCol  ||
+                theBoard.wouldMovePutPlayerInCheck(playerCol, playersMove) )
             {
                 resp.isValid = false;
                 resp.loadBoardTable(makeTable(theBoard));
