@@ -79,6 +79,12 @@ namespace WebFrontend
             move bestMove = theBoard.findBestMove(computerCol).line[0];
             theBoard.doMove(bestMove);
 
+            if (bestMove.isCapture &&
+                !bestMove.capturedSquarePos.isSameSquareAs(bestMove.dstPos))
+                resp.forceBoardReload = true;
+            if (bestMove.isACastling())
+                resp.forceBoardReload = true;
+
             // and send the move and new board to the client.
             resp.initFromMove(bestMove);
             resp.loadBoardTable(makeTable(theBoard));

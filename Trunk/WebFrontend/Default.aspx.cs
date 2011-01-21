@@ -13,7 +13,7 @@ namespace WebFrontend
             {
                 // Initialise a new board
                 Board newBoard = Board.makeNormalStartPosition();
-                newBoard.searchDepth = 3;
+                newBoard.searchDepth = 4;
 
                 Session["playerCol"] = pieceColour.white;
                 Session["board"] = newBoard;

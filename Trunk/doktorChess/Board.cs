@@ -27,6 +27,8 @@ namespace doktorChess
 
         private bool _whiteKingCaptured = false;
         private bool _blackKingCaptured = false;
+        public bool whiteHasCastled;
+        public bool blackHasCastled;
 
         /// <summary>
         /// Lookaside list of squares occupied by white pieces
@@ -98,12 +100,12 @@ namespace doktorChess
                 pieceColour col = (y == 0 ? pieceColour.white : pieceColour.black);
 
                 newBoard.addPiece(0, y, pieceType.rook, col);
-                //newBoard.addPiece(1, y, pieceType.knight, col);
-                //newBoard.addPiece(2, y, pieceType.bishop, col);
-                //newBoard.addPiece(3, y, pieceType.queen, col);
+                newBoard.addPiece(1, y, pieceType.knight, col);
+                newBoard.addPiece(2, y, pieceType.bishop, col);
+                newBoard.addPiece(3, y, pieceType.queen, col);
                 newBoard.addPiece(4, y, pieceType.king, col);
-                //newBoard.addPiece(5, y, pieceType.bishop, col);
-                //newBoard.addPiece(6, y, pieceType.knight, col);
+                newBoard.addPiece(5, y, pieceType.bishop, col);
+                newBoard.addPiece(6, y, pieceType.knight, col);
                 newBoard.addPiece(7, y, pieceType.rook, col);
             }
 
@@ -168,7 +170,7 @@ namespace doktorChess
             List<square> myPieces = getPiecesForColour(myPieceColour);
             List<square> enemyPieces = getPiecesForColour(getOtherSide(myPieceColour));
 
-            BoardScorer scorer = new BoardScorer(myPieces, enemyPieces );
+            BoardScorer scorer = new BoardScorer(this, myPieces, enemyPieces );
             scorer.setGameStatus(getGameStatus(myPieces, enemyPieces));
             int toRet = scorer.getScore();
             watch.Stop();
@@ -449,6 +451,13 @@ namespace doktorChess
             // If this move is a castling, update the rooks movedCount
             if (move.isACastling())
             {
+                if (this[move.srcPos].colour == pieceColour.white)
+                    whiteHasCastled = true;
+                else if (this[move.srcPos].colour == pieceColour.black)
+                    blackHasCastled = true;
+                else
+                    throw new Exception("Cannot identify colour");
+
                 rookSquare rook = move.findCastlingRook(this);
                 move.castlingRook = rook;
                 rook.movedCount++;
@@ -509,6 +518,13 @@ namespace doktorChess
 
             if (move.isACastling())
             {
+                if (this[move.dstPos].colour == pieceColour.white)
+                    whiteHasCastled = false;
+                else if (this[move.dstPos].colour == pieceColour.black)
+                    blackHasCastled = false;
+                else
+                    throw new Exception("Cannot identify colour");
+
                 square rook = move.castlingRook;
                 rook.movedCount--;
                 Assert.AreEqual(moveCount, rook.moveNumbers.Pop());

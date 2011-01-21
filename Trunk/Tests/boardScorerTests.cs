@@ -24,7 +24,7 @@ namespace Tests
                                         new pawnSquare(new squarePos(3, 5), pieceColour.black)
                                     };
 
-            BoardScorer myscorer = new BoardScorer(us, them);
+            BoardScorer myscorer = new BoardScorer(null, us, them);
 
             // TODO: change getScore to getMaterialAdvantage or the like for this test.
             Assert.AreEqual(8 - 2, myscorer.getScore());
