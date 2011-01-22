@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Web;
 using System.Web.Script.Serialization;
@@ -63,7 +64,10 @@ namespace WebFrontend
             // If the player has castled, force a board reload too, since the JS does not detect this yet.
             if (playersMove.isACastling())
                 resp.forceBoardReload = true;
-            
+
+            resp.moveNum = theBoard.moveCount.ToString();
+            resp.whiteMove = playersMove.ToString(moveStringStyle.chessNotation);
+
             // Check that player has not finished the game
             gameStatus status = theBoard.getGameStatus(computerCol);
             if (status != gameStatus.inProgress)
@@ -76,8 +80,19 @@ namespace WebFrontend
             }
 
             // Now, find our best move, and play it
-            move bestMove = theBoard.findBestMove(computerCol).line[0];
+            lineAndScore bestLine = theBoard.findBestMove(computerCol);
+            move bestMove = bestLine.line[0];
             theBoard.doMove(bestMove);
+            resp.blackMove = bestMove.ToString(moveStringStyle.chessNotation);
+
+            for (int index = 0; index < bestLine.line.Length; index++)
+            {
+                move lineMove = bestLine.line[index];
+                resp.bestLine += lineMove.ToString(moveStringStyle.chessNotation) + " ";
+                if (index % 2 != 0)
+                    resp.bestLine += "\n";
+            }
+            resp.bestLine += "\nScore: " + bestLine.finalScore;
 
             if (bestMove.isCapture &&
                 !bestMove.capturedSquarePos.isSameSquareAs(bestMove.dstPos))

@@ -83,8 +83,10 @@
     <Content Include="images\rook-black.png" />
     <Content Include="images\rook-white.png" />
     <Content Include="images\status_anim.gif" />
+    <Content Include="js\doktorChess.js" />
     <Content Include="moveHandler.ashx" />
     <Content Include="js\json.js" />
+    <Content Include="style\roundedbox.css" />
     <Content Include="style\styles.css" />
   </ItemGroup>
   <ItemGroup>

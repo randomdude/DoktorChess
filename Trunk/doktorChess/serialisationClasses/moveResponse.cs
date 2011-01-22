@@ -17,6 +17,10 @@ namespace doktorChess
         public bool gameFinished = false;
         public string gameResult;
         public bool forceBoardReload;
+        public string whiteMove;
+        public string blackMove;
+        public string moveNum;
+        public string bestLine;
 
         public void loadBoardTable(Table theTable)
         {

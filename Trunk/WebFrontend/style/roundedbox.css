@@ -1,0 +1,48 @@
+﻿/* Funky rounded corner CSS - see http://www.schillmania.com/projects/dialog/*/
+
+.roundbox {}	/* marker div */
+
+.dialog {
+ margin:0px auto;
+ color:#fff;
+}
+
+.dialog .hd .c,
+.dialog .ft .c {
+ font-size:1px; /* ensure minimum height */
+ height:13px;
+}
+
+.dialog .ft .c {
+ height:14px;
+}
+
+.dialog .hd {
+ background:transparent url(../images/tl.gif) no-repeat 0px 0px;
+}
+
+.dialog .hd .c {
+ background:transparent url(../images/tr.gif) no-repeat right 0px;
+}
+
+.dialog .bd {
+ background:transparent url(../images/ml.gif) repeat-y 0px 0px;
+}
+
+.dialog .bd .c {
+ background:transparent url(../images/mr.gif) repeat-y right 0px;
+}
+
+.dialog .bd .c .s {
+ margin:0px 8px 0px 4px;
+ background:#000 url(../images/ms.jpg) repeat-x 0px 0px;
+ padding:1em;
+}
+
+.dialog .ft {
+ background:transparent url(../images/bl.gif) no-repeat 0px 0px;
+}
+
+.dialog .ft .c {
+ background:transparent url(../images/br.gif) no-repeat right 0px;
+}

@@ -169,7 +169,7 @@ namespace doktorChess
                 case moveStringStyle.chessNotation:
                     return toChessNotation();
                 default:
-                    throw new ArgumentOutOfRangeException("chessNotation");
+                    throw new ArgumentOutOfRangeException("move style unrecognised");
             }
         }
 
@@ -177,12 +177,34 @@ namespace doktorChess
         {
             StringBuilder toRet = new StringBuilder();
 
-            // Append a letter indicating the piece moving
-            if (_srcSquare.type != pieceType.pawn)
-                toRet.Append(_srcSquare.ToString());
-            // Now append a chess-style coordinate.
-            toRet.Append(dstPos.ToString(moveStringStyle.chessNotation));
+            if (isACastling())
+            {
+                if (dstPos.x > srcPos.x)
+                    return "O-O";
+                else if (srcPos.x > dstPos.x)
+                    return "O-O-O";
+                else
+                    throw new ArgumentOutOfRangeException("Unrecognised castle");
+            }
 
+            if (!isCapture)
+            {
+                // A normal move, eg BE2
+
+                // Append a letter indicating the piece moving
+                if (_srcSquare.type != pieceType.pawn)
+                    toRet.Append(_srcSquare.ToString().ToUpper());
+
+                // Now append a chess-style coordinate.
+                toRet.Append(dstPos.ToString(moveStringStyle.chessNotation).ToLower());
+            }
+            else
+            {
+                // A capture, rg BxR
+                toRet.Append(_srcSquare.ToString().ToUpper());
+                toRet.Append("x");
+                toRet.Append(capturedSquare.ToString().ToUpper());
+            }
             return toRet.ToString();
         }
 

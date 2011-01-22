@@ -5,6 +5,56 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     [TestClass]
+    public class moveNotationTests
+    {
+        [TestMethod]
+        public void testPieceCaptureNotation()
+        {
+            square bish = new bishopSquare(new squarePos(0, 0), pieceColour.black);
+            square rook = new rookSquare(new squarePos(0, 1), pieceColour.white);
+
+            move theMove = new move(bish, rook);
+
+            Assert.AreEqual("BxR", theMove.ToString(moveStringStyle.chessNotation));
+        }
+
+        [TestMethod]
+        public void testPieceMoveNotation()
+        {
+            square bish = new bishopSquare(new squarePos(0, 0), pieceColour.black);
+            square targetSpace = new square( new squarePos(0, 1) );
+
+            move theMove = new move(bish, targetSpace);
+
+            Assert.AreEqual("Ba2", theMove.ToString(moveStringStyle.chessNotation));
+        }
+
+        [TestMethod]
+        public void testKingsideCastlingNotation()
+        {
+            Board ourBoard = new Board(gameType.normal);
+            square ourKing = ourBoard.addPiece(4, 0, pieceType.king, pieceColour.white);
+            ourBoard.addPiece(7, 0, pieceType.rook, pieceColour.white);
+
+            move theMove = new move(ourKing, new square(6, 0) );
+
+            Assert.AreEqual("O-O", theMove.ToString(moveStringStyle.chessNotation));
+        }
+
+        [TestMethod]
+        public void testQueensideCastlingNotation()
+        {
+            Board ourBoard = new Board(gameType.normal);
+            square ourKing = ourBoard.addPiece(4, 0, pieceType.king, pieceColour.white);
+            ourBoard.addPiece(0, 0, pieceType.rook, pieceColour.white);
+
+            move theMove = new move(ourKing, new square(2, 0));
+
+            Assert.AreEqual("O-O-O", theMove.ToString(moveStringStyle.chessNotation));
+        }
+    }
+
+    [TestClass]
     public class queensideCastlingMovementTests
     {
         [TestMethod]
