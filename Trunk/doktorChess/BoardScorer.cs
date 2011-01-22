@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace doktorChess
 {
@@ -20,7 +21,13 @@ namespace doktorChess
         public BoardScorer(Board toScore, List<square> myPieces, List<square> enemyPieces)
         {
             parentBoard = toScore;
-            viewpoint = myPieces[0].colour;
+            if (myPieces.Count > 0)
+                viewpoint = myPieces[0].colour;
+            else if (enemyPieces.Count > 0)
+                viewpoint = Board.getOtherSide( enemyPieces[0].colour );
+            else
+                throw new AssertFailedException("Attempting to score board with no pieces");
+
             commonConstructorStuff(myPieces, enemyPieces);
         }
 
