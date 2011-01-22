@@ -140,7 +140,7 @@ namespace doktorChess
                     startY = position.y - 1;
                     finishY = -1;
                     startX = position.x;
-                    finishX = 0;
+                    finishX = position.x+1;
                     directionX = 0;
                     directionY = -1;
                     break;
