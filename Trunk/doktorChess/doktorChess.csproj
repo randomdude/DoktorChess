@@ -54,6 +54,7 @@
     <Compile Include="Board.cs" />
     <Compile Include="BoardScorer.cs" />
     <Compile Include="gameStatus.cs" />
+    <Compile Include="gameType.cs" />
     <Compile Include="moveSearchStats.cs" />
     <Compile Include="serialisationClasses\minimalMove.cs" />
     <Compile Include="lineAndScore.cs" />

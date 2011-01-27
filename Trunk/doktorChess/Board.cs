@@ -92,25 +92,25 @@ namespace doktorChess
             Board newBoard = new Board(gameType.normal);
 
             // Apply two rows of pawns
-            for (int x = 0; x < 1; x++)
+            for (int x = 0; x < sizeX; x++)
             {
-                newBoard.addPiece(pieceType.pawn, pieceColour.white, x, 6);
-                newBoard.addPiece(pieceType.pawn, pieceColour.black, x, 1);
+                newBoard.addPiece(pieceType.pawn, pieceColour.white, x, 1);
+                newBoard.addPiece(pieceType.pawn, pieceColour.black, x, 6);
             }
 
-            //// And now fill in the two end ranks.
+            // And now fill in the two end ranks.
             foreach (int y in new int[] { 0, 7 })
             {
                 pieceColour col = (y == 0 ? pieceColour.white : pieceColour.black);
 
-            //    newBoard.addPiece(0, y, pieceType.rook, col);
-            //    newBoard.addPiece(1, y, pieceType.knight, col);
-            //    newBoard.addPiece(2, y, pieceType.bishop, col);
-            //    newBoard.addPiece(3, y, pieceType.queen, col);
+                newBoard.addPiece(pieceType.rook, col, 0, y);
+                newBoard.addPiece(pieceType.knight, col, 1, y);
+                newBoard.addPiece(pieceType.bishop, col, 2, y);
+                newBoard.addPiece(pieceType.queen, col, 3, y);
                 newBoard.addPiece(pieceType.king, col, 4, y);
-            //    newBoard.addPiece(5, y, pieceType.bishop, col);
-            //    newBoard.addPiece(6, y, pieceType.knight, col);
-            //    newBoard.addPiece(7, y, pieceType.rook, col);
+                newBoard.addPiece(pieceType.bishop, col, 5, y);
+                newBoard.addPiece(pieceType.knight, col, 6, y);
+                newBoard.addPiece(pieceType.rook, col, 7, y);
             }
 
             newBoard._blackKingCaptured = false;
@@ -577,8 +577,6 @@ namespace doktorChess
 
         public void doMove(move move)
         {
-            sanityCheck();
-
             // Update movedness count for the moving piece
             this[move.srcPos].moveNumbers.Push(moveCount);
             this[move.srcPos].movedCount++;
@@ -608,11 +606,9 @@ namespace doktorChess
             // Move our piece from the source to the destination, removing any piece that might be there
             if (this[move.dstPos].type != pieceType.none)
             {
-                //sanityCheck();
                 removePiece(this[move.dstPos]);
                 this[move.dstPos] = this[move.srcPos];
                 this[move.dstPos].position = move.dstPos;
-                //sanityCheck();
 
                 if (!move.isCapture)
                     throw new Exception("Non-capture in to occupied square");
@@ -660,14 +656,10 @@ namespace doktorChess
                 this[move.dstPos] = addPiece(move.typeToPromoteTo, movingSquare.colour, move.dstPos);
                 this[move.dstPos].pastLife = movingSquare;
             }
-
-            sanityCheck();
         }
 
         public void undoMove(move move)
         {
-            sanityCheck();
-
             // Revert any promotion
             if (move.isPawnPromotion)
             {
@@ -732,14 +724,13 @@ namespace doktorChess
 
                 addNewPieceToArrays(move.capturedSquare);
             }
-            sanityCheck();
         }
 
         public bool playerIsInCheck(pieceColour playerPossiblyInCheck)
         {
             List<move> moves = getMoves(getOtherSide(playerPossiblyInCheck));
 
-            return moves.Exists(a => a.isCapture != false && a.capturedSquare.type == pieceType.king);
+            return moves.Exists(a => a.isCapture && a.capturedSquare.type == pieceType.king);
         }
 
         public bool wouldMovePutPlayerInCheck(pieceColour playerCol, move playersMove)
@@ -780,10 +771,5 @@ namespace doktorChess
 
             return moves.FindAll(a => (a.isCapture && a.capturedSquare.position.isSameSquareAs(squareToCheck.position)) ).Count;
         }
-    }
-
-    public enum gameType
-    {
-        normal, queenAndPawns
     }
 }
