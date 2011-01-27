@@ -17,6 +17,8 @@ namespace doktorChess
         private pieceType _type;
         private readonly square _srcSquare;
         public rookSquare castlingRook;
+        public bool isPawnPromotion;
+        public pieceType typeToPromoteTo;
 
         public static move fromJSON(string JSON, Board parentBoard)
         {
@@ -55,13 +57,38 @@ namespace doktorChess
             _srcSquare = src;
 
             Debug.Assert(dst.type == pieceType.none);
-                
+
             if (captured.type != pieceType.none)
             {
                 isCapture = true;
                 capturedSquare = captured;
                 capturedSquarePos = captured.position;
-            }            
+            }
+        }
+
+        public move(square src, square dst, pieceType toPromoteTo)
+        {
+            srcPos = src.position;
+            dstPos = dst.position;
+            _type = src.type;
+            _srcSquare = src;
+
+            if (src.type != pieceType.pawn)
+                throw new Exception("Attempt to promote non-pawn");
+            if (toPromoteTo == pieceType.pawn)
+                throw new Exception("Attempt to promote a pawn to a pawn");
+            if (toPromoteTo == pieceType.none)
+                throw new Exception("Attempt to promote a pawn to an empty space");
+
+            isPawnPromotion = true;
+            typeToPromoteTo = toPromoteTo;
+
+            if (dst.type != pieceType.none)
+            {
+                isCapture = true;
+                capturedSquare = dst;
+                capturedSquarePos = dst.position;
+            }        
         }
 
         /// <summary>

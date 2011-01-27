@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using doktorChess;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -12,7 +13,7 @@ namespace Tests
         public void testInitialPawnMovement()
         {
             Board ourBoard = new Board(gameType.queenAndPawns);
-            ourBoard.addPiece(1,1, pieceType.pawn, pieceColour.white);
+            ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 1);
             square ourPawn = ourBoard[1, 1];
 
             List<move> actual = (List<move>) ourPawn.getPossibleMoves(ourBoard);
@@ -25,6 +26,9 @@ namespace Tests
                                       };
 
             VectorMovementTests.testListsAreOfSameMoves(expected, actual);
+
+            if (ourPawn.movedCount != 0)
+                throw new Exception("Pawn not move count not incremented");
         }
 
         [TestMethod]
@@ -32,7 +36,7 @@ namespace Tests
         {
             // Pawns can only move one square after their initial move.
             Board ourBoard = new Board(gameType.queenAndPawns);
-            square ourPawn = ourBoard.addPiece(1, 1, pieceType.pawn, pieceColour.white );
+            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 1);
 
             // Mark pawn as having moved
             ourPawn.movedCount++;
@@ -49,14 +53,84 @@ namespace Tests
         }
 
         [TestMethod]
+        public void testPawnPromotion()
+        {
+            // Pawns should be able to be promoted to any piece of their own colour, other than a
+            // king.
+            Board ourBoard = new Board(gameType.normal);
+            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 6);
+            ourPawn.movedCount++;
+
+            List<move> actual = ourPawn.getPossibleMoves(ourBoard);
+
+            // We expect a number of moves forward, all of which are promotions.
+            List<move> expected = new List<move>
+                                      {
+                                            new move(ourPawn, ourBoard[1, 7], pieceType.bishop),
+                                            new move(ourPawn, ourBoard[1, 7], pieceType.knight),
+                                            new move(ourPawn, ourBoard[1, 7], pieceType.queen),
+                                            new move(ourPawn, ourBoard[1, 7], pieceType.rook)
+                                      };
+
+            VectorMovementTests.testListsAreOfSameMoves(expected, actual);
+        }
+
+        [TestMethod]
+        public void testPawnPromotionAsBlack()
+        {
+            // Pawns should be able to be promoted to any piece of their own colour, other than a
+            // king.
+            Board ourBoard = new Board(gameType.normal);
+            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 1, 1);
+            ourPawn.movedCount++;
+
+            List<move> actual = ourPawn.getPossibleMoves(ourBoard);
+
+            // We expect a number of moves forward, all of which are promotions.
+            List<move> expected = new List<move>
+                                      {
+                                            new move(ourPawn, ourBoard[1, 0], pieceType.bishop),
+                                            new move(ourPawn, ourBoard[1, 0], pieceType.knight),
+                                            new move(ourPawn, ourBoard[1, 0], pieceType.queen),
+                                            new move(ourPawn, ourBoard[1, 0], pieceType.rook)
+                                      };
+
+            VectorMovementTests.testListsAreOfSameMoves(expected, actual);
+        }
+
+        [TestMethod]
+        public void testPawnPromotionWithCapture()
+        {
+            // Verify promotion occurs when capturing in to the back row.
+            Board ourBoard = new Board(gameType.normal);
+            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 6);
+            ourPawn.movedCount++;
+            ourBoard.addPiece(pieceType.knight, pieceColour.black, 1, 7);
+            ourBoard.addPiece(pieceType.knight, pieceColour.black, 2, 7);
+
+            List<move> actual = ourPawn.getPossibleMoves(ourBoard);
+
+            // We expect a number of moves forward, all of which are promotions.
+            List<move> expected = new List<move>
+                                      {
+                                            new move(ourPawn, ourBoard[2, 7], pieceType.bishop),
+                                            new move(ourPawn, ourBoard[2, 7], pieceType.knight),
+                                            new move(ourPawn, ourBoard[2, 7], pieceType.queen),
+                                            new move(ourPawn, ourBoard[2, 7], pieceType.rook)
+                                      };
+
+            VectorMovementTests.testListsAreOfSameMoves(expected, actual);
+        }
+
+        [TestMethod]
         public void testPawnMovementWithCaptureCol0()
         {
             // Spawn a black pawn at 0,3 and a white pawn at 1,4. Verify that the black
             // pawn can capture the white.
 
             Board ourBoard = new Board(gameType.queenAndPawns);
-            square ourPawn = ourBoard.addPiece(0, 3, pieceType.pawn, pieceColour.white);
-            square enemyPawn = ourBoard.addPiece(1, 4, pieceType.pawn, pieceColour.black);
+            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 0, 3);
+            square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 1, 4);
 
             List<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
 
@@ -68,8 +142,8 @@ namespace Tests
         {
             // Now test the same, at the other end of the board. Test on the edge.
             Board ourBoard = new Board(gameType.queenAndPawns);
-            square ourPawn = ourBoard.addPiece(6, 3, pieceType.pawn, pieceColour.white);
-            square enemyPawn = ourBoard.addPiece(7, 4, pieceType.pawn, pieceColour.black);
+            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 6, 3);
+            square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 7, 4);
 
             List<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
 
@@ -81,8 +155,8 @@ namespace Tests
         {
             Board ourBoard = new Board(gameType.normal);
             // En passant requires that the enemy pawn has just advanced two squares. Because of this, we make this move on a board and then check that en passant can occur.
-            square ourPawn = ourBoard.addPiece(6, 3, pieceType.pawn, pieceColour.black);
-            square enemyPawn = ourBoard.addPiece(7, 1, pieceType.pawn, pieceColour.white);
+            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 6, 3);
+            square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 7, 1);
 
             // Advance the enemy pawn
             move advanceTwo = new move(enemyPawn, ourBoard[enemyPawn.position.up(2)] );
@@ -117,8 +191,8 @@ namespace Tests
         public void testThatEnPassantOccursWhenItShouldAsWhite()
         {
             Board ourBoard = new Board(gameType.normal);
-            square ourPawn = ourBoard.addPiece(7, 4, pieceType.pawn, pieceColour.white);
-            square enemyPawn = ourBoard.addPiece(6, 6, pieceType.pawn, pieceColour.black);
+            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 7, 4);
+            square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 6, 6);
 
             // Advance the enemy pawn
             move advanceTwo = new move(enemyPawn, ourBoard[enemyPawn.position.down(2)]);
@@ -154,8 +228,8 @@ namespace Tests
         {
             Board ourBoard = new Board(gameType.normal);
             // Verify that we cannot en passant after our opponent has moved a pawn forward one, not two, squares.
-            square ourPawn = ourBoard.addPiece(6, 3, pieceType.pawn, pieceColour.white);
-            square enemyPawn = ourBoard.addPiece(7, 1, pieceType.pawn, pieceColour.black);
+            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 6, 3);
+            square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 7, 1);
 
             square ourNewSquare = ourBoard[ourPawn.position.rightOne().upOne()];
 
@@ -175,9 +249,9 @@ namespace Tests
         {
             Board ourBoard = new Board(gameType.normal);
             // Verify that we cannot en passant after we move a piece
-            square ourPawn = ourBoard.addPiece(6, 3, pieceType.pawn, pieceColour.white);
-            square ourKing = ourBoard.addPiece(1, 1, pieceType.pawn, pieceColour.white);
-            square enemyPawn = ourBoard.addPiece(7, 1, pieceType.pawn, pieceColour.black);
+            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 6, 3);
+            square ourKing = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 1);
+            square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 7, 1);
 
             // Advance the enemy pawn two squares, and then move our king. This should cause en passant to be impossible.
             move advanceTwo = new move(enemyPawn, ourBoard[enemyPawn.position.up(2)]);

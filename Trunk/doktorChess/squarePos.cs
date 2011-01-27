@@ -68,7 +68,12 @@ namespace doktorChess
 
         public bool isSameSquareAs(squarePos compareTo)
         {
-            return (x == compareTo.x && y == compareTo.y);
+            return isSameSquareAs(compareTo.x, compareTo.y);
+        }
+
+        public bool isSameSquareAs(int compareX, int compareY)
+        {
+            return (x == compareX && y == compareY);
         }
 
         public string ToString(moveStringStyle chessNotation)
@@ -114,5 +119,6 @@ namespace doktorChess
                     throw new ArgumentException();
             }
         }
+
     }
 }

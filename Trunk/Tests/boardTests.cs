@@ -11,8 +11,8 @@ namespace Tests
         public void testCheckDetectionAsBlack()
         {
             Board ourBoard = new Board(gameType.normal);
-            ourBoard.addPiece(1, 1, pieceType.rook, pieceColour.white);
-            ourBoard.addPiece(3, 1, pieceType.king, pieceColour.black);
+            ourBoard.addPiece(pieceType.rook, pieceColour.white, 1, 1);
+            ourBoard.addPiece(pieceType.king, pieceColour.black, 3, 1);
 
             Assert.IsTrue(ourBoard.playerIsInCheck(pieceColour.black));
         }
@@ -21,8 +21,8 @@ namespace Tests
         public void testCheckDetectionAsWhite()
         {
             Board ourBoard = new Board(gameType.normal);
-            ourBoard.addPiece(1, 1, pieceType.rook, pieceColour.black);
-            ourBoard.addPiece(3, 1, pieceType.king, pieceColour.white);
+            ourBoard.addPiece(pieceType.rook, pieceColour.black, 1, 1);
+            ourBoard.addPiece(pieceType.king, pieceColour.white, 3, 1);
 
             Assert.IsTrue(ourBoard.playerIsInCheck(pieceColour.white));
         }
@@ -35,24 +35,70 @@ namespace Tests
             string origBoard = ourBoard.ToString();
 
             List<move> moves = ourBoard.getMoves(pieceColour.white);
+            if (moves.Count == 0)
+                Assert.Inconclusive("No moves found");
 
-            ourBoard.doMove(moves[0]);
+            foreach (move thisMove in moves)
+            {
+                ourBoard.doMove(thisMove);
 
-            if (ourBoard.ToString() == origBoard)
-                throw new AssertFailedException("After a move, the board has not changed");
+                if (ourBoard.ToString() == origBoard)
+                    throw new AssertFailedException("After a move, the board has not changed");
 
-            ourBoard.undoMove(moves[0]);
+                ourBoard.undoMove(thisMove);
 
-            if (ourBoard.ToString() != origBoard)
-                throw new AssertFailedException("After a move undo, the board has changed");
+                if (ourBoard.ToString() != origBoard)
+                    throw new AssertFailedException("After a move undo, the board has changed");
+            }
+        }
+
+        [TestMethod]
+        public void testMoveDoingUndoingWithPawnPromotion()
+        {
+            Board ourBoard = new Board(gameType.normal);
+            ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 6);
+
+            string origBoard = ourBoard.ToString();
+
+            List<move> potentialMoves = ourBoard.getMoves(pieceColour.white);
+
+            if (potentialMoves.Count == 0)
+                Assert.Inconclusive("No pawn moves found");
+
+            // Find promotion moves
+            List<move> promotionMoves = potentialMoves.FindAll(a => a.isPawnPromotion);
+
+            if (promotionMoves.Count == 0)
+                Assert.Inconclusive("No promotion moves found");
+
+            foreach (move thisMove in promotionMoves)
+            {
+                ourBoard.doMove(thisMove);
+
+                if (ourBoard.ToString() == origBoard)
+                    throw new AssertFailedException("After a pawn promotion move, the board has not changed");
+
+                // Additionally, verify that the pawn has been promoted
+                if (ourBoard[thisMove.dstPos].type != thisMove.typeToPromoteTo)
+                    throw new AssertFailedException("Pawn was not promoted");
+                if (ourBoard[thisMove.dstPos].GetType() == typeof(pawnSquare))
+                    throw new AssertFailedException("Pawn was not promoted, but type has changed");
+                if (ourBoard[thisMove.dstPos].colour != pieceColour.white)
+                    throw new AssertFailedException("Pawn was promoted to wrong colour");
+
+                ourBoard.undoMove(thisMove);
+
+                if (ourBoard.ToString() != origBoard)
+                    throw new AssertFailedException("After a pawn promotion move undo, the board has changed");
+            }
         }
 
         [TestMethod]
         public void testMoveUndoingEnPassant()
         {
             Board ourBoard = new Board(gameType.normal);
-            square ourPawn = ourBoard.addPiece(7, 4, pieceType.pawn, pieceColour.white);
-            square enemyPawn = ourBoard.addPiece(6, 6, pieceType.pawn, pieceColour.black);
+            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 7, 4);
+            square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 6, 6);
 
             // Advance the enemy pawn, so we can capture it via en passant
             move advanceTwo = new move(enemyPawn, ourBoard[enemyPawn.position.down(2)]);
@@ -64,6 +110,8 @@ namespace Tests
 
             // Play our only capturing move
             move enPassant = moves.Find(a => a.isCapture == true);
+            if (enPassant == null)
+                Assert.Inconclusive("No en passant move found");
             ourBoard.doMove(enPassant);
 
             if (ourBoard.ToString() == origBoard)

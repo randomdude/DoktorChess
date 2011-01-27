@@ -49,7 +49,7 @@ namespace Tests
             Board ourBoard = new Board(gameType.queenAndPawns);
             squarePos srcSquare = new squarePos(3, 3);
 
-            ourBoard.addPiece(srcSquare.x, srcSquare.y, pieceType.queen, pieceColour.white);
+            ourBoard.addPiece(pieceType.queen, pieceColour.white, srcSquare.x, srcSquare.y);
             queenSquare queenie = (queenSquare) ourBoard[srcSquare];
 
             List<move> possibleMoves = queenie.getPossibleMoves(ourBoard);
@@ -64,12 +64,12 @@ namespace Tests
             Board ourBoard = new Board(gameType.queenAndPawns);
             squarePos srcSquare = new squarePos(3, 3);
 
-            ourBoard.addPiece(srcSquare.x, srcSquare.y, pieceType.queen, pieceColour.white);
+            ourBoard.addPiece(pieceType.queen, pieceColour.white, srcSquare.x, srcSquare.y);
             queenSquare queenie = (queenSquare)ourBoard[srcSquare];
 
             // Place a black pawn on the board, and ensure that we can capture it, and
             // that we cannot move through it.
-            ourBoard.addPiece(1, 1, pieceType.pawn, pieceColour.black);
+            ourBoard.addPiece(pieceType.pawn, pieceColour.black, 1, 1);
 
             List<move> possibleMoves = queenie.getPossibleMoves(ourBoard);
             List<move> expectedmoves = getExpectedMoveSquares(queenie);

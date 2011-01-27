@@ -57,6 +57,10 @@ namespace doktorChess
                 for (int x = 0; x < sizeX; x++)
                     _squares[x, y] = new square(new squarePos(x,y));
             }
+
+            // Note that kings are captured, since none exist.
+            _blackKingCaptured = true;
+            _whiteKingCaptured = true;
         }
 
         public square this[squarePos myPos]
@@ -76,9 +80,9 @@ namespace doktorChess
             Board newBoard = new Board(gameType.queenAndPawns);
 
             for (int x = 0; x < sizeX; x++)
-                newBoard.addPiece(x, 1, pieceType.pawn, pieceColour.white);
+                newBoard.addPiece(pieceType.pawn, pieceColour.white, x, 1);
 
-            newBoard.addPiece(3, 7, pieceType.queen, pieceColour.black);
+            newBoard.addPiece(pieceType.queen, pieceColour.black, 3, 7);
 
             return newBoard;
         }
@@ -88,28 +92,91 @@ namespace doktorChess
             Board newBoard = new Board(gameType.normal);
 
             // Apply two rows of pawns
-            for (int x = 0; x < sizeX; x++)
+            for (int x = 0; x < 1; x++)
             {
-                newBoard.addPiece(x, 1, pieceType.pawn, pieceColour.white);
-                newBoard.addPiece(x, 6, pieceType.pawn, pieceColour.black);
+                newBoard.addPiece(pieceType.pawn, pieceColour.white, x, 6);
+                newBoard.addPiece(pieceType.pawn, pieceColour.black, x, 1);
             }
 
-            // And now fill in the two end ranks.
-            foreach (int y in new int[] {0, 7})
+            //// And now fill in the two end ranks.
+            foreach (int y in new int[] { 0, 7 })
             {
                 pieceColour col = (y == 0 ? pieceColour.white : pieceColour.black);
 
-                newBoard.addPiece(0, y, pieceType.rook, col);
-                newBoard.addPiece(1, y, pieceType.knight, col);
-                newBoard.addPiece(2, y, pieceType.bishop, col);
-                newBoard.addPiece(3, y, pieceType.queen, col);
-                newBoard.addPiece(4, y, pieceType.king, col);
-                newBoard.addPiece(5, y, pieceType.bishop, col);
-                newBoard.addPiece(6, y, pieceType.knight, col);
-                newBoard.addPiece(7, y, pieceType.rook, col);
+            //    newBoard.addPiece(0, y, pieceType.rook, col);
+            //    newBoard.addPiece(1, y, pieceType.knight, col);
+            //    newBoard.addPiece(2, y, pieceType.bishop, col);
+            //    newBoard.addPiece(3, y, pieceType.queen, col);
+                newBoard.addPiece(pieceType.king, col, 4, y);
+            //    newBoard.addPiece(5, y, pieceType.bishop, col);
+            //    newBoard.addPiece(6, y, pieceType.knight, col);
+            //    newBoard.addPiece(7, y, pieceType.rook, col);
             }
 
+            newBoard._blackKingCaptured = false;
+            newBoard._whiteKingCaptured = false;
+
             return newBoard;
+        }
+
+        public void sanityCheck()
+        {
+            for (int x = 0; x < sizeX; x++)
+            {
+                for (int y = 0; y < sizeY; y++)
+                {
+                    // Check the square's position is set to its location in the array
+                    if (!this[x, y].position.isSameSquareAs(x, y))
+                        throw new Exception("Square grid is broken");
+                }
+            }
+
+            int seenBlack = 0;
+            int seenWhite = 0;
+            bool blackKingSeen = false;
+            bool whiteKingSeen = false;
+            foreach (square square in _squares)
+            {
+                if (square.type == pieceType.none)
+                    continue;
+
+                switch(square.colour)
+                {
+                    case pieceColour.black:
+                        if (!blackPieceSquares.Contains(square))
+                            throw new Exception("Black square list does not contain all black squares");
+                        seenBlack++;
+                        if (square.type == pieceType.king)
+                        {
+                            if (blackKingSeen)
+                                throw new Exception("Multiple black kings on board");
+                            blackKingSeen = true;
+                        }
+                        break;
+                    case pieceColour.white:
+                        if (!whitePieceSquares.Contains(square))
+                            throw new Exception("White square list does not contain all white squares");
+                        seenWhite++;
+                        if (square.type == pieceType.king)
+                        {
+                            if (whiteKingSeen)
+                                throw new Exception("Multiple white kings on board");
+                            whiteKingSeen = true;
+                        }
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            if (seenWhite != whitePieceSquares.Count)
+                throw new Exception("White piece list contains extra pieces");
+            if (seenBlack != blackPieceSquares.Count)
+                throw new Exception("Black piece list contains extra pieces");
+
+            if (blackKingSeen != !_blackKingCaptured)
+                throw new Exception("Black king capture status incorrect");
+            if (whiteKingSeen != !_whiteKingCaptured)
+                throw new Exception("White king capture status incorrect");
         }
 
         public override string ToString()
@@ -127,18 +194,83 @@ namespace doktorChess
             return toRet.ToString();
         }
 
-        public square addPiece(int x, int y, pieceType newType, pieceColour newColour)
+        private square addPiece(pieceType newType, pieceColour newColour, squarePos dstPos)
         {
-            _squares[x, y] = square.makeSquare(newType, newColour, new squarePos(x, y));
+            this[dstPos] = square.makeSquare(newType, newColour, dstPos);
+            addNewPieceToArrays(this[dstPos]);
 
-            if (newColour == pieceColour.white)
-                whitePieceSquares.Add(_squares[x, y]);
-            else if (newColour == pieceColour.black)
-                blackPieceSquares.Add(_squares[x, y]);
-            else
-                throw new ArgumentException();
+            // If we're adding a king, we need to record that it has not been captured.
+            if (newType == pieceType.king)
+            {
+                
+            }
 
-            return _squares[x, y];
+            return this[dstPos];
+        }
+
+        public square addPiece(pieceType newType, pieceColour newColour, int x, int y)
+        {
+            return addPiece(newType, newColour, new squarePos(x, y));
+        }
+
+        private void removePiece(square toRemove)
+        {
+            removeNewPieceFromArrays(toRemove);
+            this[toRemove.position] = new square(toRemove.position);
+        }
+
+        private void addNewPieceToArrays(square newSq)
+        {
+            if (whitePieceSquares.Contains(newSq) ||
+                blackPieceSquares.Contains(newSq))
+                throw new Exception("Duplicate square");
+
+            switch (newSq.colour)
+            {
+                case pieceColour.white:
+                    whitePieceSquares.Add(newSq);
+                    break;
+                case pieceColour.black:
+                    blackPieceSquares.Add(newSq);
+                    break;
+                default:
+                    throw new ArgumentException();
+            }
+
+            if (newSq.type == pieceType.king)
+            {
+                if (newSq.colour == pieceColour.black)
+                    _blackKingCaptured = false;
+                else if (newSq.colour == pieceColour.white)
+                    _whiteKingCaptured = false;
+                else
+                    throw new ArgumentException();
+            }
+        }
+
+        private void removeNewPieceFromArrays(square newSq)
+        {
+            switch (newSq.colour)
+            {
+                case pieceColour.white:
+                    whitePieceSquares.Remove(newSq);
+                    break;
+                case pieceColour.black:
+                    blackPieceSquares.Remove(newSq);
+                    break;
+                default:
+                    throw new ArgumentException();
+            }
+
+            if (newSq.type == pieceType.king)
+            {
+                if (newSq.colour == pieceColour.black)
+                    _blackKingCaptured = true;
+                else if (newSq.colour == pieceColour.white)
+                    _whiteKingCaptured = true;
+                else
+                    throw new ArgumentException();
+            }
         }
 
         public List<move> getMoves(pieceColour toMoveColour)
@@ -445,8 +577,14 @@ namespace doktorChess
 
         public void doMove(move move)
         {
-            square src = this[move.srcPos];
-            square dst = this[move.dstPos];
+            sanityCheck();
+
+            // Update movedness count for the moving piece
+            this[move.srcPos].moveNumbers.Push(moveCount);
+            this[move.srcPos].movedCount++;
+            
+            square movingSquare = this[move.srcPos];
+            //square dst = this[move.dstPos];
 
             // If this move is a castling, update the rooks movedCount
             if (move.isACastling())
@@ -463,16 +601,28 @@ namespace doktorChess
                 rook.movedCount++;
                 rook.moveNumbers.Push(moveCount);                
             }
-            // Update movedness count for the moving piece
-            src.moveNumbers.Push(moveCount);
-            src.movedCount++;
+
+            // Update the number of moves on this board
             moveCount++;
 
-            // Move our piece from the source to the destination
-            this[move.dstPos] = this[move.srcPos];
-            this[move.srcPos] = new square(move.srcPos);
-            // Update the piece's idea of where it is
-            this[move.dstPos].position = move.dstPos;
+            // Move our piece from the source to the destination, removing any piece that might be there
+            if (this[move.dstPos].type != pieceType.none)
+            {
+                //sanityCheck();
+                removePiece(this[move.dstPos]);
+                this[move.dstPos] = this[move.srcPos];
+                this[move.dstPos].position = move.dstPos;
+                //sanityCheck();
+
+                if (!move.isCapture)
+                    throw new Exception("Non-capture in to occupied square");
+            }
+            else
+            {
+                this[move.dstPos] = this[move.srcPos];
+                // Update the piece's idea of where it is
+                this[move.dstPos].position = move.dstPos;
+            }
 
             // If we're castling, move the rook appropriately
             if (move.isACastling())
@@ -489,33 +639,52 @@ namespace doktorChess
             {
                 square captured = move.capturedSquare;
 
-                if (!captured.position.isSameSquareAs(dst.position))
-                    this[captured.position] = new square(captured.position);
-
-                if (captured.colour == pieceColour.white)
-                    whitePieceSquares.Remove(captured);
-                else if (captured.colour == pieceColour.black)
-                    blackPieceSquares.Remove(captured);
-
-                if (captured.type == pieceType.king)
+                if (!captured.position.isSameSquareAs(move.dstPos))
                 {
-                    if (captured.colour == pieceColour.black)
-                        _blackKingCaptured = true;
-                    else if (captured.colour == pieceColour.white)
-                        _whiteKingCaptured = true;
-                    else
-                        throw new ArgumentException();
+                    // The capture was not in to our piece's destination square. Set the captured square
+                    // to be empty.
+                    this[captured.position] = new square(captured.position);
                 }
+
+                removeNewPieceFromArrays(captured);
+            }
+            //else
+            {
+                // Not a capture. Erase our old square.
+                this[move.srcPos] = new square(move.srcPos);
             }
 
+            if (move.isPawnPromotion)
+            {
+                removePiece(movingSquare);
+                this[move.dstPos] = addPiece(move.typeToPromoteTo, movingSquare.colour, move.dstPos);
+                this[move.dstPos].pastLife = movingSquare;
+            }
+
+            sanityCheck();
         }
 
         public void undoMove(move move)
         {
+            sanityCheck();
+
+            // Revert any promotion
+            if (move.isPawnPromotion)
+            {
+                square promoted = this[move.dstPos];
+                removePiece(promoted);
+                this[move.dstPos] = promoted.pastLife;
+                addNewPieceToArrays(promoted.pastLife);
+            }
+
+            // dec the move counters
             moveCount--;
             this[move.dstPos].movedCount--;
+            if (this[move.dstPos].moveNumbers.Count == 0)
+                this[move.dstPos].moveNumbers = this[move.dstPos].moveNumbers;
             Debug.Assert(this[move.dstPos].moveNumbers.Pop() == moveCount);
 
+            // Dec the rook's move counter if this is a castling
             if (move.isACastling())
             {
                 if (this[move.dstPos].colour == pieceColour.white)
@@ -561,23 +730,9 @@ namespace doktorChess
             {
                 this[move.capturedSquarePos] = move.capturedSquare;
 
-                if (move.capturedSquare.colour == pieceColour.white)
-                    whitePieceSquares.Add(move.capturedSquare);
-                else if (move.capturedSquare.colour == pieceColour.black)
-                    blackPieceSquares.Add(move.capturedSquare);
-                else
-                    throw new ArgumentException();
-
-                if (move.capturedSquare.type == pieceType.king)
-                {
-                    if (move.capturedSquare.colour == pieceColour.black)
-                        _blackKingCaptured = false;
-                    else if (move.capturedSquare.colour == pieceColour.white)
-                        _whiteKingCaptured = false;
-                    else
-                        throw new ArgumentException();
-                }
+                addNewPieceToArrays(move.capturedSquare);
             }
+            sanityCheck();
         }
 
         public bool playerIsInCheck(pieceColour playerPossiblyInCheck)

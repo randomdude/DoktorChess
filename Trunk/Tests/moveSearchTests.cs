@@ -79,9 +79,9 @@ namespace Tests
         public void testAsWinningMoveAsWhiteToPlay()
         {
             Board ourBoard = new Board(gameType.queenAndPawns);
-            ourBoard.addPiece(3, 4, pieceType.queen, pieceColour.black);
-            ourBoard.addPiece(0, 4, pieceType.pawn, pieceColour.white);
-            ourBoard.addPiece(1, 6, pieceType.pawn, pieceColour.white);
+            ourBoard.addPiece(pieceType.queen, pieceColour.black, 3, 4);
+            ourBoard.addPiece(pieceType.pawn, pieceColour.white, 0, 4);
+            ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 6);
 
             // We are white, and it is white's move. Analyze a situation in which pushing
             // a pawn will result in a win. Ensure that the AI does not push the wrong pawn.
@@ -105,11 +105,11 @@ namespace Tests
             // Test a  specific position which is giving me trouble.
             Board ourboard = new Board(gameType.queenAndPawns);
 
-            ourboard.addPiece(0, 4, pieceType.pawn, pieceColour.white).movedCount++;
-            ourboard.addPiece(1, 1, pieceType.pawn, pieceColour.white).movedCount++;
-            ourboard.addPiece(3, 5, pieceType.pawn, pieceColour.white).movedCount++;
+            ourboard.addPiece(pieceType.pawn, pieceColour.white, 0, 4).movedCount++;
+            ourboard.addPiece(pieceType.pawn, pieceColour.white, 1, 1).movedCount++;
+            ourboard.addPiece(pieceType.pawn, pieceColour.white, 3, 5).movedCount++;
 
-            ourboard.addPiece(3, 2, pieceType.queen, pieceColour.black).movedCount++;
+            ourboard.addPiece(pieceType.queen, pieceColour.black, 3, 2).movedCount++;
 
             ourboard.searchDepth = 3;
             lineAndScore best = ourboard.findBestMove(pieceColour.black);

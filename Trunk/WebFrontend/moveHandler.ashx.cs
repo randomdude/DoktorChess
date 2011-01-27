@@ -36,8 +36,9 @@ namespace WebFrontend
             string playersMoveString = context.Request["ourMove"];
             move playersMove = move.fromJSON(playersMoveString, theBoard);
 
-            // Some moves - like en passant - do not have enough information coming in from the frontend to represent
-            // properly. Add any data like that.
+            // Some moves - like en passant - do not have enough information coming in from the 
+            // frontend to represent properly, but have enough information to infer everything.
+            // Add any data like that.
             playersMove = playersMove.sanitize(theBoard);
 
             // if the players move is for the wrong side, or is illegal, return 

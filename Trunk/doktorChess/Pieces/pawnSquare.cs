@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace doktorChess
 {
@@ -30,19 +31,7 @@ namespace doktorChess
             if ((position.y + direction < Board.sizeY ) && 
                 (position.y + direction > -1) )
             {
-                // Check the two diagonals
-                if (position.x > 0)
-                {
-                    if (onThis[position.up(direction).leftOne()].containsPieceNotOfColour(colour))
-                        toRet.Add(new move(onThis[position], onThis[position.up(direction).leftOne()]));
-                }
-                if (position.x < Board.sizeX -1 )
-                {
-                    if (onThis[position.up(direction).rightOne()].containsPieceNotOfColour(colour))
-                        toRet.Add(new move(onThis[position], onThis[position.up(direction).rightOne()]));
-                }
-
-                // Check for en passant
+                // Check for en passant. En passant can never cause a promotion.
                 if (position.x > 0)
                 {
                     square adjacentLeft = onThis[position.leftOne()];
@@ -56,25 +45,72 @@ namespace doktorChess
                         toRet.Add(new move(onThis[position], onThis[position.up(direction).rightOne()], adjacentRight));
                 }
 
-                // We can move forward one if that square is empty.
-                if (onThis[position.up(direction)].type == pieceType.none)
-                    toRet.Add(new move(onThis[position], onThis[position.up(direction)]));
-                else
-                    return toRet;
-
                 // And we can move forward two if we haven't moved this piece yet, and both
-                // squares are empty.
+                // squares are empty. It is assumed that this can't cause a promotion, so explicitly
+                // prevent this move from moving in to the back row.
                 if (movedCount == 0)
                 {
-                    if (position.y + (direction * 2) < Board.sizeY && 
+                    if (position.y + (direction * 2) < Board.sizeY &&
                         position.y + (direction * 2) > -1)
                     {
-                        if (onThis[position.up(direction * 2)].type == pieceType.none)
-                            toRet.Add(new move(onThis[position], onThis[position.up(direction * 2)]));
+                        // check back row
+                        if (position.y != (colour == pieceColour.white ? 7 : 0))
+                        {
+                            if (onThis[position.up(direction * 2)].type == pieceType.none &&
+                                onThis[position.up(direction * 1)].type == pieceType.none)
+                                toRet.Add(new move(onThis[position], onThis[position.up(direction*2)]));
+                        }
                     }
+                }
+
+                // All of the other moves could cause a promotion, so call addPawnMovesToSquare so that
+                // promoting moves are added.
+
+                // Check the two diagonals
+                if (position.x > 0)
+                {
+                    if (onThis[position.up(direction).leftOne()].containsPieceNotOfColour(colour))
+                        addPawnMovesToSquare(toRet, onThis[position], onThis[position.up(direction).leftOne()]);
+                }
+                if (position.x < Board.sizeX -1 )
+                {
+                    if (onThis[position.up(direction).rightOne()].containsPieceNotOfColour(colour))
+                        addPawnMovesToSquare(toRet, onThis[position], onThis[position.up(direction).rightOne()]);
+                }
+
+                // We can move forward one if that square is empty.
+                if (onThis[position.up(direction)].type == pieceType.none)
+                {
+                    if (onThis[position.up(direction)].type == pieceType.none)
+                        addPawnMovesToSquare(toRet, onThis[position], onThis[position.up(direction)]);
                 }
             }
             return toRet;
+        }
+
+        private void addPawnMovesToSquare(List<move> moveList, square src, square dst)
+        {
+            // If we are moving in to the end row, we should promote. Handle this.
+            if (dst.position.y == (colour == pieceColour.white ? 7 : 0) )
+            {
+                // OK. Promotions it is.
+                pieceType[] promotionOptions = new pieceType[]
+                                                  {
+                                                      pieceType.bishop,
+                                                      pieceType.knight,
+                                                      pieceType.queen,
+                                                      pieceType.rook
+                                                  };
+
+                foreach (pieceType promotionOption in promotionOptions)
+                {
+                    moveList.Add(new move(src, dst, promotionOption));
+                }
+            }
+            else
+            {
+                moveList.Add(new move(src, dst));                
+            }
         }
 
         private bool canEnPassantTo(square adjacent, Board theBoard)

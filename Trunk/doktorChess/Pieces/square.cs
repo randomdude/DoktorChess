@@ -15,7 +15,12 @@ namespace doktorChess
         /// </summary>
         public Stack<int> moveNumbers = new Stack<int>(50);
 
-        public pieceType type { get; protected set; }
+        /// <summary>
+        /// If this piece has been promoted from a pawn, this is where its past life as a pawn lives.
+        /// </summary>
+        public square pastLife;
+
+        public pieceType type { get; set; }
         public pieceColour colour { get; private set; }
         public squarePos position { get; set; }
 

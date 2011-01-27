@@ -33,8 +33,8 @@ namespace Tests
         public void testKingsideCastlingNotation()
         {
             Board ourBoard = new Board(gameType.normal);
-            square ourKing = ourBoard.addPiece(4, 0, pieceType.king, pieceColour.white);
-            ourBoard.addPiece(7, 0, pieceType.rook, pieceColour.white);
+            square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
+            ourBoard.addPiece(pieceType.rook, pieceColour.white, 7, 0);
 
             move theMove = new move(ourKing, new square(6, 0) );
 
@@ -45,8 +45,8 @@ namespace Tests
         public void testQueensideCastlingNotation()
         {
             Board ourBoard = new Board(gameType.normal);
-            square ourKing = ourBoard.addPiece(4, 0, pieceType.king, pieceColour.white);
-            ourBoard.addPiece(0, 0, pieceType.rook, pieceColour.white);
+            square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
+            ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 0);
 
             move theMove = new move(ourKing, new square(2, 0));
 
@@ -61,9 +61,9 @@ namespace Tests
         public void testQueensideCastlingMoveIsFound()
         {
             Board ourBoard = new Board(gameType.normal);
-            square ourKing = ourBoard.addPiece(4, 0, pieceType.king, pieceColour.white);
-            ourBoard.addPiece(0, 0, pieceType.rook, pieceColour.white);
-            ourBoard.addPiece(7, 7, pieceType.king, pieceColour.black);
+            square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
+            ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 0);
+            ourBoard.addPiece(pieceType.king, pieceColour.black, 7, 7);
 
             List<move> possibleMoves = ourKing.getPossibleMoves(ourBoard);
 
@@ -85,12 +85,12 @@ namespace Tests
             // It is legal to castle queenside if the space next to the rook is covered, since the king
             // does not move through it.
             Board ourBoard = new Board(gameType.normal);
-            square ourKing = ourBoard.addPiece(4, 0, pieceType.king, pieceColour.white);
-            ourBoard.addPiece(0, 0, pieceType.rook, pieceColour.white);
-            ourBoard.addPiece(7, 7, pieceType.king, pieceColour.black);
+            square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
+            ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 0);
+            ourBoard.addPiece(pieceType.king, pieceColour.black, 7, 7);
 
             // Throw in a rook which covers (1,0)
-            ourBoard.addPiece(1, 7, pieceType.rook, pieceColour.black);
+            ourBoard.addPiece(pieceType.rook, pieceColour.black, 1, 7);
 
             List<move> possibleMoves = ourKing.getPossibleMoves(ourBoard);
 
@@ -111,10 +111,10 @@ namespace Tests
         {
             // And we cannot castle through check apart from as noted above.
             Board ourBoard = new Board(gameType.normal);
-            square ourKing = ourBoard.addPiece(4, 0, pieceType.king, pieceColour.white);
-            ourBoard.addPiece(0, 0, pieceType.rook, pieceColour.white);
-            ourBoard.addPiece(7, 7, pieceType.king, pieceColour.black);
-            ourBoard.addPiece(3, 7, pieceType.rook, pieceColour.black);
+            square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
+            ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 0);
+            ourBoard.addPiece(pieceType.king, pieceColour.black, 7, 7);
+            ourBoard.addPiece(pieceType.rook, pieceColour.black, 3, 7);
 
             List<move> possibleMoves = ourKing.getPossibleMoves(ourBoard);
 
@@ -128,10 +128,10 @@ namespace Tests
         {
             // Place an enemy pawn in the way which will prevent us from castling.
             Board ourBoard = new Board(gameType.normal);
-            square ourKing = ourBoard.addPiece(4, 0, pieceType.king, pieceColour.white);
-            ourBoard.addPiece(0, 0, pieceType.rook, pieceColour.white);
-            ourBoard.addPiece(1, 0, pieceType.pawn, pieceColour.black);
-            ourBoard.addPiece(7, 7, pieceType.king, pieceColour.black);
+            square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
+            ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 0);
+            ourBoard.addPiece(pieceType.pawn, pieceColour.black, 1, 0);
+            ourBoard.addPiece(pieceType.king, pieceColour.black, 7, 7);
 
             List<move> possibleMoves = ourKing.getPossibleMoves(ourBoard);
 
@@ -144,9 +144,9 @@ namespace Tests
         public void testQueensideCastlingMoveIsExecutedCorrectly()
         {
             Board ourBoard = new Board(gameType.normal);
-            square ourKing = ourBoard.addPiece(4, 0, pieceType.king, pieceColour.white);
-            square ourRook = ourBoard.addPiece(0, 0, pieceType.rook, pieceColour.white);
-            ourBoard.addPiece(7, 7, pieceType.king, pieceColour.black);
+            square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
+            square ourRook = ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 0);
+            ourBoard.addPiece(pieceType.king, pieceColour.black, 7, 7);
 
             // Make our castling move..
             move castlingMove = new move(ourKing, ourBoard[2, 0]);
@@ -161,9 +161,9 @@ namespace Tests
         public void testQueensideCastlingMoveIsUnExecutedCorrectly()
         {
             Board ourBoard = new Board(gameType.normal);
-            square ourKing = ourBoard.addPiece(4, 0, pieceType.king, pieceColour.white);
-            ourBoard.addPiece(0, 0, pieceType.rook, pieceColour.white);
-            ourBoard.addPiece(7, 7, pieceType.king, pieceColour.black);
+            square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
+            ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 0);
+            ourBoard.addPiece(pieceType.king, pieceColour.black, 7, 7);
 
             string origBoard = ourBoard.ToString();
 

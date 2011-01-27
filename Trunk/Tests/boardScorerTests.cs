@@ -36,7 +36,7 @@ namespace Tests
             // Generate a board which is lost via the 'no pieces remain' rule, and verify
             // we get the correct score.
             Board ourboard = new Board(gameType.queenAndPawns);
-            ourboard.addPiece(1,1,pieceType.pawn, pieceColour.black);
+            ourboard.addPiece(pieceType.pawn, pieceColour.black, 1, 1);
 
             // position is lost for white..
             BoardScorer whiteScorer = new BoardScorer(ourboard, pieceColour.white);
@@ -53,7 +53,7 @@ namespace Tests
             // We make two different boards here to test two different scenarios - if a black
             // pawn is at rank 0 and a white at rank 7.
             Board pawnAt0 = new Board(gameType.queenAndPawns);
-            pawnAt0.addPiece(1, 0, pieceType.pawn, pieceColour.black);
+            pawnAt0.addPiece(pieceType.pawn, pieceColour.black, 1, 0);
 
             // position is lost for white..
             BoardScorer whiteScorer = new BoardScorer(pawnAt0, pieceColour.white);
@@ -65,7 +65,7 @@ namespace Tests
 
             // Now the white pawn at rank 7.
             Board pawnAt7 = new Board(gameType.queenAndPawns);
-            pawnAt7.addPiece(1, 7, pieceType.pawn, pieceColour.white);
+            pawnAt7.addPiece(pieceType.pawn, pieceColour.white, 1, 7);
 
             whiteScorer = new BoardScorer(pawnAt7, pieceColour.white);
             Assert.AreEqual(BoardScorer.highest, whiteScorer.getScore());
@@ -78,19 +78,21 @@ namespace Tests
         {
             // Generate a board two pawns, deadlocked in front of each other. This should
             // be a draw via stalemate. Add a third pawn to ensure that stalemate is causing
-            // the '0' board score.
+            // the '0' board score, not a materian mismatch.
             Board ourboard = new Board(gameType.queenAndPawns);
-            ourboard.addPiece(1, 1, pieceType.pawn, pieceColour.white);
-            ourboard.addPiece(1, 2, pieceType.pawn, pieceColour.white);
-            ourboard.addPiece(1, 3, pieceType.pawn, pieceColour.black);
+            // Two deadlocked pawns
+            ourboard.addPiece(pieceType.pawn, pieceColour.white, 1, 2);
+            ourboard.addPiece(pieceType.pawn, pieceColour.black, 1, 3);
+            // an outlier pawn
+            ourboard.addPiece(pieceType.pawn, pieceColour.black, 4, 4);
 
             Assert.IsTrue(ourboard.getGameStatus(pieceColour.white) == gameStatus.drawn);
-            Assert.IsTrue(ourboard.getGameStatus(pieceColour.black) == gameStatus.drawn);
+            Assert.IsTrue(ourboard.getGameStatus(pieceColour.black) != gameStatus.drawn);
 
             BoardScorer whiteScorer = new BoardScorer(ourboard, pieceColour.white);
             Assert.AreEqual(0, whiteScorer.getScore());
             BoardScorer blackScorer = new BoardScorer(ourboard, pieceColour.black);
-            Assert.AreEqual(0, blackScorer.getScore());
+            Assert.AreNotEqual(0, blackScorer.getScore());
         }
     }
 }

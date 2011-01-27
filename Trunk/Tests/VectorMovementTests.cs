@@ -13,7 +13,7 @@ namespace Tests
             Board ourBoard = new Board(gameType.queenAndPawns);
             squarePos srcSquare = new squarePos(3, 3);
 
-            ourBoard.addPiece(srcSquare.x, srcSquare.y, pieceType.queen, pieceColour.white);
+            ourBoard.addPiece(pieceType.queen, pieceColour.white, srcSquare.x, srcSquare.y);
             queenSquare queenie = (queenSquare)ourBoard[srcSquare];
 
             List<move> expectedmoves = new List<move>(expectedPos.Count);
