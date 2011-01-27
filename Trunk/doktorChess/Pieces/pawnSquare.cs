@@ -96,10 +96,10 @@ namespace doktorChess
                 // OK. Promotions it is.
                 pieceType[] promotionOptions = new pieceType[]
                                                   {
-                                                      pieceType.bishop,
-                                                      pieceType.knight,
                                                       pieceType.queen,
-                                                      pieceType.rook
+                                                      pieceType.rook,
+                                                      pieceType.knight,
+                                                      pieceType.bishop
                                                   };
 
                 foreach (pieceType promotionOption in promotionOptions)

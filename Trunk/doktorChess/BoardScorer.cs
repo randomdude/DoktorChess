@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace doktorChess
@@ -54,14 +56,7 @@ namespace doktorChess
 
         private int getMaterialAdvantage(List<square> pieces)
         {
-            int toRet = 0;
-
-            foreach (square thisSq in pieces)
-            {
-                toRet += getMaterialAdvantage(thisSq.type);
-            }
-
-            return toRet;
+            return pieces.Sum(thisSq => getMaterialAdvantage((pieceType) thisSq.type));
         }
 
         private static int getMaterialAdvantage(pieceType pieces)
@@ -81,9 +76,11 @@ namespace doktorChess
                 case pieceType.queen:
                     return 8;
                 case pieceType.king:
-                    return highest;
+                    // Do not return int.Maxval, in order to avoid overflow. Situations with no king
+                    // are already handled as wins or losses.
+                    return 0;   
                 default:
-                    throw new ArgumentOutOfRangeException("Unrecognised piece");
+                    throw new Exception("Unrecognised piece");
             }
         }
 
@@ -107,8 +104,8 @@ namespace doktorChess
             int castleAdvantage = 0;
             if (parentBoard != null)
             {
-                if (parentBoard.whiteHasCastled && viewpoint == pieceColour.white) castleAdvantage += 50;
-                if (parentBoard.blackHasCastled && viewpoint == pieceColour.black) castleAdvantage += 50;
+                if (parentBoard.whiteHasCastled && viewpoint == pieceColour.white) castleAdvantage += 3;
+                if (parentBoard.blackHasCastled && viewpoint == pieceColour.black) castleAdvantage += 3;
             }
 
             return (_myMaterialAdvantage - _myMaterialDisadvantage) + castleAdvantage;
