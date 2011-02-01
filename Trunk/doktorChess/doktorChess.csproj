@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Board.cs" />
     <Compile Include="BoardScorer.cs" />
+    <Compile Include="boardSearchConfig.cs" />
     <Compile Include="disabledThreatMap.cs" />
     <Compile Include="gameStatus.cs" />
     <Compile Include="gameType.cs" />

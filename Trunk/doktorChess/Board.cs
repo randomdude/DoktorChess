@@ -633,22 +633,20 @@ namespace doktorChess
             // Update the number of moves on this board
             moveCount++;
 
+            //  Erase our old square.
+            this[move.srcPos] = new square(move.srcPos);
+
             // Move our piece from the source to the destination, removing any piece that might be there
             if (this[move.dstPos].type != pieceType.none)
             {
                 removePiece(this[move.dstPos]);
-                this[move.dstPos] = this[move.srcPos];
-                this[move.dstPos].position = move.dstPos;
-
                 if (!move.isCapture)
                     throw new Exception("Non-capture in to occupied square");
             }
-            else
-            {
-                this[move.dstPos] = this[move.srcPos];
-                // Update the piece's idea of where it is
-                this[move.dstPos].position = move.dstPos;
-            }
+            coverLevel.remove(movingSquare);
+            this[move.dstPos] = movingSquare;
+            this[move.dstPos].position = move.dstPos;
+            coverLevel.add(move.dstPos);
 
             // If we're castling, move the rook appropriately
             if (move.isACastling())
@@ -674,10 +672,8 @@ namespace doktorChess
                 }
 
                 removeNewPieceFromArrays(captured);
+                coverLevel.remove(captured);
             }
-            //  Erase our old square.
-            coverLevel.remove(this[move.srcPos]);
-            this[move.srcPos] = new square(move.srcPos);
 
             if (move.isPawnPromotion)
             {
@@ -686,9 +682,6 @@ namespace doktorChess
                 this[move.dstPos].pastLife = movingSquare;
             }
 
-            if (move.isCapture)
-                coverLevel.remove(captured);
-            coverLevel.add(move.dstPos);
 
             sanityCheck();
         }
@@ -761,9 +754,8 @@ namespace doktorChess
 
             // Restore any captured piece
             if (move.isCapture)
-            {
                 addPiece(move.capturedSquare, move.capturedSquarePos);
-            }
+
             sanityCheck();
         }
 
@@ -800,15 +792,5 @@ namespace doktorChess
             // covering it or not.
             return coverLevel.isThreatened(squareToCheck, sideToExamine);
         }
-    }
-
-    public class boardSearchConfig
-    {
-        public bool useAlphaBeta = true;
-        public bool killerHeuristic = true;
-        public bool killerHeuristicPersists = true;
-        public bool useThreatMap = true;
-        public bool checkLots = false;
-        public int searchDepth = 4;
     }
 }

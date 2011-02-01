@@ -54,55 +54,6 @@ namespace Tests
             }
         }
 
-        [TestMethod]
-        public void testMoveUndoingThreatmap()
-        {
-            Board ourBoard = Board.makeNormalStartPosition(new boardSearchConfig());
-
-            string origThreatMap = ourBoard.coverLevel.ToString();
-
-            int[,] threatCounts = new int[Board.sizeX, Board.sizeY];
-            for (int x = 0; x < Board.sizeX; x++)
-            {
-                for (int y = 0; y < Board.sizeY; y++)
-                {
-                    threatCounts[x, y] = ourBoard[x,y].coveredSquares.Count;
-                }
-            }
-
-            List<move> moves = ourBoard.getMoves(pieceColour.white);
-            if (moves.Count == 0)
-                Assert.Inconclusive("No moves found");
-
-            foreach (move thisMove in moves)
-            {
-                ourBoard.doMove(thisMove);
-
-                if (ourBoard.coverLevel.ToString() == origThreatMap)
-                    throw new AssertFailedException("After a move, the threat map has not changed");
-
-                ourBoard.undoMove(thisMove);
-
-                if (ourBoard.coverLevel.ToString() != origThreatMap)
-                {
-                    Debug.WriteLine("Troublesome move : " + thisMove.ToString());
-                    Debug.WriteLine("Expected:");
-                    Debug.WriteLine(origThreatMap);
-                    Debug.WriteLine("Actual:");
-                    Debug.WriteLine(ourBoard.coverLevel.ToString());
-                    throw new AssertFailedException("After a move undo, the threat map has changed");
-                }
-
-                for (int x = 0; x < Board.sizeX; x++)
-                {
-                    for (int y = 0; y < Board.sizeY; y++)
-                    {
-                        if (threatCounts[x, y] != ourBoard[x, y].coveredSquares.Count)
-                            throw new AssertFailedException("Piece covered count incorrect");
-                    }
-                }
-            }
-        }
 
         [TestMethod]
         public void testMoveDoingUndoingWithPawnPromotion()

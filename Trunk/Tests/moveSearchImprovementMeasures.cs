@@ -80,9 +80,32 @@ namespace Tests
             }
         }
 
+        [TestMethod]
+        public void findSlowdownThreatMappingDepth()
+        {
+            boardSearchConfig configThreatMap = new boardSearchConfig() { useAlphaBeta = true, killerHeuristic = true, useThreatMap = true };
+            boardSearchConfig configNonThreatMap = new boardSearchConfig() { useAlphaBeta = true, killerHeuristic = true, useThreatMap = false };
+
+            for (int depth = 5; depth < 6; depth++)
+            {
+                configThreatMap.searchDepth = depth;
+                configNonThreatMap.searchDepth = depth;
+
+                moveSearchStats statsThreatMap = runTest(configThreatMap);
+                moveSearchStats statsNonThreatMap = runTest(configNonThreatMap);
+
+                double timeSpeedup = statsNonThreatMap.totalSearchTime / (double)statsThreatMap.totalSearchTime;
+
+                Debug.WriteLine(string.Format("Depth {0} : time {1} without / {2} with threatmap, ratio {3}", depth, statsNonThreatMap.totalSearchTime, statsThreatMap.totalSearchTime, timeSpeedup));
+
+                if (timeSpeedup < 0.9)
+                    throw new AssertFailedException("Threat mapping is too slow");
+            }
+        }
+
         private static moveSearchStats runTest(boardSearchConfig searchConfig)
         {
-            Board ourBoard = Board.makeQueenAndPawnsStartPosition(searchConfig);
+            Board ourBoard = Board.makeNormalStartPosition(searchConfig);
 
             ourBoard.findBestMove(pieceColour.white);
 

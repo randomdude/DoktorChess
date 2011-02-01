@@ -122,8 +122,17 @@ namespace doktorChess
 
         public int flatten()
         {
+            return squarePos.flatten(x, y);
+        }
+
+        public static int flatten(int x, int y)
+        {
             return x + (y * Board.sizeX);
         }
 
+        public override string ToString()
+        {
+            return x + ", " + y;
+        }
     }
 }
