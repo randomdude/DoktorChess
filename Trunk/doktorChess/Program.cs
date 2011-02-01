@@ -8,8 +8,9 @@ namespace doktorChess
         static void Main(string[] args)
         {
             //Board myBoard = Board.makeQueenAndPawnsStartPosition();
-            Board myBoard = Board.makeNormalStartPosition();
-            myBoard.searchDepth = 4;
+            boardSearchConfig config = new boardSearchConfig();
+            config.searchDepth = 4;
+            Board myBoard = Board.makeNormalStartPosition(config);
 
             pieceColour toPlay = pieceColour.white;
 
@@ -18,18 +19,15 @@ namespace doktorChess
             while (true)
             {
                 Console.WriteLine(myBoard.ToString());
+                Console.WriteLine(myBoard.coverLevel.ToString());
 
-                // Verify alpha-beta against minimax searches
-                myBoard.alphabeta = true;
-                //lineAndScore bestMoveAB = myBoard.findBestMove(toPlay);
-                //myBoard.alphabeta = false;
                 lineAndScore bestMove = myBoard.findBestMove(toPlay);
+                myBoard.advanceKillerTables();
 
-                //if (bestMoveAB.finalScore != bestMove.finalScore)
-                //    throw new Exception("Final score of alpha-beta result differs from that of minimax result");
+                //Console.WriteLine(string.Format("Best line for {0}: {1}", toPlay, bestMove.ToString(moveStringStyle.chessNotation)));
+                //Console.WriteLine("{0} boards scored in {1} ms, {2}/sec. {3} ms in board scoring.", myBoard.stats.boardsScored, myBoard.stats.totalSearchTime, myBoard.stats.scoredPerSecond, myBoard.stats.boardScoreTime );
 
-                Console.WriteLine(string.Format("Best line for {0}: {1}", toPlay, bestMove.ToString(moveStringStyle.chessNotation)));
-                Console.WriteLine("{0} boards scored in {1} ms, {2}/sec. {3} ms in board scoring.", myBoard.stats.boardsScored, myBoard.stats.totalSearchTime, myBoard.stats.scoredPerSecond, myBoard.stats.boardScoreTime );
+                Console.Write(String.Format("{0},", myBoard.stats.boardsScored));
                 move bestFirstMove = bestMove.line[0];
                 myBoard.doMove(bestFirstMove);
 

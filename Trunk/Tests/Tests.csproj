@@ -48,6 +48,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueenMovementTests.cs" />
     <Compile Include="queensideCastlingMovementTests.cs" />
+    <Compile Include="threatMapTests.cs" />
     <Compile Include="VectorMovementTests.cs" />
   </ItemGroup>
   <ItemGroup>

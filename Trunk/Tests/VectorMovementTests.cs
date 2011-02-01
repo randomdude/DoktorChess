@@ -10,7 +10,7 @@ namespace Tests
     {
         public void testVectorMovement(List<squarePos> expectedPos, vectorDirection dir)
         {
-            Board ourBoard = new Board(gameType.queenAndPawns);
+            Board ourBoard = new Board(gameType.queenAndPawns, new boardSearchConfig());
             squarePos srcSquare = new squarePos(3, 3);
 
             ourBoard.addPiece(pieceType.queen, pieceColour.white, srcSquare.x, srcSquare.y);
@@ -21,7 +21,7 @@ namespace Tests
             foreach (squarePos thisPos in expectedPos)
                 expectedmoves.Add(new move(queenie, ourBoard[thisPos]));
 
-            List<move> possibleMoves = queenie.getMovesForVector(ourBoard, dir);
+            List<move> possibleMoves = queenie.getMovesForVector(ourBoard, dir, false);
 
             testListsAreOfSameMoves(expectedmoves, possibleMoves);
 

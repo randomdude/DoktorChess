@@ -227,7 +227,7 @@ namespace doktorChess
             }
             else
             {
-                // A capture, rg BxR
+                // A capture, eg BxR
                 toRet.Append(_srcSquare.ToString().ToUpper());
                 toRet.Append("x");
                 toRet.Append(capturedSquare.ToString().ToUpper());

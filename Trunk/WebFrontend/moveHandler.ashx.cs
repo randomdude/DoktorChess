@@ -82,6 +82,7 @@ namespace WebFrontend
 
             // Now, find our best move, and play it
             lineAndScore bestLine = theBoard.findBestMove(computerCol);
+            theBoard.advanceKillerTables();
             move bestMove = bestLine.line[0];
             theBoard.doMove(bestMove);
             resp.blackMove = bestMove.ToString(moveStringStyle.chessNotation);

@@ -51,15 +51,18 @@ namespace Tests
 
         public static void testAsWhiteToPlay(int depth, bool useAlphaBeta)
         {
-            Board ourBoard = Board.makeQueenAndPawnsStartPosition();
+            boardSearchConfig config = new boardSearchConfig();
+            config.useThreatMap = false;
+            config.killerHeuristic = false;
+            config.useAlphaBeta = useAlphaBeta;
+            config.searchDepth = depth;
+            Board ourBoard = Board.makeQueenAndPawnsStartPosition(config);
 
             // We are white, and it is white's move. What is the (our) best move? It should
             // be D3, to prevent the pawn at D2 from being taken. Note that this relies on
             // the following move sequence being considered:
             // D3 QxD3 D4xQ
             // and thus needs a search depth that deep or more.
-            ourBoard.searchDepth = depth;
-            ourBoard.alphabeta = useAlphaBeta;
             lineAndScore bestLine = ourBoard.findBestMove(pieceColour.white);
 
             for (int i = 0; i < bestLine.line.Length; i++)
@@ -78,14 +81,15 @@ namespace Tests
         [TestMethod]
         public void testAsWinningMoveAsWhiteToPlay()
         {
-            Board ourBoard = new Board(gameType.queenAndPawns);
+            boardSearchConfig config = new boardSearchConfig();
+            config.searchDepth = 0;
+            Board ourBoard = new Board(gameType.queenAndPawns, config);
             ourBoard.addPiece(pieceType.queen, pieceColour.black, 3, 4);
             ourBoard.addPiece(pieceType.pawn, pieceColour.white, 0, 4);
             ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 6);
 
             // We are white, and it is white's move. Analyze a situation in which pushing
             // a pawn will result in a win. Ensure that the AI does not push the wrong pawn.
-            ourBoard.searchDepth = 0;
             lineAndScore bestLine = ourBoard.findBestMove(pieceColour.white);
 
             for (int i = 0; i < bestLine.line.Length; i++)
@@ -99,11 +103,14 @@ namespace Tests
             Assert.IsTrue(bestLine.line[0].dstPos.isSameSquareAs(new squarePos(1, 7)));
         }
 
+        [Ignore]
         [TestMethod]
         public void testSpecificPosition()
         {
+            boardSearchConfig config = new boardSearchConfig();
+            config.searchDepth = 3;
             // Test a  specific position which is giving me trouble.
-            Board ourboard = new Board(gameType.queenAndPawns);
+            Board ourboard = new Board(gameType.queenAndPawns, config);
 
             ourboard.addPiece(pieceType.pawn, pieceColour.white, 0, 4).movedCount++;
             ourboard.addPiece(pieceType.pawn, pieceColour.white, 1, 1).movedCount++;
@@ -111,7 +118,6 @@ namespace Tests
 
             ourboard.addPiece(pieceType.queen, pieceColour.black, 3, 2).movedCount++;
 
-            ourboard.searchDepth = 3;
             lineAndScore best = ourboard.findBestMove(pieceColour.black);
 
             Debug.WriteLine("Best line:");

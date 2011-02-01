@@ -8,13 +8,14 @@ namespace doktorChess
 {
     public class BoardScorer
     {
-        private int _myPieceCount;
-        private int _enemyPieceCount;
         private int _myMaterialAdvantage;
         private int _myMaterialDisadvantage;
         private gameStatus _status;
         private Board parentBoard;
         private pieceColour viewpoint;
+
+        int castleAdvantage = 0;
+        private int danglingModifier = 2;
 
         // Don't use min and maxval, because they are used by searches. This keeps things clean.
         public const int lowest = int.MinValue + 1;
@@ -47,8 +48,6 @@ namespace doktorChess
 
         private void commonConstructorStuff(List<square> myPieces, List<square> enemyPieces)
         {
-            _myPieceCount = myPieces.Count;
-            _enemyPieceCount = enemyPieces.Count;
             _myMaterialAdvantage = getMaterialAdvantage(myPieces);
             _myMaterialDisadvantage = getMaterialAdvantage(enemyPieces);
 
@@ -101,11 +100,26 @@ namespace doktorChess
                     throw new ArgumentOutOfRangeException();
             }
 
-            int castleAdvantage = 0;
             if (parentBoard != null)
             {
                 if (parentBoard.whiteHasCastled && viewpoint == pieceColour.white) castleAdvantage += 3;
                 if (parentBoard.blackHasCastled && viewpoint == pieceColour.black) castleAdvantage += 3;
+            }
+
+            if (parentBoard != null)
+            {
+                // Find any dangling pieces, and give them a modifier
+                int danglingBonus = 0;
+                List<square> myPieces = parentBoard.getPiecesForColour(viewpoint);
+
+                foreach (square myPiece in myPieces)
+                {
+                    if (parentBoard.getCoverLevel(myPiece, viewpoint) - parentBoard.getCoverLevel(myPiece, viewpoint) >
+                        0)
+                    {
+                        danglingBonus -= getMaterialAdvantage(myPiece.type)/danglingModifier;
+                    }
+                }
             }
 
             return (_myMaterialAdvantage - _myMaterialDisadvantage) + castleAdvantage;

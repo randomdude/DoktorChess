@@ -131,5 +131,26 @@ namespace doktorChess
 
             return false;
         }
+
+        public override List<move> getCoveredSquares(Board parentBoard)
+        {
+            List<move> toRet = new List<move>(2);
+            int direction = (colour == pieceColour.white) ? 1 : -1;
+
+            if ((position.y + direction < Board.sizeY) &&
+                           (position.y + direction > -1))
+            {
+                // Check the two diagonals
+                if (position.x > 0)
+                {
+                    toRet.Add(new move(this, parentBoard[position.up(direction).leftOne()])); ;
+                }
+                if (position.x < Board.sizeX - 1)
+                {
+                    toRet.Add(new move(this, parentBoard[position.up(direction).rightOne()])); ;
+                }
+            }
+            return toRet;            
+        }
     }
 }

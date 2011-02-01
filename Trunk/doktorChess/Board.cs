@@ -11,8 +11,6 @@ namespace doktorChess
         public const int sizeX = 8;
         public const int sizeY = 8;
 
-        public int searchDepth = 5;
-
         /// <summary>
         /// How many moves have been played on this board
         /// </summary>
@@ -40,13 +38,15 @@ namespace doktorChess
         /// </summary>
         private List<square> blackPieceSquares = new List<square>();
 
-        public bool alphabeta = true;
-        public bool killerHeuristic = true;
+        private boardSearchConfig searchConfig;
+
+        private killerMoveStore killerStore;
+        public IEnableableThreatMap coverLevel;
 
         // Keep some search stats in here
         public moveSearchStats stats;
 
-        public Board (gameType newType)
+        public Board (gameType newType, boardSearchConfig newSearchConfig)
         {
             // Set the game type
             _type = newType;
@@ -61,6 +61,13 @@ namespace doktorChess
             // Note that kings are captured, since none exist.
             _blackKingCaptured = true;
             _whiteKingCaptured = true;
+
+            if (newSearchConfig.useThreatMap)
+                coverLevel = new threatMap(this);
+            else
+                coverLevel = new disabledThreatMap();
+
+            searchConfig = newSearchConfig;
         }
 
         public square this[squarePos myPos]
@@ -75,9 +82,9 @@ namespace doktorChess
             private set { _squares[x, y] = value; }
         }
 
-        public static Board makeQueenAndPawnsStartPosition()
+        public static Board makeQueenAndPawnsStartPosition(boardSearchConfig searchConfig)
         {
-            Board newBoard = new Board(gameType.queenAndPawns);
+            Board newBoard = new Board(gameType.queenAndPawns, searchConfig);
 
             for (int x = 0; x < sizeX; x++)
                 newBoard.addPiece(pieceType.pawn, pieceColour.white, x, 1);
@@ -87,9 +94,9 @@ namespace doktorChess
             return newBoard;
         }
 
-        public static Board makeNormalStartPosition()
+        public static Board makeNormalStartPosition(boardSearchConfig searchConfig)
         {
-            Board newBoard = new Board(gameType.normal);
+            Board newBoard = new Board(gameType.normal, searchConfig);
 
             // Apply two rows of pawns
             for (int x = 0; x < sizeX; x++)
@@ -121,6 +128,9 @@ namespace doktorChess
 
         public void sanityCheck()
         {
+            if (!searchConfig.checkLots)
+                return;
+
             for (int x = 0; x < sizeX; x++)
             {
                 for (int y = 0; y < sizeY; y++)
@@ -198,23 +208,28 @@ namespace doktorChess
         {
             this[dstPos] = square.makeSquare(newType, newColour, dstPos);
             addNewPieceToArrays(this[dstPos]);
-
-            // If we're adding a king, we need to record that it has not been captured.
-            if (newType == pieceType.king)
-            {
-                
-            }
+            coverLevel.add(dstPos.x, dstPos.y);
 
             return this[dstPos];
         }
 
         public square addPiece(pieceType newType, pieceColour newColour, int x, int y)
         {
-            return addPiece(newType, newColour, new squarePos(x, y));
+            square toRet = addPiece(newType, newColour, new squarePos(x, y));
+
+            return toRet;
+        }
+
+        private void addPiece(square newSquare, squarePos newSquarePos)
+        {
+            this[newSquarePos] = newSquare;
+            addNewPieceToArrays(newSquare);
+            coverLevel.add(newSquarePos);
         }
 
         private void removePiece(square toRemove)
         {
+            coverLevel.remove(toRemove);
             removeNewPieceFromArrays(toRemove);
             this[toRemove.position] = new square(toRemove.position);
         }
@@ -431,24 +446,27 @@ namespace doktorChess
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            if (killerHeuristic)
+            if ( (searchConfig.killerHeuristic && !searchConfig.killerHeuristicPersists) || 
+                 (searchConfig.killerHeuristic && killerStore == null) )
+                killerStore = new killerMoveStore(searchConfig.searchDepth);
+
+            lineAndScore toRet = findBestMove(playerCol, true, searchConfig.searchDepth, int.MinValue, int.MaxValue);
+
+            if (searchConfig.killerHeuristic)
             {
-                for (int n = 0; n < searchDepth + 1; n++)
-                    killerMovesAtDepth.Add(n, new List<move>(1000));
+                killerStore.Clear();
             }
 
-            lineAndScore toRet = findBestMove(playerCol, true, searchDepth, int.MinValue, int.MaxValue);
-
-            if (killerHeuristic)
-                killerMovesAtDepth.Clear();
-            
             watch.Stop();
             stats.totalSearchTime = watch.ElapsedMilliseconds;
 
             return toRet;
         }
 
-        private readonly Dictionary<int, List<move>> killerMovesAtDepth = new Dictionary<int, List<move>>(10);
+        public void advanceKillerTables()
+        {
+            killerStore.advanceOne(searchConfig.searchDepth);
+        }
 
         private lineAndScore findBestMove(pieceColour playerCol, bool usToPlay, int depthLeft, int min, int max)
         {
@@ -466,9 +484,9 @@ namespace doktorChess
             // depending if we're searching for the minimum or maximum score.
             lineAndScore bestLineSoFar;
             if (usToPlay)
-                bestLineSoFar = new lineAndScore(new move[searchDepth + 1], int.MinValue);
+                bestLineSoFar = new lineAndScore(new move[searchConfig.searchDepth + 1], int.MinValue);
             else
-                bestLineSoFar = new lineAndScore(new move[searchDepth + 1], int.MaxValue);
+                bestLineSoFar = new lineAndScore(new move[searchConfig.searchDepth + 1], int.MaxValue);
 
             // Find a list of possible moves..
             List<move> movesToConsider = getMoves(toPlay);
@@ -479,15 +497,19 @@ namespace doktorChess
                 throw new ArgumentException();
             }
 
-            if (killerHeuristic)
+            if (searchConfig.killerHeuristic)
             {
+                int killerMoves = 0;
+
                 // If one of these moves caused a cutoff last time, consider that move first.
                 List<move> reorderedMovesToConsider = new List<move>(movesToConsider.Count);
                 foreach (move consideredMove in movesToConsider)
                 {
-                    if (killerMovesAtDepth[depthLeft].Find( (a) =>
-                                                            a.isSameSquaresAs(consideredMove) ) != null)
+                    if (killerStore.contains(consideredMove, depthLeft))
+                    {
                         reorderedMovesToConsider.Add(consideredMove);
+                        killerMoves++;
+                    }
                 }
                 if (reorderedMovesToConsider.Count > 0)
                 {
@@ -505,6 +527,7 @@ namespace doktorChess
 // ReSharper disable TooWideLocalVariableScope
             int score;
 // ReSharper restore TooWideLocalVariableScope
+            int moveIndex = 0;
             foreach (move consideredMove in movesToConsider)
             {
                 doMove(consideredMove);
@@ -518,7 +541,7 @@ namespace doktorChess
                          (!usToPlay && (score < bestLineSoFar.finalScore)))
                     {
                         bestLineSoFar.finalScore = score;
-                        bestLineSoFar.line[searchDepth] = consideredMove;
+                        bestLineSoFar.line[searchConfig.searchDepth] = consideredMove;
                     }
                 }
                 else
@@ -529,7 +552,7 @@ namespace doktorChess
                         (!usToPlay && (thisMove.finalScore < bestLineSoFar.finalScore)))
                     {
                         bestLineSoFar.finalScore = thisMove.finalScore;
-                        bestLineSoFar.line[searchDepth - depthLeft] = consideredMove;
+                        bestLineSoFar.line[searchConfig.searchDepth - depthLeft] = consideredMove;
                         for (int index = 0; index < thisMove.line.Length; index++)
                         {
                             if (thisMove.line[index] != null)
@@ -540,7 +563,7 @@ namespace doktorChess
 
                 undoMove(consideredMove);
 
-                if (alphabeta)
+                if (searchConfig.useAlphaBeta)
                 {
                     if (depthLeft > 0)
                     {
@@ -551,8 +574,10 @@ namespace doktorChess
 
                             if (min >= max)
                             {
-                                if (killerHeuristic)
-                                    killerMovesAtDepth[depthLeft].Add(consideredMove);
+                                if (searchConfig.killerHeuristic)
+                                {
+                                    killerStore.add(depthLeft, consideredMove);
+                                }
                                 break;
                             }
                         }
@@ -563,13 +588,16 @@ namespace doktorChess
 
                             if (max <= min)
                             {
-                                if (killerHeuristic)
-                                    killerMovesAtDepth[depthLeft].Add(consideredMove);
+                                if (searchConfig.killerHeuristic)
+                                {
+                                    killerStore.add(depthLeft, consideredMove);
+                                }
                                 break;
                             }
                         }
                     }
                 }
+                moveIndex++;
             }
 
             return bestLineSoFar;
@@ -577,6 +605,8 @@ namespace doktorChess
 
         public void doMove(move move)
         {
+            sanityCheck();
+
             // Update movedness count for the moving piece
             this[move.srcPos].moveNumbers.Push(moveCount);
             this[move.srcPos].movedCount++;
@@ -631,9 +661,10 @@ namespace doktorChess
                 this[newRookPos].position = newRookPos;
             }
 
+            square captured = null;
             if (move.isCapture)
             {
-                square captured = move.capturedSquare;
+                captured = move.capturedSquare;
 
                 if (!captured.position.isSameSquareAs(move.dstPos))
                 {
@@ -644,11 +675,9 @@ namespace doktorChess
 
                 removeNewPieceFromArrays(captured);
             }
-            //else
-            {
-                // Not a capture. Erase our old square.
-                this[move.srcPos] = new square(move.srcPos);
-            }
+            //  Erase our old square.
+            coverLevel.remove(this[move.srcPos]);
+            this[move.srcPos] = new square(move.srcPos);
 
             if (move.isPawnPromotion)
             {
@@ -656,10 +685,18 @@ namespace doktorChess
                 this[move.dstPos] = addPiece(move.typeToPromoteTo, movingSquare.colour, move.dstPos);
                 this[move.dstPos].pastLife = movingSquare;
             }
+
+            if (move.isCapture)
+                coverLevel.remove(captured);
+            coverLevel.add(move.dstPos);
+
+            sanityCheck();
         }
 
         public void undoMove(move move)
         {
+            sanityCheck();
+
             // Revert any promotion
             if (move.isPawnPromotion)
             {
@@ -691,12 +728,17 @@ namespace doktorChess
                 Assert.AreEqual(moveCount, rook.moveNumbers.Pop());
             }
 
-            // Move our piece back to its source square
-            this[move.srcPos] = this[move.dstPos];
-            this[move.srcPos].position = move.srcPos;
+            // store the piece which is moving before we erase it
+            square movingPiece = this[move.dstPos];
 
             // Erase the old destination
+            coverLevel.remove(movingPiece);
             this[move.dstPos] = new square(move.dstPos);
+
+            // Move our piece back to its source square
+            this[move.srcPos] = movingPiece;
+            this[move.srcPos].position = move.srcPos;
+            coverLevel.add(move.srcPos); 
 
             // If a castling, move the rook back too.
             if (move.isACastling())
@@ -720,11 +762,11 @@ namespace doktorChess
             // Restore any captured piece
             if (move.isCapture)
             {
-                this[move.capturedSquarePos] = move.capturedSquare;
-
-                addNewPieceToArrays(move.capturedSquare);
+                addPiece(move.capturedSquare, move.capturedSquarePos);
             }
+            sanityCheck();
         }
+
 
         public bool playerIsInCheck(pieceColour playerPossiblyInCheck)
         {
@@ -744,32 +786,29 @@ namespace doktorChess
 
         public int getCoverLevel(square squareToCheck, pieceColour sideToExamine)
         {
-            List<square> squaresToCheck = getPiecesForColour(sideToExamine);
-            List<move> moves = new List<move>(squaresToCheck.Count * 8);
-
-            // Place a dummy piece in the square to check, and see what can capture it.
-            // This is done to prevent us finding 'moves' as opposed to 'captures' - eg
-            // pawns going forward.
-            this[squareToCheck.position.x, squareToCheck.position.y] = new pawnSquare(squareToCheck.position, getOtherSide(sideToExamine));
-
-            foreach (square thisSq in squaresToCheck)
-            {
-                // We need to be careful here! Because the king square logic calls this function in order to ascertain 
-                // if we can castle, we need to ensure that we do not call it again, to prevent infinite recursion.
-                // This is safe, since a castle cannot 'cover' a square anyway.
-                if (thisSq.type == pieceType.king)
-                    ((kingSquare) thisSq).inhibitCastling = true;
-
-                moves.AddRange(thisSq.getPossibleMoves(this));
-                
-                if (thisSq.type == pieceType.king)
-                    ((kingSquare)thisSq).inhibitCastling = false;
-            }
-
-            // Remove our dummy piece
-            this[squareToCheck.position] = squareToCheck;
-
-            return moves.FindAll(a => (a.isCapture && a.capturedSquare.position.isSameSquareAs(squareToCheck.position)) ).Count;
+            return getCoverLevel(squareToCheck.position, sideToExamine);
         }
+
+        public int getCoverLevel(squarePos squareToCheck, pieceColour sideToExamine)
+        {
+            return sideToExamine == pieceColour.white ? coverLevel[squareToCheck] : -coverLevel[squareToCheck];
+        }
+
+        public bool isThreatened(square squareToCheck, pieceColour sideToExamine)
+        {
+            // Return true if the square is covered by at least one enemy piece. Ignore if we are 
+            // covering it or not.
+            return coverLevel.isThreatened(squareToCheck, sideToExamine);
+        }
+    }
+
+    public class boardSearchConfig
+    {
+        public bool useAlphaBeta = true;
+        public bool killerHeuristic = true;
+        public bool killerHeuristicPersists = true;
+        public bool useThreatMap = true;
+        public bool checkLots = false;
+        public int searchDepth = 4;
     }
 }

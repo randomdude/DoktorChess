@@ -24,6 +24,8 @@ namespace doktorChess
         public pieceColour colour { get; private set; }
         public squarePos position { get; set; }
 
+        public List<squarePos> coveredSquares = new List<squarePos>(60);
+
         public static square makeSquare(pieceType newType, pieceColour newColour, squarePos newPos)
         {
             square toRet ;
@@ -103,8 +105,9 @@ namespace doktorChess
         /// </summary>
         /// <param name="onThis">The board to move on</param>
         /// <param name="dir">The vectorDirection to move in</param>
+        /// <param name="asCovering"></param>
         /// <returns>A List&lt;move&gt; of moves</returns>
-        public List<move> getMovesForVector(Board onThis, vectorDirection dir)
+        public List<move> getMovesForVector(Board onThis, vectorDirection dir, bool asCovering)
         {
             List<move> toRet = new List<move>(8);
 
@@ -200,9 +203,19 @@ namespace doktorChess
                 {
                     if (onThis[sqPos].colour == colour )
                     {
-                        // the square is occupied by one of our pieces, we cannot move past
-                        // it.
-                        break;
+                        if (asCovering)
+                        {
+                            // the square is occupied by one of our pieces, so we are covering it, 
+                            // but we cannot go any further.
+                            toRet.Add(new move(onThis[position], onThis[sqPos]));
+                            break;                            
+                        }
+                        else
+                        {
+                            // the square is occupied by one of our pieces, we cannot move past
+                            // it.
+                            break;
+                        }
                     }
                     else
                     {
@@ -231,10 +244,7 @@ namespace doktorChess
 
             foreach (squarePosOffset potentialSquareOffset in potentialSquareOffsets)
             {
-                if (potentialSquareOffset.x + position.x > Board.sizeX - 1 ||
-                    potentialSquareOffset.x + position.x < 0  ||
-                    potentialSquareOffset.y + position.y > Board.sizeY - 1||
-                    potentialSquareOffset.y + position.y < 0 )
+                if (!IsOnBoard(potentialSquareOffset.x, potentialSquareOffset.y))
                     continue;
 
                 square destSquare = onThis[potentialSquareOffset.x + position.x, potentialSquareOffset.y + position.y];
@@ -256,17 +266,21 @@ namespace doktorChess
 
             return toRet;
         }
-    }
 
-    public class squarePosOffset
-    {
-        public readonly int x;
-        public readonly int y;
-
-        public squarePosOffset(int newX, int newY)
+        protected bool IsOnBoard(int x, int y)
         {
-            x = newX;
-            y = newY;
+            if (x + position.x > Board.sizeX - 1 ||
+                x + position.x < 0 ||
+                y + position.y > Board.sizeY - 1 ||
+                y + position.y < 0)
+                return false;
+
+            return true;
+        }
+
+        public virtual List<move> getCoveredSquares(Board parentBoard)
+        {
+            return getPossibleMoves(parentBoard);
         }
     }
 }

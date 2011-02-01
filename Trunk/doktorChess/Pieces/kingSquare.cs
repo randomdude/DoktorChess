@@ -7,6 +7,12 @@ namespace doktorChess
     {
         public bool inhibitCastling;
 
+        // We can move to these squares if they are free.
+        private squarePosOffset[] potentialSquares = new squarePosOffset[] {    new squarePosOffset(-1, +1), new squarePosOffset( 0, +1), new squarePosOffset(+1, +1),
+                                                                            new squarePosOffset(-1,  0), new squarePosOffset(+1,  0),
+                                                                            new squarePosOffset(-1, -1), new squarePosOffset( 0, -1), new squarePosOffset(+1, -1)};
+
+
         public kingSquare(squarePos newPos, pieceColour newColour)
             : base(newPos, newColour)
         {
@@ -20,10 +26,6 @@ namespace doktorChess
 
         public override List<move> getPossibleMoves(Board onThis)
         {
-            // We can move to these squares if they are free.
-            squarePosOffset[] potentialSquares = new squarePosOffset[] {    new squarePosOffset(-1, +1), new squarePosOffset( 0, +1), new squarePosOffset(+1, +1),
-                                                                            new squarePosOffset(-1,  0), new squarePosOffset(+1,  0),
-                                                                            new squarePosOffset(-1, -1), new squarePosOffset( 0, -1), new squarePosOffset(+1, -1)};
             List<move> possibleMoves = findFreeOrCapturableIfOnBoard(onThis, potentialSquares);
 
             if (canCastle(onThis, true))
@@ -38,6 +40,22 @@ namespace doktorChess
             }
 
             return possibleMoves;
+        }
+
+        public override List<move> getCoveredSquares(Board parentBoard)
+        {
+            List<move> toRet = new List<move>(8);
+
+            foreach (squarePosOffset potentialSquare in potentialSquares)
+            {
+                int posX = position.x + potentialSquare.x;
+                int posY = position.y + potentialSquare.y;
+
+                if (IsOnBoard(potentialSquare.x, potentialSquare.y))
+                    toRet.Add(new move(this, parentBoard[posX, posY]));
+            }
+
+            return toRet;
         }
 
         private bool canCastle(Board theBoard, bool kingSide)
@@ -87,7 +105,7 @@ namespace doktorChess
                 for (int n = 1; n < 3; n++)
                 {
                     square perhapsThreatened = theBoard[ kingSide ? position.right(n) : position.left(n)];
-                    if ( theBoard.getCoverLevel(perhapsThreatened, Board.getOtherSide(colour) ) > 0 )
+                    if ( theBoard.isThreatened(perhapsThreatened, colour)  )
                     {
                         // Intermediate squares are threatened - castling is impossible.
                         return false;

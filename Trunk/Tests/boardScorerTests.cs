@@ -35,7 +35,7 @@ namespace Tests
         {
             // Generate a board which is lost via the 'no pieces remain' rule, and verify
             // we get the correct score.
-            Board ourboard = new Board(gameType.queenAndPawns);
+            Board ourboard = new Board(gameType.queenAndPawns, new boardSearchConfig());
             ourboard.addPiece(pieceType.pawn, pieceColour.black, 1, 1);
 
             // position is lost for white..
@@ -52,7 +52,7 @@ namespace Tests
         {
             // We make two different boards here to test two different scenarios - if a black
             // pawn is at rank 0 and a white at rank 7.
-            Board pawnAt0 = new Board(gameType.queenAndPawns);
+            Board pawnAt0 = new Board(gameType.queenAndPawns, new boardSearchConfig());
             pawnAt0.addPiece(pieceType.pawn, pieceColour.black, 1, 0);
 
             // position is lost for white..
@@ -64,7 +64,7 @@ namespace Tests
             Assert.AreEqual(BoardScorer.highest, blackScorer.getScore());
 
             // Now the white pawn at rank 7.
-            Board pawnAt7 = new Board(gameType.queenAndPawns);
+            Board pawnAt7 = new Board(gameType.queenAndPawns, new boardSearchConfig());
             pawnAt7.addPiece(pieceType.pawn, pieceColour.white, 1, 7);
 
             whiteScorer = new BoardScorer(pawnAt7, pieceColour.white);
@@ -79,7 +79,7 @@ namespace Tests
             // Generate a board two pawns, deadlocked in front of each other. This should
             // be a draw via stalemate. Add a third pawn to ensure that stalemate is causing
             // the '0' board score, not a materian mismatch.
-            Board ourboard = new Board(gameType.queenAndPawns);
+            Board ourboard = new Board(gameType.queenAndPawns, new boardSearchConfig());
             // Two deadlocked pawns
             ourboard.addPiece(pieceType.pawn, pieceColour.white, 1, 2);
             ourboard.addPiece(pieceType.pawn, pieceColour.black, 1, 3);

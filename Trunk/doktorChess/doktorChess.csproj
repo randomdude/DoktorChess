@@ -54,9 +54,13 @@
   <ItemGroup>
     <Compile Include="Board.cs" />
     <Compile Include="BoardScorer.cs" />
+    <Compile Include="disabledThreatMap.cs" />
     <Compile Include="gameStatus.cs" />
     <Compile Include="gameType.cs" />
+    <Compile Include="IEnableableThreatMap.cs" />
+    <Compile Include="killerMoveStore.cs" />
     <Compile Include="moveSearchStats.cs" />
+    <Compile Include="squarePosOffset.cs" />
     <Compile Include="serialisationClasses\minimalMove.cs" />
     <Compile Include="lineAndScore.cs" />
     <Compile Include="move.cs" />
@@ -74,6 +78,7 @@
     <Compile Include="Pieces\square.cs" />
     <Compile Include="serialisationClasses\moveResponse.cs" />
     <Compile Include="squarePos.cs" />
+    <Compile Include="threatMap.cs" />
     <Compile Include="vectorDirection.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

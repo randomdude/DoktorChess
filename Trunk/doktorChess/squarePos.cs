@@ -120,5 +120,10 @@ namespace doktorChess
             }
         }
 
+        public int flatten()
+        {
+            return x + (y * Board.sizeX);
+        }
+
     }
 }
