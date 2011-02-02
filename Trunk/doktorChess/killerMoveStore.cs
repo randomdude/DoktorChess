@@ -18,28 +18,35 @@ namespace doktorChess
                 // For each depth, add a new list..
                 killerMovesAtDepth.Add(new List<List<bool>>(boardSqCount));
 
-                // Then add a list of 64 square lists to each.
-                for (int n = 0; n < boardSqCount; n++)
+                initTableAtDepth(depth);
+            }
+        }
+
+        private void initTableAtDepth(int depth)
+        {
+            int boardSqCount = Board.sizeX * Board.sizeY;
+
+            // Then add a list of 64 square lists to each.
+            for (int n = 0; n < boardSqCount; n++)
+            {
+                killerMovesAtDepth[depth].Add(new List<bool>(boardSqCount));
+                for (int m = 0; m < boardSqCount; m++)
                 {
-                    killerMovesAtDepth[depth].Add(new List<bool>(boardSqCount));
-                    for (int m = 0; m < boardSqCount; m++)
-                    {
-                        killerMovesAtDepth[depth][n].Add(false);
-                    }
+                    killerMovesAtDepth[depth][n].Add(false);
                 }
             }
         }
 
         public void Clear()
         {
-            //foreach (List<List<bool>> depth in killerMovesAtDepth)
-            //{
-            //    foreach (List<bool> srcSquareList in depth)
-            //    {
-            //        for (int index = 0; index < srcSquareList.Count; index++)
-            //            srcSquareList[index] = false;
-            //    }
-            //}
+            foreach (List<List<bool>> depth in killerMovesAtDepth)
+            {
+                foreach (List<bool> srcSquareList in depth)
+                {
+                    for (int index = 0; index < srcSquareList.Count; index++)
+                        srcSquareList[index] = false;
+                }
+            }
         }
 
         public bool contains(move toAdd, int depth)
@@ -61,18 +68,22 @@ namespace doktorChess
             fromThisSq[toAdd.dstPos.flatten()] = true;
         }
 
-        public void advanceOne(int depth)
+        public void advanceOne(int maxDepth)
         {
-            // Clear bottom move
-            for (int i = 1; i < Board.sizeX * Board.sizeY; i++)
-                killerMovesAtDepth[depth][i].Add(false);
-
-            // Notch all the other moves down.
-            for (int i = 3; i < depth; i++)
+            // Notch all the other moves up.
+            for (int i = 0; i < maxDepth - 1; i++)
             {
-                killerMovesAtDepth[i - 1] = killerMovesAtDepth[i];
+                killerMovesAtDepth[i + 1] = killerMovesAtDepth[i];
             }
-            
+
+            // Clear bottom move
+            initTableAtDepth(1);
+            //for (int i = 1; i < Board.sizeX * Board.sizeY; i++)
+            //{
+            //    killerMovesAtDepth[maxDepth][i].Clear();
+            //    killerMovesAtDepth[maxDepth][i].Add(false);
+            //}
+        
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace doktorChess
 {
@@ -9,17 +10,23 @@ namespace doktorChess
         {
             //Board myBoard = Board.makeQueenAndPawnsStartPosition();
             boardSearchConfig config = new boardSearchConfig();
-            config.searchDepth = 4;
+            config.searchDepth = 3;
+            //config.killerHeuristicPersists = false;
             Board myBoard = Board.makeNormalStartPosition(config);
 
             pieceColour toPlay = pieceColour.white;
 
             List<move> moves = new List<move>();
 
+            Debug.WriteLine("--- game start ---");
+
+            killerMoveStore otherSideKS = null;
+            killerMoveStore tmp = null;
+
             while (true)
             {
-                Console.WriteLine(myBoard.ToString());
-                Console.WriteLine(myBoard.coverLevel.ToString());
+                //Console.WriteLine(myBoard.ToString());
+                //Console.WriteLine(myBoard.coverLevel.ToString());
 
                 lineAndScore bestMove = myBoard.findBestMove(toPlay);
                 myBoard.advanceKillerTables();
@@ -28,6 +35,7 @@ namespace doktorChess
                 //Console.WriteLine("{0} boards scored in {1} ms, {2}/sec. {3} ms in board scoring.", myBoard.stats.boardsScored, myBoard.stats.totalSearchTime, myBoard.stats.scoredPerSecond, myBoard.stats.boardScoreTime );
 
                 Console.Write(String.Format("{0},", myBoard.stats.boardsScored));
+
                 move bestFirstMove = bestMove.line[0];
                 myBoard.doMove(bestFirstMove);
 
@@ -44,6 +52,11 @@ namespace doktorChess
                         Console.WriteLine(thisMove.ToString(moveStringStyle.chessNotation));
                     break;
                 }
+
+                // Store the killer store
+                tmp = myBoard.killerStore;
+                myBoard.killerStore = otherSideKS;
+                otherSideKS = tmp;
 
                 // Change player
                 toPlay = Board.getOtherSide(toPlay);

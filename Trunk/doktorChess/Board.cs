@@ -40,7 +40,7 @@ namespace doktorChess
 
         private boardSearchConfig searchConfig;
 
-        private killerMoveStore killerStore;
+        public killerMoveStore killerStore;
         public IEnableableThreatMap coverLevel;
 
         // Keep some search stats in here
@@ -67,6 +67,7 @@ namespace doktorChess
             else
                 coverLevel = new disabledThreatMap();
 
+            coverLevel.checkStuff = newSearchConfig.checkThreatMapLots;
             searchConfig = newSearchConfig;
         }
 
@@ -222,6 +223,7 @@ namespace doktorChess
 
         private void addPiece(square newSquare, squarePos newSquarePos)
         {
+            newSquare.position = newSquarePos;
             this[newSquarePos] = newSquare;
             addNewPieceToArrays(newSquare);
             coverLevel.add(newSquarePos);
@@ -446,16 +448,11 @@ namespace doktorChess
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            if ( (searchConfig.killerHeuristic && !searchConfig.killerHeuristicPersists) || 
-                 (searchConfig.killerHeuristic && killerStore == null) )
+            if ((searchConfig.killerHeuristic && !searchConfig.killerHeuristicPersists) ||
+                 (searchConfig.killerHeuristic && killerStore == null))
                 killerStore = new killerMoveStore(searchConfig.searchDepth);
 
             lineAndScore toRet = findBestMove(playerCol, true, searchConfig.searchDepth, int.MinValue, int.MaxValue);
-
-            if (searchConfig.killerHeuristic)
-            {
-                killerStore.Clear();
-            }
 
             watch.Stop();
             stats.totalSearchTime = watch.ElapsedMilliseconds;
@@ -530,6 +527,16 @@ namespace doktorChess
             int moveIndex = 0;
             foreach (move consideredMove in movesToConsider)
             {
+                // If we're checking heavily, we check that the board is restored correctly after we
+                // undo any move.
+                string origThreatMap = null;
+                string origPieces = null;
+                if (searchConfig.checkLots)
+                {
+                    origThreatMap = coverLevel.ToString();
+                    origPieces = ToString();
+                }
+
                 doMove(consideredMove);
 
                 if (depthLeft == 0)
@@ -562,6 +569,23 @@ namespace doktorChess
                 }
 
                 undoMove(consideredMove);
+
+                // Verify that the board has been restored to its former state correctly.
+                if (searchConfig.checkLots)
+                {
+                    if (origPieces != ToString())
+                        throw new Exception("Board pieces were not restored correctly");
+
+                    if (origThreatMap != coverLevel.ToString())
+                    {
+                        Debug.WriteLine("Move : " + consideredMove.ToString());
+                        Debug.WriteLine("expected");
+                        Debug.WriteLine(origThreatMap);
+                        Debug.WriteLine("actual");
+                        Debug.WriteLine(coverLevel.ToString());
+                        throw new Exception("Threat map was not restored correctly");
+                    }
+                }
 
                 if (searchConfig.useAlphaBeta)
                 {
@@ -612,7 +636,6 @@ namespace doktorChess
             this[move.srcPos].movedCount++;
             
             square movingSquare = this[move.srcPos];
-            //square dst = this[move.dstPos];
 
             // If this move is a castling, update the rooks movedCount
             if (move.isACastling())
@@ -633,9 +656,6 @@ namespace doktorChess
             // Update the number of moves on this board
             moveCount++;
 
-            //  Erase our old square.
-            this[move.srcPos] = new square(move.srcPos);
-
             // Move our piece from the source to the destination, removing any piece that might be there
             if (this[move.dstPos].type != pieceType.none)
             {
@@ -643,20 +663,13 @@ namespace doktorChess
                 if (!move.isCapture)
                     throw new Exception("Non-capture in to occupied square");
             }
-            coverLevel.remove(movingSquare);
-            this[move.dstPos] = movingSquare;
-            this[move.dstPos].position = move.dstPos;
-            coverLevel.add(move.dstPos);
+            movePiece(movingSquare, move.dstPos);
 
             // If we're castling, move the rook appropriately
             if (move.isACastling())
             {
                 square rook = move.findCastlingRook(this);
-                this[rook.position] = new square(rook.position);
-                squarePos newRookPos = move.findNewPosForCastlingRook();
-
-                this[newRookPos] = rook;
-                this[newRookPos].position = newRookPos;
+                movePiece(rook, move.findNewPosForCastlingRook() );
             }
 
             square captured = null;
@@ -669,10 +682,9 @@ namespace doktorChess
                     // The capture was not in to our piece's destination square. Set the captured square
                     // to be empty.
                     this[captured.position] = new square(captured.position);
+                    removeNewPieceFromArrays(captured);
+                    coverLevel.remove(captured);
                 }
-
-                removeNewPieceFromArrays(captured);
-                coverLevel.remove(captured);
             }
 
             if (move.isPawnPromotion)
@@ -684,6 +696,17 @@ namespace doktorChess
 
 
             sanityCheck();
+        }
+
+        private void movePiece(square toMove, squarePos destPos)
+        {
+            squarePos srcPos = toMove.position;
+
+            coverLevel.remove(toMove);
+            this[destPos] = toMove;
+            this[destPos].position = destPos;
+            this[srcPos] = new square(srcPos);
+            coverLevel.add(destPos);
         }
 
         public void undoMove(move move)
@@ -725,8 +748,8 @@ namespace doktorChess
             square movingPiece = this[move.dstPos];
 
             // Erase the old destination
-            coverLevel.remove(movingPiece);
             this[move.dstPos] = new square(move.dstPos);
+            coverLevel.remove(movingPiece);
 
             // Move our piece back to its source square
             this[move.srcPos] = movingPiece;
@@ -737,16 +760,21 @@ namespace doktorChess
             if (move.isACastling())
             {
                 square rook = move.castlingRook;
+
+                removePiece(rook);
+
                 this[rook.position] = new square(rook.position);
                 if (rook.position.x == 3)
                 {
-                    this[0, rook.position.y] = rook;
-                    rook.position = new squarePos(0, rook.position.y);
+                    addPiece(rook, new squarePos(0, rook.position.y));
+                    //this[0, rook.position.y] = rook;
+                    //rook.position = new squarePos(0, rook.position.y);
                 }
                 else if (rook.position.x == 5)
                 {
-                    this[7, rook.position.y] = rook;
-                    rook.position = new squarePos(7, rook.position.y);                    
+                    addPiece(rook, new squarePos(7, rook.position.y));
+                    //this[7, rook.position.y] = rook;
+                    //rook.position = new squarePos(7, rook.position.y);                    
                 }
                 else
                     Assert.Fail("While uncastling, could not find castled rook");

@@ -12,7 +12,7 @@ namespace Tests
         [TestMethod]
         public void testCheckDetectionAsBlack()
         {
-            Board ourBoard = new Board(gameType.normal, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 1, 1);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 3, 1);
 
@@ -22,7 +22,7 @@ namespace Tests
         [TestMethod]
         public void testCheckDetectionAsWhite()
         {
-            Board ourBoard = new Board(gameType.normal, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
             ourBoard.addPiece(pieceType.rook, pieceColour.black, 1, 1);
             ourBoard.addPiece(pieceType.king, pieceColour.white, 3, 1);
 
@@ -32,7 +32,7 @@ namespace Tests
         [TestMethod]
         public void testMoveUndoing()
         {
-            Board ourBoard = Board.makeNormalStartPosition(new boardSearchConfig());
+            Board ourBoard = Board.makeNormalStartPosition(boardSearchConfig.getDebugConfig());
 
             string origBoard = ourBoard.ToString();
 
@@ -58,7 +58,7 @@ namespace Tests
         [TestMethod]
         public void testMoveDoingUndoingWithPawnPromotion()
         {
-            Board ourBoard = new Board(gameType.normal, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
             ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 6);
 
             string origBoard = ourBoard.ToString();
@@ -99,7 +99,7 @@ namespace Tests
         [TestMethod]
         public void testMoveUndoingEnPassant()
         {
-            Board ourBoard = new Board(gameType.normal, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 7, 4);
             square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 6, 6);
 

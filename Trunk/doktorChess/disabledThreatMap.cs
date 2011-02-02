@@ -2,7 +2,7 @@
 
 namespace doktorChess
 {
-    class disabledThreatMap : IEnableableThreatMap
+    public class disabledThreatMap : IEnableableThreatMap
     {
         public int this[squarePos position]
         {
@@ -21,6 +21,8 @@ namespace doktorChess
         public void remove(square toRemove)
         {
         }
+
+        public bool checkStuff { get; set; }
 
         public bool isThreatened(square squareToCheck, pieceColour sideToExamine)
         {

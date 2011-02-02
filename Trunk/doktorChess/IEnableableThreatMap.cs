@@ -9,6 +9,8 @@ namespace doktorChess
         void add(squarePos pos);
         void remove(square toRemove);
 
+        bool checkStuff { get; set; }
+
         string ToString();
         bool isThreatened(square squareToCheck, pieceColour sideToExamine);
     }

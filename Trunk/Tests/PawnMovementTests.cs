@@ -12,7 +12,7 @@ namespace Tests
         [TestMethod]
         public void testInitialPawnMovement()
         {
-            Board ourBoard = new Board(gameType.queenAndPawns, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 1);
             square ourPawn = ourBoard[1, 1];
 
@@ -35,7 +35,7 @@ namespace Tests
         public void testNonInitialPawnMovement()
         {
             // Pawns can only move one square after their initial move.
-            Board ourBoard = new Board(gameType.queenAndPawns, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 1);
 
             // Mark pawn as having moved
@@ -57,7 +57,7 @@ namespace Tests
         {
             // Pawns should be able to be promoted to any piece of their own colour, other than a
             // king.
-            Board ourBoard = new Board(gameType.normal, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 6);
             ourPawn.movedCount++;
 
@@ -80,7 +80,7 @@ namespace Tests
         {
             // Pawns should be able to be promoted to any piece of their own colour, other than a
             // king.
-            Board ourBoard = new Board(gameType.normal, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 1, 1);
             ourPawn.movedCount++;
 
@@ -102,7 +102,7 @@ namespace Tests
         public void testPawnPromotionWithCapture()
         {
             // Verify promotion occurs when capturing in to the back row.
-            Board ourBoard = new Board(gameType.normal, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 6);
             ourPawn.movedCount++;
             ourBoard.addPiece(pieceType.knight, pieceColour.black, 1, 7);
@@ -128,7 +128,7 @@ namespace Tests
             // Spawn a black pawn at 0,3 and a white pawn at 1,4. Verify that the black
             // pawn can capture the white.
 
-            Board ourBoard = new Board(gameType.queenAndPawns, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 0, 3);
             square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 1, 4);
 
@@ -141,7 +141,7 @@ namespace Tests
         public void testPawnMovementWithCaptureCol7()
         {
             // Now test the same, at the other end of the board. Test on the edge.
-            Board ourBoard = new Board(gameType.queenAndPawns, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 6, 3);
             square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 7, 4);
 
@@ -153,7 +153,7 @@ namespace Tests
         [TestMethod]
         public void testThatEnPassantOccursWhenItShouldAsBlack()
         {
-            Board ourBoard = new Board(gameType.normal, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
             // En passant requires that the enemy pawn has just advanced two squares. Because of this, we make this move on a board and then check that en passant can occur.
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 6, 3);
             square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 7, 1);
@@ -190,7 +190,7 @@ namespace Tests
         [TestMethod]
         public void testThatEnPassantOccursWhenItShouldAsWhite()
         {
-            Board ourBoard = new Board(gameType.normal, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 7, 4);
             square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 6, 6);
 
@@ -226,7 +226,7 @@ namespace Tests
         [TestMethod]
         public void testThatEnPassantDoesNotOccurAfterTwoPawnAdvances()
         {
-            Board ourBoard = new Board(gameType.normal, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
             // Verify that we cannot en passant after our opponent has moved a pawn forward one, not two, squares.
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 6, 3);
             square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 7, 1);
@@ -247,7 +247,7 @@ namespace Tests
         [TestMethod]
         public void testThatEnPassantDoesNotOccurAfterExtraMove()
         {
-            Board ourBoard = new Board(gameType.normal, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
             // Verify that we cannot en passant after we move a piece
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 6, 3);
             square ourKing = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 1);

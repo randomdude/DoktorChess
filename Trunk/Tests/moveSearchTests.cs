@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
 {
+    [Ignore]
     [TestClass]
     public class moveSearchTests
     {
@@ -51,7 +52,7 @@ namespace Tests
 
         public static void testAsWhiteToPlay(int depth, bool useAlphaBeta)
         {
-            boardSearchConfig config = new boardSearchConfig();
+            boardSearchConfig config = boardSearchConfig.getDebugConfig();
             config.useThreatMap = false;
             config.killerHeuristic = false;
             config.useAlphaBeta = useAlphaBeta;
@@ -81,7 +82,7 @@ namespace Tests
         [TestMethod]
         public void testAsWinningMoveAsWhiteToPlay()
         {
-            boardSearchConfig config = new boardSearchConfig();
+            boardSearchConfig config = boardSearchConfig.getDebugConfig();
             config.searchDepth = 0;
             Board ourBoard = new Board(gameType.queenAndPawns, config);
             ourBoard.addPiece(pieceType.queen, pieceColour.black, 3, 4);
@@ -107,7 +108,7 @@ namespace Tests
         [TestMethod]
         public void testSpecificPosition()
         {
-            boardSearchConfig config = new boardSearchConfig();
+            boardSearchConfig config = boardSearchConfig.getDebugConfig();
             config.searchDepth = 3;
             // Test a  specific position which is giving me trouble.
             Board ourboard = new Board(gameType.queenAndPawns, config);

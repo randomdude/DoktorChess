@@ -46,7 +46,7 @@ namespace Tests
         [TestMethod]        
         public void testQueenMovement()
         {
-            Board ourBoard = new Board(gameType.queenAndPawns, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             squarePos srcSquare = new squarePos(3, 3);
 
             ourBoard.addPiece(pieceType.queen, pieceColour.white, srcSquare.x, srcSquare.y);
@@ -61,7 +61,7 @@ namespace Tests
         [TestMethod]
         public void testQueenMovementWithCapture()
         {
-            Board ourBoard = new Board(gameType.queenAndPawns, new boardSearchConfig());
+            Board ourBoard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             squarePos srcSquare = new squarePos(3, 3);
 
             ourBoard.addPiece(pieceType.queen, pieceColour.white, srcSquare.x, srcSquare.y);
