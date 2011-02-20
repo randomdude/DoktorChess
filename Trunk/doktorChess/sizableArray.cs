@@ -5,7 +5,7 @@ namespace doktorChess
 {
     public class sizableArray<T> : IEnumerable  
     {
-        private T[] elements;
+        private readonly T[] elements;
 
         private int cursor = 0;
 
@@ -17,6 +17,11 @@ namespace doktorChess
         public int Length
         {
             get { return cursor; }
+        }
+
+        public void Clear()
+        {
+            cursor = 0;
         }
 
         public void Add(T newItem)
@@ -32,7 +37,7 @@ namespace doktorChess
             return nonNulls;
         }
 
-        public void AddRange(sizableArray<T> toAdd)
+        public void AddRange(IEnumerable toAdd)
         {
             foreach (T thisToAdd in toAdd)
                 Add(thisToAdd);
@@ -55,6 +60,11 @@ namespace doktorChess
             T tmp = elements[newPos];               // save old element
             elements[newPos] = elements[posToMove]; // set new element to old
             elements[posToMove] = tmp;              // set old element to our copy of new
+        }
+
+        public T this[int i]
+        {
+            get { return elements[i]; }
         }
     }
 
@@ -84,7 +94,7 @@ namespace doktorChess
 
         public object Current
         {
-            get { return _parent.getArray()[i]; }
+            get { return _parent[i]; }
         }
     }
 }

@@ -24,7 +24,8 @@ namespace doktorChess
         public pieceColour colour { get; private set; }
         public squarePos position { get; set; }
 
-        public List<squarePos> coveredSquares = new List<squarePos>(60);
+        // flattened dst to dst hashtable
+        public Dictionary<int, squarePos> coveredSquares = new Dictionary<int, squarePos>(60);
 
         public static square makeSquare(pieceType newType, pieceColour newColour, squarePos newPos)
         {

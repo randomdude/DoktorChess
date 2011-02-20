@@ -38,6 +38,16 @@ namespace doktorChess
         /// </summary>
         private List<square> blackPieceSquares = new List<square>();
 
+        /// <summary>
+        /// Lookaside of white material advantage
+        /// </summary>
+        public int whiteMaterialAdvantage = 0;
+
+        /// <summary>
+        /// Lookaside of black material advantage
+        /// </summary>
+        public int blackMaterialAdvantage = 0;
+
         private boardSearchConfig searchConfig;
 
         public killerMoveStore killerStore;
@@ -144,6 +154,8 @@ namespace doktorChess
 
             int seenBlack = 0;
             int seenWhite = 0;
+            int seenBlackMaterialScore = 0;
+            int seenWhiteMaterialScore = 0;
             bool blackKingSeen = false;
             bool whiteKingSeen = false;
             foreach (square square in _squares)
@@ -163,6 +175,7 @@ namespace doktorChess
                                 throw new Exception("Multiple black kings on board");
                             blackKingSeen = true;
                         }
+                        seenBlackMaterialScore += BoardScorer.getMaterialAdvantage(square.type);
                         break;
                     case pieceColour.white:
                         if (!whitePieceSquares.Contains(square))
@@ -174,6 +187,7 @@ namespace doktorChess
                                 throw new Exception("Multiple white kings on board");
                             whiteKingSeen = true;
                         }
+                        seenWhiteMaterialScore += BoardScorer.getMaterialAdvantage(square.type);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -183,6 +197,11 @@ namespace doktorChess
                 throw new Exception("White piece list contains extra pieces");
             if (seenBlack != blackPieceSquares.Count)
                 throw new Exception("Black piece list contains extra pieces");
+
+            if (seenWhiteMaterialScore != whiteMaterialAdvantage)
+                throw new Exception("White material score is wrong");
+            if (seenBlackMaterialScore != blackMaterialAdvantage)
+                throw new Exception("Black material score is wrong");
 
             if (blackKingSeen != !_blackKingCaptured)
                 throw new Exception("Black king capture status incorrect");
@@ -245,10 +264,12 @@ namespace doktorChess
             switch (newSq.colour)
             {
                 case pieceColour.white:
+                    whiteMaterialAdvantage += BoardScorer.getMaterialAdvantage(newSq);
                     whitePieceSquares.Add(newSq);
                     break;
                 case pieceColour.black:
                     blackPieceSquares.Add(newSq);
+                    blackMaterialAdvantage += BoardScorer.getMaterialAdvantage(newSq);
                     break;
                 default:
                     throw new ArgumentException();
@@ -271,9 +292,11 @@ namespace doktorChess
             {
                 case pieceColour.white:
                     whitePieceSquares.Remove(newSq);
+                    whiteMaterialAdvantage -= BoardScorer.getMaterialAdvantage(newSq);
                     break;
                 case pieceColour.black:
                     blackPieceSquares.Remove(newSq);
+                    blackMaterialAdvantage -= BoardScorer.getMaterialAdvantage(newSq);
                     break;
                 default:
                     throw new ArgumentException();

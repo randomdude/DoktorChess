@@ -15,7 +15,7 @@ namespace doktorChess
         private pieceColour viewpoint;
 
         int castleAdvantage = 0;
-        public int danglingModifier = 5;
+        public int danglingModifier = 2;
         public int materialModifier = 10;
 
         // Don't use min and maxval, because they are used by searches. This keeps things clean.
@@ -32,7 +32,7 @@ namespace doktorChess
             else
                 throw new AssertFailedException("Attempting to score board with no pieces");
 
-            commonConstructorStuff(myPieces, enemyPieces);
+            commonConstructorStuff(toScore, myPieces, enemyPieces);
         }
 
         public BoardScorer(Board toScore, pieceColour newViewpoint)
@@ -42,16 +42,22 @@ namespace doktorChess
             List<square> enemyPieces = toScore.getPiecesForColour(viewpoint == pieceColour.black ? pieceColour.white : pieceColour.black);
 
             parentBoard = toScore;
-            commonConstructorStuff(myPieces, enemyPieces);
+            commonConstructorStuff(toScore, myPieces, enemyPieces);
 
             setGameStatus(toScore.getGameStatus(myPieces, enemyPieces) );
         }
 
-        private void commonConstructorStuff(List<square> myPieces, List<square> enemyPieces)
+        private void commonConstructorStuff(Board toScore,  List<square> myPieces, List<square> enemyPieces)
         {
-            _myMaterialAdvantage = getMaterialAdvantage(myPieces);
-            _myMaterialDisadvantage = getMaterialAdvantage(enemyPieces);
-
+            if (viewpoint == pieceColour.black)
+            {
+                _myMaterialAdvantage = toScore.blackMaterialAdvantage;
+                _myMaterialDisadvantage = toScore.whiteMaterialAdvantage;
+            } else if (viewpoint == pieceColour.white)
+            {
+                _myMaterialAdvantage = toScore.whiteMaterialAdvantage;
+                _myMaterialDisadvantage = toScore.blackMaterialAdvantage;
+            }
         }
 
         private int getMaterialAdvantage(List<square> pieces)
@@ -59,7 +65,12 @@ namespace doktorChess
             return pieces.Sum(thisSq => getMaterialAdvantage((pieceType) thisSq.type));
         }
 
-        private static int getMaterialAdvantage(pieceType pieces)
+        public static int getMaterialAdvantage(square square)
+        {
+            return getMaterialAdvantage(square.type);
+        }
+
+        public static int getMaterialAdvantage(pieceType pieces)
         {
             switch (pieces)
             {
@@ -108,7 +119,7 @@ namespace doktorChess
             }
 
             int danglingBonus = 0;
-            if (parentBoard != null)
+            //if (parentBoard != null)
             {
                 // Find any dangling pieces, and give them a modifier
                 List<square> myPieces = parentBoard.getPiecesForColour(viewpoint);
@@ -119,12 +130,12 @@ namespace doktorChess
                         danglingBonus -= (getMaterialAdvantage(myPiece.type)) * danglingModifier;
                 }
 
-                List<square> enemyPieces = parentBoard.getPiecesForColour(Board.getOtherSide(viewpoint));
-                foreach (square enemyPiece in enemyPieces)
-                {
-                    if (parentBoard.getCoverLevel   (enemyPiece, Board.getOtherSide(viewpoint)) < 0)
-                        danglingBonus += (getMaterialAdvantage(enemyPiece.type)) * danglingModifier;
-                }
+                //List<square> enemyPieces = parentBoard.getPiecesForColour(Board.getOtherSide(viewpoint));
+                //foreach (square enemyPiece in enemyPieces)
+                //{
+                //    if (parentBoard.getCoverLevel(enemyPiece, Board.getOtherSide(viewpoint)) < 0)
+                //        danglingBonus += (getMaterialAdvantage(enemyPiece.type)) * danglingModifier;
+                //}
             }
 
             return ((_myMaterialAdvantage - _myMaterialDisadvantage) * materialModifier) + castleAdvantage + danglingBonus;

@@ -30,7 +30,7 @@ namespace doktorChess
                 lineAndScore bestMove = myBoard.findBestMove(toPlay);
                 myBoard.advanceKillerTables();
 
-                //Console.WriteLine(string.Format("Best line for {0}: {1}", toPlay, bestMove.ToString(moveStringStyle.chessNotation)));
+                Console.WriteLine(string.Format("Best line for {0}: {1}", toPlay, bestMove.ToString(moveStringStyle.chessNotation)));
                 //Console.WriteLine("{0} boards scored in {1} ms, {2}/sec. {3} ms in board scoring.", myBoard.stats.boardsScored, myBoard.stats.totalSearchTime, myBoard.stats.scoredPerSecond, myBoard.stats.boardScoreTime );
 
                 //Console.Write(String.Format("{0},", myBoard.stats.boardsScored));

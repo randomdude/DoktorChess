@@ -47,7 +47,7 @@ namespace Tests
             // White's queen is dangling, as is blacks pawn.
             int expected = whiteScorer.materialModifier * (8 - 1);
             expected -= whiteScorer.danglingModifier * 8;
-            expected += whiteScorer.danglingModifier * 1;
+            //expected += whiteScorer.danglingModifier * 1;
 
             Assert.AreEqual(expected, whiteScorer.getScore());
 

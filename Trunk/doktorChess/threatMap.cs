@@ -53,7 +53,7 @@ namespace doktorChess
 
             // Find squares which threaten the square we are placing in to, and stash them in another
             // list
-            List<square> piecesToRecalc = new List<square>(piecesWhichThreatenSquare[x, y].Count);
+            sizableArray<square> piecesToRecalc = new sizableArray<square>(piecesWhichThreatenSquare[x, y].Count);
             piecesToRecalc.AddRange( piecesWhichThreatenSquare[x, y].Values );
 
             // Now, add the new pieces threatened squares
@@ -80,7 +80,7 @@ namespace doktorChess
                 piecesWhichThreatenSquare[potentialMove.dstPos.x, potentialMove.dstPos.y].Add( x + (y * Board.sizeX), _parentBoard[x, y]);
 
                 // and our list of squares covered by piece
-                _parentBoard[x, y].coveredSquares.Add(potentialMove.dstPos);
+                _parentBoard[x, y].coveredSquares.Add(potentialMove.dstPos.flatten(), potentialMove.dstPos);
             }
 
             // and then recalculate pieces that need it. To save time, we don't re-evaluate everything-
@@ -140,11 +140,12 @@ namespace doktorChess
                 while(removex >= 0 && removex < limitx &&
                     removey >= 0 && removey < limity )
                 {
-                    squarePos pos = new squarePos(removex, removey);
+                    squarePos toRemoveSqPos = new squarePos(removex, removey);
 
-                    this[pos] -= toRecalcAddition;
+                    this[toRemoveSqPos] -= toRecalcAddition;
+
                     piecesWhichThreatenSquare[removex, removey].Remove(toRecalc.position.x + (toRecalc.position.y * Board.sizeX));
-                    toRecalc.coveredSquares.RemoveAll( a => a.isSameSquareAs(pos) );
+                    toRecalc.coveredSquares.Remove( toRemoveSqPos.flatten() );
 
                     //Debug.WriteLine("Removed now-blocked " + pos);
 
@@ -170,7 +171,7 @@ namespace doktorChess
             int posDirection = toRemove.colour == pieceColour.white ? 1 : -1;
 
             // Remove the actual piece, and what it threatens
-            foreach (squarePos threatenedSquare in toRemove.coveredSquares )
+            foreach (squarePos threatenedSquare in toRemove.coveredSquares.Values )
             {
                 this[threatenedSquare] -= posDirection;
 
@@ -180,7 +181,7 @@ namespace doktorChess
             toRemove.coveredSquares.Clear();
             
             // and now force a re-evaluation of things that threatened this square.
-            List<square> piecesToRecalc = new List<square>(piecesWhichThreatenSquare[toRemove.position.x, toRemove.position.y].Count);
+            sizableArray<square> piecesToRecalc = new sizableArray<square>(piecesWhichThreatenSquare[toRemove.position.x, toRemove.position.y].Count);
             piecesToRecalc.AddRange(piecesWhichThreatenSquare[toRemove.position.x, toRemove.position.y].Values);
 
             foreach (square toRecalc in piecesToRecalc)
@@ -241,7 +242,7 @@ namespace doktorChess
 
                     this[pos] += toRecalcAddition;
                     piecesWhichThreatenSquare[removex, removey].Add(toRecalc.position.flatten(), toRecalc );
-                    toRecalc.coveredSquares.Add(pos);
+                    toRecalc.coveredSquares.Add(pos.flatten(), pos);
 
                     //Debug.WriteLine("Added discovered " + pos);
 
