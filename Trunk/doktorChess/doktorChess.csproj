@@ -61,6 +61,7 @@
     <Compile Include="IEnableableThreatMap.cs" />
     <Compile Include="killerMoveStore.cs" />
     <Compile Include="moveSearchStats.cs" />
+    <Compile Include="sizableArray.cs" />
     <Compile Include="squarePosOffset.cs" />
     <Compile Include="serialisationClasses\minimalMove.cs" />
     <Compile Include="lineAndScore.cs" />

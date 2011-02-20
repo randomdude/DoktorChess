@@ -94,22 +94,24 @@ namespace doktorChess
             return ".";
         }
 
-        virtual public List<move> getPossibleMoves(Board onThis)
+        virtual public sizableArray<move> getPossibleMoves(Board onThis)
         {
             // Empty squares can't move, silly.
-            return new List<move>();
+            return new sizableArray<move>(0);
         }
 
         /// <summary>
         /// Find moves in a given direction, including captures
         /// </summary>
+        /// <param name="addTo"></param>
         /// <param name="onThis">The board to move on</param>
         /// <param name="dir">The vectorDirection to move in</param>
         /// <param name="asCovering"></param>
         /// <returns>A List&lt;move&gt; of moves</returns>
-        public List<move> getMovesForVector(Board onThis, vectorDirection dir, bool asCovering)
+        public sizableArray<move> getMovesForVector(sizableArray<move> addTo, Board onThis, vectorDirection dir, bool asCovering)
         {
-            List<move> toRet = new List<move>(8);
+            if (addTo == null)
+                addTo = new sizableArray<move>(8);
 
             int startX;
             int finishX;
@@ -197,7 +199,7 @@ namespace doktorChess
                 // If the square is empty, we can move to it..
                 if (onThis[sqPos].type == pieceType.none)
                 {
-                    toRet.Add(new move(onThis[position], onThis[sqPos]));
+                    addTo.Add(new move(onThis[position], onThis[sqPos]));
                 }
                 else
                 {
@@ -207,7 +209,7 @@ namespace doktorChess
                         {
                             // the square is occupied by one of our pieces, so we are covering it, 
                             // but we cannot go any further.
-                            toRet.Add(new move(onThis[position], onThis[sqPos]));
+                            addTo.Add(new move(onThis[position], onThis[sqPos]));
                             break;                            
                         }
                         else
@@ -221,7 +223,7 @@ namespace doktorChess
                     {
                         // the square is occupied by an enemy piece, we can move to it, 
                         // but no further.
-                        toRet.Add(new move(onThis[position], onThis[sqPos]));
+                        addTo.Add(new move(onThis[position], onThis[sqPos]));
                         break;
                     }
                 }
@@ -230,7 +232,7 @@ namespace doktorChess
                 y += directionY;
             }
 
-            return toRet;
+            return addTo;
         }
 
         public bool containsPieceNotOfColour(pieceColour ourColour)
@@ -238,9 +240,10 @@ namespace doktorChess
             return ((type != pieceType.none) && (colour != ourColour));
         }
 
-        protected List<move> findFreeOrCapturableIfOnBoard(Board onThis, squarePosOffset[] potentialSquareOffsets)
+        protected sizableArray<move> findFreeOrCapturableIfOnBoard(sizableArray<move> returnArray, Board onThis, squarePosOffset[] potentialSquareOffsets)
         {
-            List<move> toRet = new List<move>(potentialSquareOffsets.Length);
+            if (returnArray == null)
+                returnArray = new sizableArray<move>(potentialSquareOffsets.Length);
 
             foreach (squarePosOffset potentialSquareOffset in potentialSquareOffsets)
             {
@@ -252,33 +255,33 @@ namespace doktorChess
                 if (destSquare.type == pieceType.none)
                 {
                     // Square is free.
-                    toRet.Add(new move(this, destSquare));
+                    returnArray.Add(new move(this, destSquare));
                 }
                 else
                 {
                     if (destSquare.colour != this.colour)
                     {
                         // We can capture.
-                        toRet.Add(new move(this, destSquare));
+                        returnArray.Add(new move(this, destSquare));
                     }
                 }
             }
 
-            return toRet;
+            return returnArray;
         }
 
         protected bool IsOnBoard(int x, int y)
         {
-            if (x + position.x > Board.sizeX - 1 ||
-                x + position.x < 0 ||
-                y + position.y > Board.sizeY - 1 ||
-                y + position.y < 0)
-                return false;
+            int offX = x + position.x;
+            int offY = y + position.y;
 
-            return true;
+            return (! (offX > Board.sizeX - 1 ||
+                       offX < 0 ||
+                       offY > Board.sizeY - 1 ||
+                       offY < 0));
         }
 
-        public virtual List<move> getCoveredSquares(Board parentBoard)
+        public virtual sizableArray<move> getCoveredSquares(Board parentBoard)
         {
             return getPossibleMoves(parentBoard);
         }

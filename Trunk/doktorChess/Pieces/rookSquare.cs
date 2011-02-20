@@ -15,26 +15,26 @@ namespace doktorChess
             return "r";
         }
 
-        public override List<move> getPossibleMoves(Board onThis)
+        public override sizableArray<move> getPossibleMoves(Board onThis)
         {
-            List<move> toRet = new List<move>(20);
+            sizableArray<move> toRet = new sizableArray<move>(20);
 
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.left, false));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.right, false));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.up, false));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.down, false));
+            getMovesForVector(toRet, onThis, vectorDirection.left, false);
+            getMovesForVector(toRet, onThis, vectorDirection.down, false);
+            getMovesForVector(toRet, onThis, vectorDirection.right, false);
+            getMovesForVector(toRet, onThis, vectorDirection.up, false);
 
             return toRet;
         }
 
-        public override List<move> getCoveredSquares(Board onThis)
+        public override sizableArray<move> getCoveredSquares(Board onThis)
         {
-            List<move> toRet = new List<move>(20);
+            sizableArray<move> toRet = new sizableArray<move>(20);
 
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.left, true));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.up, true));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.right, true));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.down, true));
+            getMovesForVector(toRet, onThis, vectorDirection.left, true);
+            getMovesForVector(toRet, onThis, vectorDirection.down, true);
+            getMovesForVector(toRet, onThis, vectorDirection.right, true);
+            getMovesForVector(toRet, onThis, vectorDirection.up, true);
 
             return toRet;
         }    

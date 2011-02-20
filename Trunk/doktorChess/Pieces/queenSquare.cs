@@ -15,34 +15,34 @@ namespace doktorChess
             return "q";
         }
 
-        public override List<move> getPossibleMoves(Board onThis)
+        public override sizableArray<move> getPossibleMoves(Board onThis)
         {
-            List<move> toRet = new List<move>(35);
+            sizableArray<move> toRet = new sizableArray<move>(35);
 
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.left, false));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.right, false));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.up, false));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.down, false));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.leftup, false));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.leftdown, false));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.rightup, false));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.rightdown, false));
+            getMovesForVector(toRet, onThis, vectorDirection.left, false);
+            getMovesForVector(toRet, onThis, vectorDirection.down, false);
+            getMovesForVector(toRet, onThis, vectorDirection.right, false);
+            getMovesForVector(toRet, onThis, vectorDirection.up, false);
+            getMovesForVector(toRet, onThis, vectorDirection.leftdown, false);
+            getMovesForVector(toRet, onThis, vectorDirection.rightdown, false);
+            getMovesForVector(toRet, onThis, vectorDirection.leftup, false);
+            getMovesForVector(toRet, onThis, vectorDirection.rightup, false);
 
             return toRet;
         }
 
-        public override List<move> getCoveredSquares(Board onThis)
+        public override sizableArray<move> getCoveredSquares(Board onThis)
         {
-            List<move> toRet = new List<move>(35);
+            sizableArray<move> toRet = new sizableArray<move>(35);
 
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.left, true));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.right, true));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.up, true));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.down, true));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.leftup, true));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.leftdown, true));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.rightup, true));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.rightdown, true));
+            getMovesForVector(toRet, onThis, vectorDirection.left, true);
+            getMovesForVector(toRet, onThis, vectorDirection.down, true);
+            getMovesForVector(toRet, onThis, vectorDirection.right, true);
+            getMovesForVector(toRet, onThis, vectorDirection.up, true);
+            getMovesForVector(toRet, onThis, vectorDirection.leftdown, true);
+            getMovesForVector(toRet, onThis, vectorDirection.rightdown, true);
+            getMovesForVector(toRet, onThis, vectorDirection.leftup, true);
+            getMovesForVector(toRet, onThis, vectorDirection.rightup, true);
 
             return toRet;
         }

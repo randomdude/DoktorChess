@@ -238,8 +238,8 @@ namespace Tests
                 }
             }
 
-            List<move> moves = ourBoard.getMoves(pieceColour.white);
-            if (moves.Count == 0)
+            sizableArray<move> moves = ourBoard.getMoves(pieceColour.white);
+            if (moves.Length == 0)
                 Assert.Inconclusive("No moves found");
 
             foreach (move thisMove in moves)

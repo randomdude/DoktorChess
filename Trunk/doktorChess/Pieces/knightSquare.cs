@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace doktorChess
 {
@@ -23,15 +24,14 @@ namespace doktorChess
             return "n";
         }
 
-        public override List<move> getPossibleMoves(Board onThis)
+        public override sizableArray<move> getPossibleMoves(Board onThis)
         {
-
-            return findFreeOrCapturableIfOnBoard(onThis, potentialSquares);
+            return findFreeOrCapturableIfOnBoard(null, onThis, potentialSquares);
         }
 
-        public override List<move> getCoveredSquares(Board parentBoard)
+        public override sizableArray<move> getCoveredSquares(Board parentBoard)
         {
-            List<move> toRet = new List<move>(8);
+            sizableArray<move> toRet = new sizableArray<move>(8);
 
             foreach (squarePosOffset potentialSquare in potentialSquares)
             {

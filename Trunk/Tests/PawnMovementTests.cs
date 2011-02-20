@@ -16,7 +16,7 @@ namespace Tests
             ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 1);
             square ourPawn = ourBoard[1, 1];
 
-            List<move> actual = (List<move>) ourPawn.getPossibleMoves(ourBoard);
+            sizableArray<move> actual = ourPawn.getPossibleMoves(ourBoard);
 
             // We expect that the pawn can move two spaces forward, or one space forward.
             List<move> expected = new List<move>
@@ -41,7 +41,7 @@ namespace Tests
             // Mark pawn as having moved
             ourPawn.movedCount++;
 
-            List<move> actual = ourPawn.getPossibleMoves(ourBoard);
+            sizableArray<move> actual = ourPawn.getPossibleMoves(ourBoard);
 
             // We expect that the pawn can move one space forward only.
             List<move> expected = new List<move>
@@ -61,7 +61,7 @@ namespace Tests
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 6);
             ourPawn.movedCount++;
 
-            List<move> actual = ourPawn.getPossibleMoves(ourBoard);
+            sizableArray<move> actual = ourPawn.getPossibleMoves(ourBoard);
 
             // We expect a number of moves forward, all of which are promotions.
             List<move> expected = new List<move>
@@ -84,7 +84,7 @@ namespace Tests
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 1, 1);
             ourPawn.movedCount++;
 
-            List<move> actual = ourPawn.getPossibleMoves(ourBoard);
+            sizableArray<move> actual = ourPawn.getPossibleMoves(ourBoard);
 
             // We expect a number of moves forward, all of which are promotions.
             List<move> expected = new List<move>
@@ -108,7 +108,7 @@ namespace Tests
             ourBoard.addPiece(pieceType.knight, pieceColour.black, 1, 7);
             ourBoard.addPiece(pieceType.knight, pieceColour.black, 2, 7);
 
-            List<move> actual = ourPawn.getPossibleMoves(ourBoard);
+            sizableArray<move> actual = ourPawn.getPossibleMoves(ourBoard);
 
             // We expect a number of moves forward, all of which are promotions.
             List<move> expected = new List<move>
@@ -132,9 +132,9 @@ namespace Tests
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 0, 3);
             square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 1, 4);
 
-            List<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
+            sizableArray<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
 
-            checkContainsSingleCapture(possibleMoves, ourPawn, enemyPawn);
+            checkContainsSingleCapture(possibleMoves.getArray(), ourPawn, enemyPawn);
         }
 
         [TestMethod]
@@ -145,9 +145,9 @@ namespace Tests
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 6, 3);
             square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 7, 4);
 
-            List<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
+            sizableArray<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
 
-            checkContainsSingleCapture(possibleMoves, ourPawn, enemyPawn);
+            checkContainsSingleCapture(possibleMoves.getArray(), ourPawn, enemyPawn);
         }
 
         [TestMethod]
@@ -163,7 +163,7 @@ namespace Tests
             ourBoard.doMove(advanceTwo);
 
             // Now verify that the enemy pawn is captured.
-            List<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
+            sizableArray<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
             move enPassantCapture = null; 
             foreach (move thisMove in possibleMoves)
             {
@@ -199,7 +199,7 @@ namespace Tests
             ourBoard.doMove(advanceTwo);
 
             // Now verify that the enemy pawn is captured.
-            List<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
+            sizableArray<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
             move enPassantCapture = null;
             foreach (move thisMove in possibleMoves)
             {
@@ -239,8 +239,8 @@ namespace Tests
             advanceOne = new move(enemyPawn, ourBoard[enemyPawn.position.upOne()]);
             ourBoard.doMove(advanceOne);
 
-            List<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
-            if (possibleMoves.Find(a => a.isCapture == true) != null) 
+            sizableArray<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
+            if (Array.Find(possibleMoves.getArray(), a => a.isCapture == true) != null) 
                 throw new AssertFailedException("Found en passant capture when none is legal");
         }
 
@@ -262,8 +262,8 @@ namespace Tests
             ourBoard.doMove(kingMove);
 
             // Now. Can we en passant?
-            List<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
-            if (possibleMoves.Find(a => a.isCapture == true) != null)
+            sizableArray<move> possibleMoves = ourPawn.getPossibleMoves(ourBoard);
+            if (Array.Find(possibleMoves.getArray(), a => a.isCapture == true) != null)
                 throw new AssertFailedException("Found en passant capture when none is legal");
         }
 
@@ -274,7 +274,7 @@ namespace Tests
         /// <param name="ourPiece"></param>
         /// <param name="enemyPiece"></param>
         /// <returns></returns>
-        public move checkContainsSingleCapture(List<move> possibleMoves, square ourPiece, square enemyPiece)
+        public move checkContainsSingleCapture(move[] possibleMoves, square ourPiece, square enemyPiece)
         {
             bool captureFound = false;
             move capture = null;

@@ -52,7 +52,7 @@ namespace Tests
             ourBoard.addPiece(pieceType.queen, pieceColour.white, srcSquare.x, srcSquare.y);
             queenSquare queenie = (queenSquare) ourBoard[srcSquare];
 
-            List<move> possibleMoves = queenie.getPossibleMoves(ourBoard);
+            sizableArray<move> possibleMoves = queenie.getPossibleMoves(ourBoard);
             List<move> expectedmoves = getExpectedMoveSquares(queenie);
 
             VectorMovementTests.testListsAreOfSameMoves(expectedmoves, possibleMoves);
@@ -71,7 +71,7 @@ namespace Tests
             // that we cannot move through it.
             ourBoard.addPiece(pieceType.pawn, pieceColour.black, 1, 1);
 
-            List<move> possibleMoves = queenie.getPossibleMoves(ourBoard);
+            sizableArray<move> possibleMoves = queenie.getPossibleMoves(ourBoard);
             List<move> expectedmoves = getExpectedMoveSquares(queenie);
 
             // We don't expect to be able to move to (0,0), since that square is behind an

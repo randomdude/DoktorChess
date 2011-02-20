@@ -36,8 +36,8 @@ namespace Tests
 
             string origBoard = ourBoard.ToString();
 
-            List<move> moves = ourBoard.getMoves(pieceColour.white);
-            if (moves.Count == 0)
+            sizableArray<move> moves = ourBoard.getMoves(pieceColour.white);
+            if (moves.Length == 0)
                 Assert.Inconclusive("No moves found");
 
             foreach (move thisMove in moves)
@@ -63,15 +63,15 @@ namespace Tests
 
             string origBoard = ourBoard.ToString();
 
-            List<move> potentialMoves = ourBoard.getMoves(pieceColour.white);
+            sizableArray<move> potentialMoves = ourBoard.getMoves(pieceColour.white);
 
-            if (potentialMoves.Count == 0)
+            if (potentialMoves.Length == 0)
                 Assert.Inconclusive("No pawn moves found");
 
             // Find promotion moves
-            List<move> promotionMoves = potentialMoves.FindAll(a => a.isPawnPromotion);
+            move[] promotionMoves = Array.FindAll(potentialMoves.getArray(), a => a.isPawnPromotion);
 
-            if (promotionMoves.Count == 0)
+            if (promotionMoves.Length == 0)
                 Assert.Inconclusive("No promotion moves found");
 
             foreach (move thisMove in promotionMoves)
@@ -109,10 +109,10 @@ namespace Tests
 
             string origBoard = ourBoard.ToString();
 
-            List<move> moves = ourBoard.getMoves(pieceColour.white);
+            sizableArray<move> moves = ourBoard.getMoves(pieceColour.white);
 
             // Play our only capturing move
-            move enPassant = moves.Find(a => a.isCapture == true);
+            move enPassant = Array.Find(moves.getArray(), a => a.isCapture == true);
             if (enPassant == null)
                 Assert.Inconclusive("No en passant move found");
             ourBoard.doMove(enPassant);

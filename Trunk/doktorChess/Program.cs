@@ -10,8 +10,7 @@ namespace doktorChess
         {
             //Board myBoard = Board.makeQueenAndPawnsStartPosition();
             boardSearchConfig config = new boardSearchConfig();
-            config.searchDepth = 3;
-            //config.killerHeuristicPersists = false;
+            config.searchDepth = 4;
             Board myBoard = Board.makeNormalStartPosition(config);
 
             pieceColour toPlay = pieceColour.white;
@@ -25,7 +24,7 @@ namespace doktorChess
 
             while (true)
             {
-                //Console.WriteLine(myBoard.ToString());
+                Console.WriteLine(myBoard.ToString());
                 //Console.WriteLine(myBoard.coverLevel.ToString());
 
                 lineAndScore bestMove = myBoard.findBestMove(toPlay);
@@ -34,7 +33,7 @@ namespace doktorChess
                 //Console.WriteLine(string.Format("Best line for {0}: {1}", toPlay, bestMove.ToString(moveStringStyle.chessNotation)));
                 //Console.WriteLine("{0} boards scored in {1} ms, {2}/sec. {3} ms in board scoring.", myBoard.stats.boardsScored, myBoard.stats.totalSearchTime, myBoard.stats.scoredPerSecond, myBoard.stats.boardScoreTime );
 
-                Console.Write(String.Format("{0},", myBoard.stats.boardsScored));
+                //Console.Write(String.Format("{0},", myBoard.stats.boardsScored));
 
                 move bestFirstMove = bestMove.line[0];
                 myBoard.doMove(bestFirstMove);

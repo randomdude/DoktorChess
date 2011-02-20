@@ -1,10 +1,67 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using doktorChess;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
 {
+    [TestClass]
+    public class sizableArrayTests
+    {
+        [TestMethod]
+        public void testIterator()
+        {
+            sizableArray<move> foo = new sizableArray<move>(5);
+            
+            move move1 = new move(new square(0,0), new square(1,1));
+            move move2 = new move(new square(1,1), new square(2,2));
+
+            foo.Add(move1);
+            foo.Add(move2);
+
+            bool move1seen = false;
+            bool move2seen = false;
+
+            foreach (move iterated in foo)
+            {
+                Debug.WriteLine("Iterated object " + iterated);
+                if (iterated == move1)
+                {
+                    if (move1seen)
+                        throw new Exception("Move one iterated twice");
+                    move1seen = true;
+                }
+                else if (iterated == move2)
+                {
+                    if (move2seen)
+                        throw new Exception("Move two iterated twice");
+                    move2seen = true;
+                }
+                else if (iterated == null)
+                    throw new Exception("Iterator returned null");
+                else 
+                    throw new Exception("Iterator returned something crazy");
+            }
+
+            if (!move1seen || !move2seen)
+                throw new Exception("Iterator did not iterate over all elements");
+        }
+
+        [TestMethod]
+        public void testIteratorOverEmptyCollection()
+        {
+            sizableArray<move> foo = new sizableArray<move>(5);
+
+            if (foo.Length != 0)
+                throw new Exception("Iterator length not zero while iterating over an empty collection");
+
+            foreach (move thisMove in foo)
+                throw new Exception("Iterator returned something while iterating over an empty collection");
+        }
+    }
+
+
     [TestClass]
     public class VectorMovementTests
     {
@@ -21,15 +78,15 @@ namespace Tests
             foreach (squarePos thisPos in expectedPos)
                 expectedmoves.Add(new move(queenie, ourBoard[thisPos]));
 
-            List<move> possibleMoves = queenie.getMovesForVector(ourBoard, dir, false);
+            sizableArray<move> possibleMoves = queenie.getMovesForVector(null, ourBoard, dir, false);
 
             testListsAreOfSameMoves(expectedmoves, possibleMoves);
 
         }
 
-        public static void testListsAreOfSameMoves(List<move> expectedmoves, List<move> actualMoves)
+        public static void testListsAreOfSameMoves(List<move> expectedmoves, sizableArray<move> actualMoves)
         {
-            Assert.AreEqual(expectedmoves.Count, actualMoves.Count, "Incorrect amount of moves");
+            Assert.AreEqual(expectedmoves.Count, actualMoves.Length, "Incorrect amount of moves");
 
             foreach (move thisPossibleMove in actualMoves)
             {

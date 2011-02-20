@@ -16,9 +16,9 @@ namespace doktorChess
             return "p";
         }
 
-        public override List<move> getPossibleMoves(Board onThis)
+        public override sizableArray<move> getPossibleMoves(Board onThis)
         {
-            List<move> toRet = new List<move>(4);
+            sizableArray<move> toRet = new sizableArray<move>(4);
 
             int direction;
             if (colour == pieceColour.white)
@@ -85,10 +85,11 @@ namespace doktorChess
                         addPawnMovesToSquare(toRet, onThis[position], onThis[position.up(direction)]);
                 }
             }
+
             return toRet;
         }
 
-        private void addPawnMovesToSquare(List<move> moveList, square src, square dst)
+        private void addPawnMovesToSquare(sizableArray<move> moveList, square src, square dst)
         {
             // If we are moving in to the end row, we should promote. Handle this.
             if (dst.position.y == (colour == pieceColour.white ? 7 : 0) )
@@ -132,9 +133,9 @@ namespace doktorChess
             return false;
         }
 
-        public override List<move> getCoveredSquares(Board parentBoard)
+        public override sizableArray<move> getCoveredSquares(Board parentBoard)
         {
-            List<move> toRet = new List<move>(2);
+            sizableArray<move> toRet = new sizableArray<move>(2);
             int direction = (colour == pieceColour.white) ? 1 : -1;
 
             if ((position.y + direction < Board.sizeY) &&
@@ -150,7 +151,7 @@ namespace doktorChess
                     toRet.Add(new move(this, parentBoard[position.up(direction).rightOne()])); ;
                 }
             }
-            return toRet;            
+            return toRet;
         }
     }
 }

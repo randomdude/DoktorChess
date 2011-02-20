@@ -24,9 +24,11 @@ namespace doktorChess
             return "k";
         }
 
-        public override List<move> getPossibleMoves(Board onThis)
+        public override sizableArray<move> getPossibleMoves(Board onThis)
         {
-            List<move> possibleMoves = findFreeOrCapturableIfOnBoard(onThis, potentialSquares);
+            sizableArray<move> possibleMoves = new sizableArray<move>(potentialSquares.Length + 2);
+
+            findFreeOrCapturableIfOnBoard(possibleMoves, onThis, potentialSquares);
 
             if (canCastle(onThis, true))
             {
@@ -42,9 +44,9 @@ namespace doktorChess
             return possibleMoves;
         }
 
-        public override List<move> getCoveredSquares(Board parentBoard)
+        public override sizableArray<move> getCoveredSquares(Board parentBoard)
         {
-            List<move> toRet = new List<move>(8);
+            sizableArray<move> toRet = new sizableArray<move>(8);
 
             foreach (squarePosOffset potentialSquare in potentialSquares)
             {

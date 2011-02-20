@@ -111,7 +111,7 @@ namespace doktorChess
             if (_srcSquare.type == pieceType.none)
                 return false;
 
-            List<move> possibleMovesWithMovingPiece = _srcSquare.getPossibleMoves(ourBoard);
+            sizableArray<move> possibleMovesWithMovingPiece = _srcSquare.getPossibleMoves(ourBoard);
 
             foreach (move possibleMove in possibleMovesWithMovingPiece)
             {
@@ -130,7 +130,7 @@ namespace doktorChess
         /// <returns>null if move is illegal</returns>
         public move sanitize(Board ourBoard)
         {
-            List<move> possibleMovesWithMovingPiece = _srcSquare.getPossibleMoves(ourBoard);
+            sizableArray<move> possibleMovesWithMovingPiece = _srcSquare.getPossibleMoves(ourBoard);
 
             foreach (move possibleMove in possibleMovesWithMovingPiece)
             {

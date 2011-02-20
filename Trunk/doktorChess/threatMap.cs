@@ -57,7 +57,7 @@ namespace doktorChess
             piecesToRecalc.AddRange( piecesWhichThreatenSquare[x, y].Values );
 
             // Now, add the new pieces threatened squares
-            List<move> potentialMoves = _parentBoard[x, y].getCoveredSquares(_parentBoard);
+            sizableArray<move> potentialMoves = _parentBoard[x, y].getCoveredSquares(_parentBoard);
 
             // Since our threat map is always stored from white's viewpoint, we should add or subtract
             // depending if threatened pieces are white or black.
@@ -67,6 +67,9 @@ namespace doktorChess
             //_parentBoard[x, y].coveredSquares.Clear();
             foreach (move potentialMove in potentialMoves)
             {
+                if (potentialMove == null)
+                    break;
+
                 // Add the threatened squares to our threat map
                 this[potentialMove.dstPos] += mapAddition;
 
@@ -219,7 +222,7 @@ namespace doktorChess
                 int limity = Board.sizeY;
                 if (toRecalc.type == pieceType.king)
                 {
-                    limitx = toRecalc.position.x + ( 2 * sx);
+                    limitx = toRecalc.position.x + (2 * sx);
                     limity = toRecalc.position.x + (2 * sx);
 
                     if (limitx > Board.sizeX)

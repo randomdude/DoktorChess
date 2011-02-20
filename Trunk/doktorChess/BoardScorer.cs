@@ -15,7 +15,8 @@ namespace doktorChess
         private pieceColour viewpoint;
 
         int castleAdvantage = 0;
-        private int danglingModifier = 2;
+        public int danglingModifier = 5;
+        public int materialModifier = 10;
 
         // Don't use min and maxval, because they are used by searches. This keeps things clean.
         public const int lowest = int.MinValue + 1;
@@ -106,23 +107,27 @@ namespace doktorChess
                 if (parentBoard.blackHasCastled && viewpoint == pieceColour.black) castleAdvantage += 3;
             }
 
+            int danglingBonus = 0;
             if (parentBoard != null)
             {
                 // Find any dangling pieces, and give them a modifier
-                int danglingBonus = 0;
                 List<square> myPieces = parentBoard.getPiecesForColour(viewpoint);
 
                 foreach (square myPiece in myPieces)
                 {
-                    if (parentBoard.getCoverLevel(myPiece, viewpoint) - parentBoard.getCoverLevel(myPiece, viewpoint) >
-                        0)
-                    {
-                        danglingBonus -= getMaterialAdvantage(myPiece.type)/danglingModifier;
-                    }
+                    if (parentBoard.getCoverLevel(myPiece, viewpoint) < 0)
+                        danglingBonus -= (getMaterialAdvantage(myPiece.type)) * danglingModifier;
+                }
+
+                List<square> enemyPieces = parentBoard.getPiecesForColour(Board.getOtherSide(viewpoint));
+                foreach (square enemyPiece in enemyPieces)
+                {
+                    if (parentBoard.getCoverLevel   (enemyPiece, Board.getOtherSide(viewpoint)) < 0)
+                        danglingBonus += (getMaterialAdvantage(enemyPiece.type)) * danglingModifier;
                 }
             }
 
-            return (_myMaterialAdvantage - _myMaterialDisadvantage) + castleAdvantage;
+            return ((_myMaterialAdvantage - _myMaterialDisadvantage) * materialModifier) + castleAdvantage + danglingBonus;
         }
 
         public void setGameStatus(gameStatus newGameStatus)

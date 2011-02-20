@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace doktorChess
 {
@@ -14,26 +15,26 @@ namespace doktorChess
             return "b";
         }
 
-        public override List<move> getPossibleMoves(Board onThis)
+        public override sizableArray<move> getPossibleMoves(Board onThis)
         {
-            List<move> toRet = new List<move>(20);
+            sizableArray<move> toRet = new sizableArray<move>(20);
 
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.leftup, false));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.leftdown, false));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.rightup, false));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.rightdown, false));
+            getMovesForVector(toRet, onThis, vectorDirection.leftup, false);
+            getMovesForVector(toRet, onThis, vectorDirection.leftdown, false);
+            getMovesForVector(toRet, onThis, vectorDirection.rightup, false);
+            getMovesForVector(toRet, onThis, vectorDirection.rightdown, false);
 
             return toRet;
         }
 
-        public override List<move> getCoveredSquares(Board onThis)
+        public override sizableArray<move> getCoveredSquares(Board onThis)
         {
-            List<move> toRet = new List<move>(20);
+            sizableArray<move> toRet = new sizableArray<move>(20);
 
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.leftup, true));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.leftdown, true));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.rightup, true));
-            toRet.AddRange(getMovesForVector(onThis, vectorDirection.rightdown, true));
+            getMovesForVector(toRet, onThis, vectorDirection.leftup, true);
+            getMovesForVector(toRet, onThis, vectorDirection.leftdown, true);
+            getMovesForVector(toRet, onThis, vectorDirection.rightup, true);
+            getMovesForVector(toRet, onThis, vectorDirection.rightdown, true);
 
             return toRet;
         }

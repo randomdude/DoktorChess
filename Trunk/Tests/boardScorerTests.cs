@@ -26,9 +26,33 @@ namespace Tests
 
             BoardScorer myscorer = new BoardScorer(null, us, them);
 
-            // TODO: change getScore to getMaterialAdvantage or the like for this test.
+            // Check only material advantage
+            myscorer.danglingModifier = 0;
+            myscorer.materialModifier = 1;
             Assert.AreEqual(8 - 2, myscorer.getScore());
         }
+
+        [TestMethod]
+        public void testScoreWithDangling()
+        {
+            Board ourboard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            ourboard.addPiece(pieceType.pawn, pieceColour.black, 3, 3);
+            ourboard.addPiece(pieceType.queen, pieceColour.white, 2, 2);
+
+            ourboard.addPiece(pieceType.king, pieceColour.black, 7, 7);
+            ourboard.addPiece(pieceType.king, pieceColour.white, 5, 5);
+
+            BoardScorer whiteScorer = new BoardScorer(ourboard, pieceColour.white);
+
+            // White's queen is dangling, as is blacks pawn.
+            int expected = whiteScorer.materialModifier * (8 - 1);
+            expected -= whiteScorer.danglingModifier * 8;
+            expected += whiteScorer.danglingModifier * 1;
+
+            Assert.AreEqual(expected, whiteScorer.getScore());
+
+        }
+
 
         [TestMethod]
         public void testFinishedGameScoreNoPieces()

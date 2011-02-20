@@ -290,13 +290,15 @@ namespace doktorChess
             }
         }
 
-        public List<move> getMoves(pieceColour toMoveColour)
+        public sizableArray<move> getMoves(pieceColour toMoveColour)
         {
             List<square> occupiedSquares = getPiecesForColour(toMoveColour);
 
-            List<move> possibleMoves = new List<move>(occupiedSquares.Count * 5);
+            // Generously guess the size of this array
+            sizableArray<move> possibleMoves = new sizableArray<move>(occupiedSquares.Count * 50);
+
             foreach (square occupiedSquare in occupiedSquares)
-                possibleMoves.AddRange(occupiedSquare.getPossibleMoves(this));
+                possibleMoves.AddRange(occupiedSquare.getPossibleMoves(this) );
 
             return possibleMoves;
         }
@@ -379,7 +381,7 @@ namespace doktorChess
             bool movesFound = false;
             foreach (square myPiece in myPieces)
             {
-                if (myPiece.getPossibleMoves(this).Count != 0)
+                if (myPiece.getPossibleMoves(this).Length != 0)
                 {
                     movesFound = true;
                     break;
@@ -407,7 +409,8 @@ namespace doktorChess
             bool movesFound = false;
             foreach (square myPiece in myPieces)
             {
-                if (myPiece.getPossibleMoves(this).Count != 0)
+                sizableArray<move> possMoves = myPiece.getPossibleMoves(this);
+                if (possMoves.Length != 0)
                 {
                     movesFound = true;
                     break;
@@ -486,45 +489,20 @@ namespace doktorChess
                 bestLineSoFar = new lineAndScore(new move[searchConfig.searchDepth + 1], int.MaxValue);
 
             // Find a list of possible moves..
-            List<move> movesToConsider = getMoves(toPlay);
-            if (movesToConsider.Count == 0)
+            sizableArray<move> movesToConsider = getMoves(toPlay);
+
+#if DEBUG
+            if (movesToConsider.Length == 0)
             {
                 // This should totally and absolutely not happen after we've verified that the
                 // game is still in progress.
                 throw new ArgumentException();
             }
+#endif
 
-            if (searchConfig.killerHeuristic)
-            {
-                int killerMoves = 0;
+            // Move any good (possibly killer) moves to the top of our search 
+            prioritizeMoves(movesToConsider, depthLeft);
 
-                // If one of these moves caused a cutoff last time, consider that move first.
-                List<move> reorderedMovesToConsider = new List<move>(movesToConsider.Count);
-                foreach (move consideredMove in movesToConsider)
-                {
-                    if (killerStore.contains(consideredMove, depthLeft))
-                    {
-                        reorderedMovesToConsider.Add(consideredMove);
-                        killerMoves++;
-                    }
-                }
-                if (reorderedMovesToConsider.Count > 0)
-                {
-                    foreach (move move in movesToConsider)
-                    {
-                        if (!reorderedMovesToConsider.Contains(move))
-                            reorderedMovesToConsider.Add(move);
-                    }
-                    movesToConsider = reorderedMovesToConsider;
-                }
-            }
-
-            // As we score each, keep the score in this var. We declare it outside the loop to
-            // prevent costly re-instantiation.
-// ReSharper disable TooWideLocalVariableScope
-            int score;
-// ReSharper restore TooWideLocalVariableScope
-            int moveIndex = 0;
             foreach (move consideredMove in movesToConsider)
             {
                 // If we're checking heavily, we check that the board is restored correctly after we
@@ -542,7 +520,7 @@ namespace doktorChess
                 if (depthLeft == 0)
                 {
                     stats.boardsScored++;
-                    score = getScore(playerCol);
+                    int score = getScore(playerCol);
 
                     if ((usToPlay && (score > bestLineSoFar.finalScore)) ||
                          (!usToPlay && (score < bestLineSoFar.finalScore)))
@@ -621,10 +599,54 @@ namespace doktorChess
                         }
                     }
                 }
-                moveIndex++;
+
             }
 
             return bestLineSoFar;
+        }
+
+        private void prioritizeMoves(sizableArray<move> movesToConsider, int depthLeft)
+        {
+            // Bring any moves which are 'probably good' to the top of our list. Hold an array of bools, and set
+            // each one which corresponds to a good move, so that we can avoid moving anything twice.
+            bool[] movesReordered = new bool[movesToConsider.Length];
+            int[] reorderedMovesToConsider = new int[movesToConsider.Length];
+            int reorderedCount = 0;
+
+            int n = 0;
+            if (searchConfig.killerHeuristic)
+            {
+                // If one of these moves caused a cutoff last time, consider that move first.
+                foreach (move consideredMove in movesToConsider)
+                {
+                    if (killerStore.contains(consideredMove, depthLeft))
+                    {
+                        movesReordered[n] = true;
+                        reorderedMovesToConsider[reorderedCount++] = n;
+                    }
+                    n++;
+                }
+            }
+
+            // Consider any capturing moves first, too
+            n = 0;
+            foreach (move thisMove in movesToConsider)
+            {
+                if (thisMove.isCapture)
+                {
+                    if (movesReordered[n] == false)
+                    {
+                        movesReordered[n] = true;
+                        reorderedMovesToConsider[reorderedCount++] = n;
+                    }
+                }
+                n++;
+            }
+
+            // Swap any good moves such that they are at the top
+            int swapCount = 0;
+            for (int i = 0; i < reorderedCount; i++)
+                movesToConsider.bringToPosition( reorderedMovesToConsider[i], swapCount++ );
         }
 
         public void doMove(move move)
@@ -790,7 +812,7 @@ namespace doktorChess
 
         public bool playerIsInCheck(pieceColour playerPossiblyInCheck)
         {
-            List<move> moves = getMoves(getOtherSide(playerPossiblyInCheck));
+            sizableArray<move> moves = getMoves(getOtherSide(playerPossiblyInCheck));
 
             return moves.Exists(a => a.isCapture && a.capturedSquare.type == pieceType.king);
         }

@@ -10,12 +10,12 @@ namespace Tests
         /// <summary>
         /// Never run a test involving a minimax search at deeper than this ply.
         /// </summary>
-        private const int maxDepthForMinimax = 5;
+        private const int maxDepthForMinimax = 4;
 
         /// <summary>
         /// Never run a test involving an AB search at deeper than this ply.
         /// </summary>
-        private const int MaxDepthForAB = 7;
+        private const int MaxDepthForAB = 5;
 
         [TestMethod]
         public void findImprovementAlphaBetaDepth()
@@ -65,7 +65,7 @@ namespace Tests
             boardSearchConfig configKiller = new boardSearchConfig() {useAlphaBeta = true, killerHeuristic = true, useThreatMap = false};
             boardSearchConfig configNonKiller = new boardSearchConfig() {useAlphaBeta = true, killerHeuristic = false, useThreatMap = false};
 
-            for (int depth = 0; depth < MaxDepthForAB; depth++)
+            for (int depth = 1; depth < MaxDepthForAB; depth++)
             {
                 configKiller.searchDepth = depth;
                 configNonKiller.searchDepth = depth;

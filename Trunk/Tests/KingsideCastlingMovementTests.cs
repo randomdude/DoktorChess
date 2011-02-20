@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using doktorChess;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -15,13 +16,13 @@ namespace Tests
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 7, 0);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 0, 0);
 
-            List<move> possibleMoves = ourKing.getPossibleMoves(ourBoard);
+            sizableArray<move> possibleMoves = ourKing.getPossibleMoves(ourBoard);
 
             // One of these moves should be a non-capturing move of the king to (6,0).
-            List<move> castlingMoveList = possibleMoves.FindAll(a => !a.isCapture && a.dstPos.isSameSquareAs(new squarePos(6, 0)));
+            move[] castlingMoveList = Array.FindAll(possibleMoves.getArray(), a => !a.isCapture && a.dstPos.isSameSquareAs(new squarePos(6, 0)));
 
-            Assert.AreNotEqual(0, castlingMoveList.Count, "Castling move was not found");
-            Assert.AreEqual(1, castlingMoveList.Count, "Multiple castling moves were found");
+            Assert.AreNotEqual(0, castlingMoveList.Length, "Castling move was not found");
+            Assert.AreEqual(1, castlingMoveList.Length, "Multiple castling moves were found");
 
             // Verify some other stuff on the move.
             move castlingMove = castlingMoveList[0];
@@ -39,10 +40,10 @@ namespace Tests
             ourBoard.addPiece(pieceType.rook, pieceColour.black, 5, 7);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 0, 0);
 
-            List<move> possibleMoves = ourKing.getPossibleMoves(ourBoard);
+            sizableArray<move> possibleMoves = ourKing.getPossibleMoves(ourBoard);
 
             // None of these moves should end up at (6, 0).
-            if (possibleMoves.Find(a => a.dstPos.isSameSquareAs(new squarePos(6, 0))) != null)
+            if (Array.Find(possibleMoves.getArray(), a => a.dstPos.isSameSquareAs(new squarePos(6, 0))) != null)
                 throw new AssertFailedException("Castling found through check");
         }
 
@@ -56,10 +57,10 @@ namespace Tests
             ourBoard.addPiece(pieceType.pawn, pieceColour.black, 6, 0);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 0, 0);
 
-            List<move> possibleMoves = ourKing.getPossibleMoves(ourBoard);
+            sizableArray<move> possibleMoves = ourKing.getPossibleMoves(ourBoard);
 
             // None of these moves should end up at (6, 0).
-            if (possibleMoves.Find(a => a.dstPos.isSameSquareAs(new squarePos(6, 0))) != null)
+            if (Array.Find(possibleMoves.getArray(), a => a.dstPos.isSameSquareAs(new squarePos(6, 0))) != null)
                 throw new AssertFailedException("Castling found through an enemy piece");
         }
 
@@ -75,10 +76,10 @@ namespace Tests
             ourBoard.doMove(new move(ourKing, ourBoard[4,0]));
 
             // Now make sure we cannot castle.
-            List<move> possibleMoves = ourKing.getPossibleMoves(ourBoard);
+            sizableArray<move> possibleMoves = ourKing.getPossibleMoves(ourBoard);
 
             // None of these moves should end up at (6,0).
-            if (possibleMoves.Find(a => a.dstPos.isSameSquareAs(new squarePos(6,0))) != null)
+            if (Array.Find(possibleMoves.getArray(), a => a.dstPos.isSameSquareAs(new squarePos(6, 0))) != null)
                 throw new AssertFailedException("Castling found after king has moved");
         }
 
@@ -94,10 +95,10 @@ namespace Tests
             ourBoard.doMove(new move(ourRook, ourBoard[7,0]));
 
             // Now make sure we cannot castle.
-            List<move> possibleMoves = ourKing.getPossibleMoves(ourBoard);
+            sizableArray<move> possibleMoves = ourKing.getPossibleMoves(ourBoard);
 
             // None of these moves should end up at (6,0).
-            if (possibleMoves.Find(a => a.dstPos.isSameSquareAs(new squarePos(6, 0))) != null)
+            if (Array.Find(possibleMoves.getArray(), a => a.dstPos.isSameSquareAs(new squarePos(6, 0))) != null)
                 throw new AssertFailedException("Castling found after rook has moved");
         }
 
