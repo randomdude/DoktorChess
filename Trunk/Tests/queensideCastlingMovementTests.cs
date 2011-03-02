@@ -11,6 +11,7 @@ namespace Tests
         [TestMethod]
         public void testPieceCaptureNotation()
         {
+            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig() );
             square bish = new bishopSquare(new squarePos(0, 0), pieceColour.black);
             square rook = new rookSquare(new squarePos(0, 1), pieceColour.white);
 
@@ -22,6 +23,7 @@ namespace Tests
         [TestMethod]
         public void testPieceMoveNotation()
         {
+            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
             square bish = new bishopSquare(new squarePos(0, 0), pieceColour.black);
             square targetSpace = new square( new squarePos(0, 1) );
 
@@ -37,7 +39,7 @@ namespace Tests
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 7, 0);
 
-            move theMove = new move(ourKing, new square(6, 0) );
+            move theMove = new move(ourKing, new square(6, 0));
 
             Assert.AreEqual("O-O", theMove.ToString(moveStringStyle.chessNotation));
         }

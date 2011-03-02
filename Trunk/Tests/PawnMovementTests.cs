@@ -159,7 +159,7 @@ namespace Tests
             square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 7, 1);
 
             // Advance the enemy pawn
-            move advanceTwo = new move(enemyPawn, ourBoard[enemyPawn.position.up(2)] );
+            move advanceTwo = new move(enemyPawn, ourBoard[enemyPawn.position.up(2)]);
             ourBoard.doMove(advanceTwo);
 
             // Now verify that the enemy pawn is captured.

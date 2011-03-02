@@ -4,18 +4,15 @@ namespace doktorChess
 {
     public class squarePos
     {
-        public int x;
-        public int y;
+        public readonly int x;
+        public readonly int y;
 
 // ReSharper disable UnusedMember.Global
         /// <summary>
         /// This parameterless constructor is only to be called by deserialisation methods! 
         /// </summary>
-        public squarePos()
+        public squarePos() { }
 // ReSharper restore UnusedMember.Global
-        {
-            
-        }
 
         public squarePos(int newX, int newY)
         {
@@ -122,7 +119,7 @@ namespace doktorChess
 
         public int flatten()
         {
-            return squarePos.flatten(x, y);
+            return flatten(x, y);
         }
 
         public static int flatten(int x, int y)
@@ -130,9 +127,18 @@ namespace doktorChess
             return x + (y * Board.sizeX);
         }
 
+        public static squarePos unflatten(int flattened)
+        {
+            int y = flattened / Board.sizeX;
+            int x = flattened % Board.sizeX;
+
+            return new squarePos(x, y);
+        }
+
         public override string ToString()
         {
             return x + ", " + y;
         }
+
     }
 }

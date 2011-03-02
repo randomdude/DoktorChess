@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
 namespace doktorChess
 {
@@ -9,17 +7,20 @@ namespace doktorChess
         /// <summary>
         /// List of moves we represent
         /// </summary>
-        public move[] line;
+        public readonly move[] line;
 
         /// <summary>
         /// Score of the final position when all moves have been played
         /// </summary>
         public int finalScore;
 
-        public lineAndScore(move[] newLine, int newFinalScore)
+        public BoardScorer _scorer;
+
+        public lineAndScore(move[] newLine, int newFinalScore, BoardScorer scorer)
         {
             line = newLine;
             finalScore = newFinalScore;
+            _scorer = scorer;
         }
 
         public override string ToString()
@@ -36,7 +37,7 @@ namespace doktorChess
                 if (move != null)
                     toRet.AppendLine(move.ToString(notationStyle));
             }
-            toRet.AppendLine("Score " + finalScore);
+            toRet.AppendLine(_scorer.ToString());
 
             return toRet.ToString();
         }

@@ -76,7 +76,7 @@ namespace Tests
             List<move> expectedmoves = new List<move>(expectedPos.Count);
 
             foreach (squarePos thisPos in expectedPos)
-                expectedmoves.Add(new move(queenie, ourBoard[thisPos]));
+                expectedmoves.Add(new move((square) queenie, ourBoard[thisPos]));
 
             sizableArray<move> possibleMoves = queenie.getMovesForVector(null, ourBoard, dir, false);
 

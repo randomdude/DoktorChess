@@ -1,12 +1,16 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace doktorChess
 {
+    /// <summary>
+    /// This class is used by serialisation stuff.
+    /// </summary>
     public class moveResponse
     {
+// ReSharper disable UnaccessedField.Global
+// ReSharper disable MemberCanBePrivate.Global
         public bool isValid;
 
         public string newBoardHTML;
@@ -21,6 +25,8 @@ namespace doktorChess
         public string blackMove;
         public string moveNum;
         public string bestLine;
+// ReSharper restore MemberCanBePrivate.Global
+// ReSharper restore UnaccessedField.Global
 
         public void loadBoardTable(Table theTable)
         {

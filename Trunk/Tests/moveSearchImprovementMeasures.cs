@@ -70,14 +70,13 @@ namespace Tests
                 configKiller.searchDepth = depth;
                 configNonKiller.searchDepth = depth;
 
-                //moveSearchStats statsNonKiller = runTest(configNonKiller);
+                moveSearchStats statsNonKiller = runTest(configNonKiller);
                 moveSearchStats statsKiller = runTest(configKiller);
 
-                //double ratio = ((double)statsKiller.boardsScored) / ((double)statsNonKiller.boardsScored);
-                //double timeSpeedup = statsKiller.totalSearchTime / (double)statsNonKiller.totalSearchTime;
+                double ratio = ((double)statsKiller.boardsScored) / ((double)statsNonKiller.boardsScored);
+                double timeSpeedup = statsKiller.totalSearchTime / (double)statsNonKiller.totalSearchTime;
 
-                //Debug.WriteLine(string.Format("Depth {0}, scored {1} boards killer and {2} without, ratio {3} : time {4} / {5}, ratio {6}", depth, statsKiller.boardsScored, statsNonKiller.boardsScored, ratio, statsKiller.totalSearchTime, statsNonKiller.totalSearchTime, timeSpeedup));
-                Debug.WriteLine(string.Format("Depth {0}, scored {1} boards killer : time {2}", depth, statsKiller.boardsScored, statsKiller.totalSearchTime ));
+                Debug.WriteLine(string.Format("Depth {0}, scored {1} boards killer and {2} without, ratio {3} : time {4} / {5}, ratio {6}", depth, statsKiller.boardsScored, statsNonKiller.boardsScored, ratio, statsKiller.totalSearchTime, statsNonKiller.totalSearchTime, timeSpeedup));
             }
         }
 

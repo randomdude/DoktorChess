@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace doktorChess
+﻿namespace doktorChess
 {
     public class knightSquare : square
     {
         // We can move to these squares if they are free.
-        private squarePosOffset[] potentialSquares = new squarePosOffset[]
+        private readonly squarePosOffset[] potentialSquares = new[]
                                                {
                                                    new squarePosOffset(1,2), new squarePosOffset(2,1),
                                                    new squarePosOffset(-1,2), new squarePosOffset(-2,1),
@@ -19,7 +16,7 @@ namespace doktorChess
             type = pieceType.knight;
         }
 
-        public override string getPieceNotation()
+        protected override string getPieceNotation()
         {
             return "n";
         }
@@ -39,7 +36,7 @@ namespace doktorChess
                 int posY = position.y + potentialSquare.y;
 
                 if (IsOnBoard(potentialSquare.x, potentialSquare.y))
-                    toRet.Add(new move(this, parentBoard[posX, posY]));
+                    toRet.Add(new move( this, parentBoard[posX, posY]));
             }
 
             return toRet;

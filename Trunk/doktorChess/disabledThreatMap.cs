@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace doktorChess
+﻿namespace doktorChess
 {
     public class disabledThreatMap : IEnableableThreatMap
     {

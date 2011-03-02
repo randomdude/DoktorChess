@@ -11,6 +11,7 @@ namespace doktorChess
             //Board myBoard = Board.makeQueenAndPawnsStartPosition();
             boardSearchConfig config = new boardSearchConfig();
             config.searchDepth = 4;
+            config.checkLots = true;
             Board myBoard = Board.makeNormalStartPosition(config);
 
             pieceColour toPlay = pieceColour.white;
@@ -20,7 +21,6 @@ namespace doktorChess
             Debug.WriteLine("--- game start ---");
 
             killerMoveStore otherSideKS = null;
-            killerMoveStore tmp = null;
 
             while (true)
             {
@@ -31,9 +31,11 @@ namespace doktorChess
                 myBoard.advanceKillerTables();
 
                 Console.WriteLine(string.Format("Best line for {0}: {1}", toPlay, bestMove.ToString(moveStringStyle.chessNotation)));
+                Console.WriteLine(bestMove._scorer.ToString());
                 //Console.WriteLine("{0} boards scored in {1} ms, {2}/sec. {3} ms in board scoring.", myBoard.stats.boardsScored, myBoard.stats.totalSearchTime, myBoard.stats.scoredPerSecond, myBoard.stats.boardScoreTime );
 
                 //Console.Write(String.Format("{0},", myBoard.stats.boardsScored));
+                Console.Write(myBoard.coverLevel.ToString() );
 
                 move bestFirstMove = bestMove.line[0];
                 myBoard.doMove(bestFirstMove);
@@ -53,7 +55,7 @@ namespace doktorChess
                 }
 
                 // Store the killer store
-                tmp = myBoard.killerStore;
+                killerMoveStore tmp = myBoard.killerStore;
                 myBoard.killerStore = otherSideKS;
                 otherSideKS = tmp;
 

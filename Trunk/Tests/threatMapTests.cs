@@ -22,8 +22,8 @@ namespace Tests
             if (ourPawn.coveredSquares.Count != 2)
                 throw new AssertFailedException("Pawn created not covering two squares");
 
-            if ((!ourPawn.coveredSquares[new squarePos(3, 2).flatten()].isSameSquareAs(new squarePos(3, 2))) || 
-                (!ourPawn.coveredSquares[new squarePos(5, 2).flatten()].isSameSquareAs(new squarePos(5,2)))   )
+            if ((!ourPawn.coveredSquares.Contains( squarePos.flatten(3, 2) )) || 
+                (!ourPawn.coveredSquares.Contains( squarePos.flatten(5, 2) ))    )
                 throw new AssertFailedException("Pawn created with incorrect .coveredSquares");
 
             if (((threatMap)ourBoard.coverLevel).piecesWhichThreatenSquare[3, 2].Count != 1 ||
@@ -44,8 +44,8 @@ namespace Tests
             if (ourPawn.coveredSquares.Count != 2)
                 throw new AssertFailedException("Pawn updated not covering two squares");
 
-            if ((!ourPawn.coveredSquares[new squarePos(3, 4).flatten()].isSameSquareAs(new squarePos(3, 4))) ||
-                (!ourPawn.coveredSquares[new squarePos(5, 4).flatten()].isSameSquareAs(new squarePos(5, 4))))
+            if ((!ourPawn.coveredSquares.Contains( squarePos.flatten(3, 4) )) ||
+                (!ourPawn.coveredSquares.Contains( squarePos.flatten(5, 4) ))   )
                 throw new AssertFailedException("Pawn updated with incorrect .coveredSquares");
 
             if (((threatMap)ourBoard.coverLevel).piecesWhichThreatenSquare[3, 2].Count != 0 ||
@@ -79,8 +79,8 @@ namespace Tests
             if (ourPawn.coveredSquares.Count != 2)
                 throw new AssertFailedException("Pawn created not covering two squares");
 
-            if ((!ourPawn.coveredSquares[new squarePos(3, 2).flatten()].isSameSquareAs(new squarePos(3, 2))) ||
-                (!ourPawn.coveredSquares[new squarePos(5, 2).flatten()].isSameSquareAs(new squarePos(5, 2))))
+            if ((!ourPawn.coveredSquares.Contains( squarePos.flatten(3, 2) )) ||
+                (!ourPawn.coveredSquares.Contains( squarePos.flatten(5, 2) ))   )
                 throw new AssertFailedException("Pawn created with incorrect .coveredSquares");
 
             if (((threatMap)ourBoard.coverLevel).piecesWhichThreatenSquare[3, 2].Count != 1 ||
@@ -105,8 +105,8 @@ namespace Tests
             if (ourPawn.coveredSquares.Count != 2)
                 throw new AssertFailedException("Pawn updated not covering two squares");
 
-            if ((!ourPawn.coveredSquares[new squarePos(2, 3).flatten()].isSameSquareAs(new squarePos(2, 3))) ||
-                (!ourPawn.coveredSquares[new squarePos(4, 3).flatten()].isSameSquareAs(new squarePos(4, 3))))
+            if (!ourPawn.coveredSquares.Contains( squarePos.flatten(2, 3) ) ||
+                !ourPawn.coveredSquares.Contains( squarePos.flatten(4, 3) )   )
                 throw new AssertFailedException("Pawn updated with incorrect .coveredSquares");
 
             if (((threatMap)ourBoard.coverLevel).piecesWhichThreatenSquare[3, 2].Count != 0 ||

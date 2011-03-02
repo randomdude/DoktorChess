@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace doktorChess
+﻿namespace doktorChess
 {
     public class kingSquare : square
     {
-        public bool inhibitCastling;
-
         // We can move to these squares if they are free.
-        private squarePosOffset[] potentialSquares = new squarePosOffset[] {    new squarePosOffset(-1, +1), new squarePosOffset( 0, +1), new squarePosOffset(+1, +1),
-                                                                            new squarePosOffset(-1,  0), new squarePosOffset(+1,  0),
-                                                                            new squarePosOffset(-1, -1), new squarePosOffset( 0, -1), new squarePosOffset(+1, -1)};
+        private readonly squarePosOffset[] potentialSquares = new[] {
+                    new squarePosOffset(-1, +1), new squarePosOffset( 0, +1), new squarePosOffset(+1, +1),
+                    new squarePosOffset(-1,  0), new squarePosOffset(+1,  0),
+                    new squarePosOffset(-1, -1), new squarePosOffset( 0, -1), new squarePosOffset(+1, -1)};
 
 
         public kingSquare(squarePos newPos, pieceColour newColour)
@@ -19,7 +15,7 @@ namespace doktorChess
             type = pieceType.king;
         }
 
-        public override string getPieceNotation()
+        protected override string getPieceNotation()
         {
             return "k";
         }
@@ -33,7 +29,7 @@ namespace doktorChess
             if (canCastle(onThis, true))
             {
                 // Castling kingside is possible. It is represented as a two-space move by the king.
-                possibleMoves.Add(new move(this, onThis[ position.right(2) ] ));
+                possibleMoves.Add(new move(this, onThis[position.right(2)]));
             }
             if (canCastle(onThis, false))
             {
@@ -67,10 +63,6 @@ namespace doktorChess
             // * A rook is on the same rank as the king and has not moved
             // * The squares between the king and the rook are empty
             // * The first two spaces between the king and the rook are not threatened by anything (the rook can move through 'check' but the king cannot)
-            
-            if (inhibitCastling)
-                // This is set by other logic so we don't return a castling move even if one is possible.
-                return false;
 
             // If we are castling kingside, examine row 7 - otherwise, row 0.
             square potentialRookSquare = theBoard[ kingSide ? 7 : 0 , position.y];
@@ -80,8 +72,8 @@ namespace doktorChess
                 && potentialRookSquare.movedCount == 0)         // Rook has not moved
             {
                 // Verify that king spaces are free
-                int startx = 0;
-                int limitx = 0;
+                int startx;
+                int limitx;
                 if (kingSide)
                 {
                     startx = position.x + 1;

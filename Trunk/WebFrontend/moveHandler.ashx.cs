@@ -63,7 +63,7 @@ namespace WebFrontend
                 resp.forceBoardReload = true;
 
             // If the player has castled, force a board reload too, since the JS does not detect this yet.
-            if (playersMove.isACastling())
+            if (playersMove.isACastling)
                 resp.forceBoardReload = true;
 
             resp.moveNum = theBoard.moveCount.ToString();
@@ -94,12 +94,12 @@ namespace WebFrontend
                 if (index % 2 != 0)
                     resp.bestLine += "\n";
             }
-            resp.bestLine += "\nScore: " + bestLine.finalScore;
+            resp.bestLine += "\nScore: " + bestLine._scorer.ToString();
 
             if (bestMove.isCapture &&
                 !bestMove.capturedSquarePos.isSameSquareAs(bestMove.dstPos))
                 resp.forceBoardReload = true;
-            if (bestMove.isACastling())
+            if (bestMove.isACastling)
                 resp.forceBoardReload = true;
 
             // and send the move and new board to the client.

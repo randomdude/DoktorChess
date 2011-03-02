@@ -20,12 +20,12 @@ namespace doktorChess
         /// </summary>
         public square pastLife;
 
-        public pieceType type { get; set; }
+        public pieceType type { get; internal set; }
         public pieceColour colour { get; private set; }
         public squarePos position { get; set; }
 
         // flattened dst to dst hashtable
-        public Dictionary<int, squarePos> coveredSquares = new Dictionary<int, squarePos>(60);
+        public readonly List<int> coveredSquares = new List<int>(20);
 
         public static square makeSquare(pieceType newType, pieceColour newColour, squarePos newPos)
         {
@@ -67,12 +67,14 @@ namespace doktorChess
             type = pieceType.none;
         }
 
+// ReSharper disable MemberCanBeProtected.Global
         public square(squarePos newPos, pieceColour newColour)
         {
             movedCount = 0;
             position = newPos;
             colour = newColour;
         }
+// ReSharper restore MemberCanBeProtected.Global
 
         public square(int newx, int newy)
         {
@@ -90,7 +92,7 @@ namespace doktorChess
             return toRet;
         }
 
-        public virtual string getPieceNotation()
+        protected virtual string getPieceNotation()
         {
             return ".";
         }
@@ -211,22 +213,15 @@ namespace doktorChess
                             // the square is occupied by one of our pieces, so we are covering it, 
                             // but we cannot go any further.
                             addTo.Add(new move(onThis[position], onThis[sqPos]));
-                            break;                            
-                        }
-                        else
-                        {
-                            // the square is occupied by one of our pieces, we cannot move past
-                            // it.
-                            break;
                         }
                     }
                     else
                     {
-                        // the square is occupied by an enemy piece, we can move to it, 
+                        // the square is occupied by an enemy piece. we can move to it, 
                         // but no further.
                         addTo.Add(new move(onThis[position], onThis[sqPos]));
-                        break;
                     }
+                    break;
                 }
 
                 x += directionX;

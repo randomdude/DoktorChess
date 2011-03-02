@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace doktorChess
 {
-    public class sizableArray<T> : IEnumerable  
+    public class sizableArray<T> : IEnumerable where T : class
     {
         private readonly T[] elements;
 
@@ -19,10 +19,12 @@ namespace doktorChess
             get { return cursor; }
         }
 
+// ReSharper disable UnusedMember.Global
         public void Clear()
         {
             cursor = 0;
         }
+// ReSharper restore UnusedMember.Global
 
         public void Add(T newItem)
         {
@@ -52,7 +54,7 @@ namespace doktorChess
         {
             T[] nonNulls = Array.FindAll(elements, a => a != null);
 
-            return (Array.Exists<T>(nonNulls, match));
+            return (Array.Exists(nonNulls, match));
         }
 
         public void bringToPosition(int posToMove, int newPos)
@@ -68,7 +70,7 @@ namespace doktorChess
         }
     }
 
-    public class sizableArrayEnumerator<T> : IEnumerator
+    public class sizableArrayEnumerator<T> : IEnumerator where T : class
     {
         private readonly sizableArray<T> _parent;
         private int i = -1;

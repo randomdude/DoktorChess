@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace doktorChess
+﻿namespace doktorChess
 {
     public class pawnSquare : square
     {
@@ -11,14 +8,14 @@ namespace doktorChess
             type = pieceType.pawn;
         }
 
-        public override string getPieceNotation()
+        protected override string getPieceNotation()
         {
             return "p";
         }
 
         public override sizableArray<move> getPossibleMoves(Board onThis)
         {
-            sizableArray<move> toRet = new sizableArray<move>(4);
+            sizableArray<move> toRet = new sizableArray<move>(10);
 
             int direction;
             if (colour == pieceColour.white)
@@ -95,8 +92,7 @@ namespace doktorChess
             if (dst.position.y == (colour == pieceColour.white ? 7 : 0) )
             {
                 // OK. Promotions it is.
-                pieceType[] promotionOptions = new pieceType[]
-                                                  {
+                pieceType[] promotionOptions = new[] {
                                                       pieceType.queen,
                                                       pieceType.rook,
                                                       pieceType.knight,
@@ -144,11 +140,11 @@ namespace doktorChess
                 // Check the two diagonals
                 if (position.x > 0)
                 {
-                    toRet.Add(new move(this, parentBoard[position.up(direction).leftOne()])); ;
+                    toRet.Add(new move( this, parentBoard[position.up(direction).leftOne()]));
                 }
                 if (position.x < Board.sizeX - 1)
                 {
-                    toRet.Add(new move(this, parentBoard[position.up(direction).rightOne()])); ;
+                    toRet.Add(new move( this, parentBoard[position.up(direction).rightOne()]));
                 }
             }
             return toRet;

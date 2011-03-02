@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -9,7 +8,7 @@ namespace doktorChess
     public class threatMap : IEnableableThreatMap
     {
         /// <summary>
-        /// The actual threat map, from white's POV
+        /// The actual threat map, from whites POV
         /// </summary>
         private readonly int[,] threats = new int[Board.sizeX,Board.sizeY];
 
@@ -20,9 +19,9 @@ namespace doktorChess
         private readonly Board _parentBoard;
 
         /// <summary>
-        /// Check internal consistancy frequently if set
+        /// Check internal consistency frequently if set
         /// </summary>
-        public bool checkStuff { get; set; }
+        public bool checkStuff { private get; set; }
 
         public int this[squarePos position]
         {
@@ -80,7 +79,7 @@ namespace doktorChess
                 piecesWhichThreatenSquare[potentialMove.dstPos.x, potentialMove.dstPos.y].Add( x + (y * Board.sizeX), _parentBoard[x, y]);
 
                 // and our list of squares covered by piece
-                _parentBoard[x, y].coveredSquares.Add(potentialMove.dstPos.flatten(), potentialMove.dstPos);
+                _parentBoard[x, y].coveredSquares.Add(potentialMove.dstPos.flatten());
             }
 
             // and then recalculate pieces that need it. To save time, we don't re-evaluate everything-
@@ -103,7 +102,7 @@ namespace doktorChess
                 int offX = toRecalc.position.x - x;
                 int offY = toRecalc.position.y - y;
 
-                int sx = 0;
+                int sx;
                 if (offX < 0)
                     sx = +1;
                 else if (offX > 0)
@@ -111,7 +110,7 @@ namespace doktorChess
                 else
                     sx = 0;
 
-                int sy = 0;
+                int sy;
                 if (offY < 0)
                     sy = +1;
                 else if (offY > 0)
@@ -171,12 +170,13 @@ namespace doktorChess
             int posDirection = toRemove.colour == pieceColour.white ? 1 : -1;
 
             // Remove the actual piece, and what it threatens
-            foreach (squarePos threatenedSquare in toRemove.coveredSquares.Values )
+            foreach (int threatenedSquareFlat in toRemove.coveredSquares )
             {
+                squarePos threatenedSquare = squarePos.unflatten(threatenedSquareFlat);
                 this[threatenedSquare] -= posDirection;
 
                 // The removed piece no longer threatens this square.
-                piecesWhichThreatenSquare[threatenedSquare.x, threatenedSquare.y].Remove(toRemove.position.flatten());
+                piecesWhichThreatenSquare[threatenedSquare.x, threatenedSquare.y].Remove( toRemove.position.flatten() );
             }
             toRemove.coveredSquares.Clear();
             
@@ -201,7 +201,7 @@ namespace doktorChess
                 int offX = toRecalc.position.x - toRemove.position.x;
                 int offY = toRecalc.position.y - toRemove.position.y;
 
-                int sx = 0;
+                int sx;
                 if (offX < 0)
                     sx = +1;
                 else if (offX > 0)
@@ -209,7 +209,7 @@ namespace doktorChess
                 else
                     sx = 0;
 
-                int sy = 0;
+                int sy;
                 if (offY < 0)
                     sy = +1;
                 else if (offY > 0)
@@ -242,7 +242,7 @@ namespace doktorChess
 
                     this[pos] += toRecalcAddition;
                     piecesWhichThreatenSquare[removex, removey].Add(toRecalc.position.flatten(), toRecalc );
-                    toRecalc.coveredSquares.Add(pos.flatten(), pos);
+                    toRecalc.coveredSquares.Add( pos.flatten() );
 
                     //Debug.WriteLine("Added discovered " + pos);
 
@@ -277,15 +277,10 @@ namespace doktorChess
             // Return true if the square is covered by at least one enemy piece. Ignore if we are 
             // covering it or not.
             pieceColour otherSide = Board.getOtherSide(sideToExamine);
-            foreach (KeyValuePair<int, square> squareKVP in piecesWhichThreatenSquare[squareToCheck.position.x, squareToCheck.position.y])
-            {
-                if (squareKVP.Value.colour == otherSide)
-                    return true;
-            }
-            return false;
+            return piecesWhichThreatenSquare[squareToCheck.position.x, squareToCheck.position.y].Any(squareKVP => squareKVP.Value.colour == otherSide);
         }
 
-        public void sanityCheck()
+        private void sanityCheck()
         {
             if (!checkStuff)
                 return;

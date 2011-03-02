@@ -28,7 +28,7 @@ namespace Tests
         public void verifyLegalMoveIsLegal()
         {
             Board ourBoard = Board.makeQueenAndPawnsStartPosition(boardSearchConfig.getDebugConfig());
-            move legalMove = new move( ourBoard[1,1], ourBoard[1,3] );
+            move legalMove = new move(ourBoard[1, 1], ourBoard[1, 3]);
             Assert.IsTrue(legalMove.isLegal(ourBoard));
         }
 

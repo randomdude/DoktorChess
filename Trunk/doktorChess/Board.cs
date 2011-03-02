@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -31,27 +32,27 @@ namespace doktorChess
         /// <summary>
         /// Lookaside list of squares occupied by white pieces
         /// </summary>
-        private List<square> whitePieceSquares = new List<square>();
+        private readonly List<square> whitePieceSquares = new List<square>(20);
 
         /// <summary>
         /// Lookaside list of squares occupied by black pieces
         /// </summary>
-        private List<square> blackPieceSquares = new List<square>();
+        private readonly List<square> blackPieceSquares = new List<square>(20);
 
         /// <summary>
         /// Lookaside of white material advantage
         /// </summary>
-        public int whiteMaterialAdvantage = 0;
+        public int whiteMaterialAdvantage;
 
         /// <summary>
         /// Lookaside of black material advantage
         /// </summary>
-        public int blackMaterialAdvantage = 0;
+        public int blackMaterialAdvantage;
 
-        private boardSearchConfig searchConfig;
+        private readonly boardSearchConfig searchConfig;
 
         public killerMoveStore killerStore;
-        public IEnableableThreatMap coverLevel;
+        public readonly IEnableableThreatMap coverLevel;
 
         // Keep some search stats in here
         public moveSearchStats stats;
@@ -83,14 +84,18 @@ namespace doktorChess
 
         public square this[squarePos myPos]
         {
+// ReSharper disable UnusedMember.Local
             get { return _squares[myPos.x, myPos.y]; }
             private set { _squares[myPos.x, myPos.y] = value; }
+// ReSharper restore UnusedMember.Local
         }
 
         public square this[int x, int y]
         {
+// ReSharper disable UnusedMember.Local
             get { return _squares[x, y]; }
             private set { _squares[x, y] = value; }
+// ReSharper restore UnusedMember.Local
         }
 
         public static Board makeQueenAndPawnsStartPosition(boardSearchConfig searchConfig)
@@ -117,7 +122,7 @@ namespace doktorChess
             }
 
             // And now fill in the two end ranks.
-            foreach (int y in new int[] { 0, 7 })
+            foreach (int y in new[] { 0, 7 })
             {
                 pieceColour col = (y == 0 ? pieceColour.white : pieceColour.black);
 
@@ -137,7 +142,7 @@ namespace doktorChess
             return newBoard;
         }
 
-        public void sanityCheck()
+        private void sanityCheck()
         {
             if (!searchConfig.checkLots)
                 return;
@@ -337,22 +342,6 @@ namespace doktorChess
 
         }
 
-        public int getScore(pieceColour myPieceColour)
-        {
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-            List<square> myPieces = getPiecesForColour(myPieceColour);
-            List<square> enemyPieces = getPiecesForColour(getOtherSide(myPieceColour));
-
-            BoardScorer scorer = new BoardScorer(this, myPieces, enemyPieces );
-            scorer.setGameStatus(getGameStatus(myPieces, enemyPieces));
-            int toRet = scorer.getScore();
-            watch.Stop();
-            stats.boardScoreTime += watch.ElapsedMilliseconds;
-
-            return toRet;
-        }
-
         public static pieceColour getOtherSide(pieceColour ofThisSide)
         {
             switch (ofThisSide)
@@ -397,19 +386,11 @@ namespace doktorChess
 
             if (_whiteKingCaptured)
                 return myCol == pieceColour.white ? gameStatus.lost : gameStatus.won;
-            else if (_blackKingCaptured)
+            if (_blackKingCaptured)
                 return myCol == pieceColour.black ? gameStatus.lost : gameStatus.won;
 
             // If the current player cannot move, then the game is a draw.
-            bool movesFound = false;
-            foreach (square myPiece in myPieces)
-            {
-                if (myPiece.getPossibleMoves(this).Length != 0)
-                {
-                    movesFound = true;
-                    break;
-                }
-            }
+            bool movesFound = myPieces.Any(a => a.getPossibleMoves(this).Length != 0);
 
             if (!movesFound)
                 return gameStatus.drawn;
@@ -429,16 +410,7 @@ namespace doktorChess
             pieceColour myCol = myPieces[0].colour;
 
             // If the current player cannot move, it is a draw.
-            bool movesFound = false;
-            foreach (square myPiece in myPieces)
-            {
-                sizableArray<move> possMoves = myPiece.getPossibleMoves(this);
-                if (possMoves.Length != 0)
-                {
-                    movesFound = true;
-                    break;
-                }
-            }
+            bool movesFound = myPieces.Any(myPiece => myPiece.getPossibleMoves(this).Length != 0);
 
             if (!movesFound)
                 return gameStatus.drawn;
@@ -500,16 +472,17 @@ namespace doktorChess
             {
                 // The game is over. Return a score immediately, and no moves.
                 stats.boardsScored++;
-                return new lineAndScore( new move[] {}, getScore(playerCol));
+                BoardScorer scorer = new BoardScorer(this, toPlay, searchConfig.scoreConfig);
+                return new lineAndScore(new move[] { }, scorer.getScore(), scorer);
             }
 
             // Find our best move and its score. Initialise the best score to max or min,
             // depending if we're searching for the minimum or maximum score.
             lineAndScore bestLineSoFar;
             if (usToPlay)
-                bestLineSoFar = new lineAndScore(new move[searchConfig.searchDepth + 1], int.MinValue);
+                bestLineSoFar = new lineAndScore(new move[searchConfig.searchDepth + 1], int.MinValue, null);
             else
-                bestLineSoFar = new lineAndScore(new move[searchConfig.searchDepth + 1], int.MaxValue);
+                bestLineSoFar = new lineAndScore(new move[searchConfig.searchDepth + 1], int.MaxValue, null);
 
             // Find a list of possible moves..
             sizableArray<move> movesToConsider = getMoves(toPlay);
@@ -543,13 +516,15 @@ namespace doktorChess
                 if (depthLeft == 0)
                 {
                     stats.boardsScored++;
-                    int score = getScore(playerCol);
+                    BoardScorer scorer = new BoardScorer(this, toPlay, searchConfig.scoreConfig);
+                    int score = scorer.getScore();
 
                     if ((usToPlay && (score > bestLineSoFar.finalScore)) ||
                          (!usToPlay && (score < bestLineSoFar.finalScore)))
                     {
-                        bestLineSoFar.finalScore = score;
+                        bestLineSoFar.finalScore = scorer.getScore();
                         bestLineSoFar.line[searchConfig.searchDepth] = consideredMove;
+                        bestLineSoFar._scorer = scorer;
                     }
                 }
                 else
@@ -560,6 +535,7 @@ namespace doktorChess
                         (!usToPlay && (thisMove.finalScore < bestLineSoFar.finalScore)))
                     {
                         bestLineSoFar.finalScore = thisMove.finalScore;
+                        bestLineSoFar._scorer = thisMove._scorer;
                         bestLineSoFar.line[searchConfig.searchDepth - depthLeft] = consideredMove;
                         for (int index = 0; index < thisMove.line.Length; index++)
                         {
@@ -683,7 +659,7 @@ namespace doktorChess
             square movingSquare = this[move.srcPos];
 
             // If this move is a castling, update the rooks movedCount
-            if (move.isACastling())
+            if (move.isACastling)
             {
                 if (this[move.srcPos].colour == pieceColour.white)
                     whiteHasCastled = true;
@@ -692,10 +668,8 @@ namespace doktorChess
                 else
                     throw new Exception("Cannot identify colour");
 
-                rookSquare rook = move.findCastlingRook(this);
-                move.castlingRook = rook;
-                rook.movedCount++;
-                rook.moveNumbers.Push(moveCount);                
+                this[move.castlingRookSrcPos].movedCount++;
+                this[move.castlingRookSrcPos].moveNumbers.Push(moveCount);                
             }
 
             // Update the number of moves on this board
@@ -711,13 +685,13 @@ namespace doktorChess
             movePiece(movingSquare, move.dstPos);
 
             // If we're castling, move the rook appropriately
-            if (move.isACastling())
+            if (move.isACastling)
             {
                 square rook = move.findCastlingRook(this);
                 movePiece(rook, move.findNewPosForCastlingRook() );
             }
 
-            square captured = null;
+            square captured;
             if (move.isCapture)
             {
                 captured = move.capturedSquare;
@@ -775,7 +749,8 @@ namespace doktorChess
             Debug.Assert(this[move.dstPos].moveNumbers.Pop() == moveCount);
 
             // Dec the rook's move counter if this is a castling
-            if (move.isACastling())
+            square castlingRook = null;
+            if (move.isACastling)
             {
                 if (this[move.dstPos].colour == pieceColour.white)
                     whiteHasCastled = false;
@@ -784,9 +759,9 @@ namespace doktorChess
                 else
                     throw new Exception("Cannot identify colour");
 
-                square rook = move.castlingRook;
-                rook.movedCount--;
-                Assert.AreEqual(moveCount, rook.moveNumbers.Pop());
+                castlingRook = this[move.castlingRookDstPos];
+                castlingRook.movedCount--;
+                Assert.AreEqual(moveCount, castlingRook.moveNumbers.Pop());
             }
 
             // store the piece which is moving before we erase it
@@ -802,24 +777,21 @@ namespace doktorChess
             coverLevel.add(move.srcPos); 
 
             // If a castling, move the rook back too.
-            if (move.isACastling())
+            if (move.isACastling)
             {
-                square rook = move.castlingRook;
+                removePiece(castlingRook);
 
-                removePiece(rook);
-
-                this[rook.position] = new square(rook.position);
-                if (rook.position.x == 3)
+// ReSharper disable PossibleNullReferenceException
+                // castlingRook cannot be null at this point, as we set it if there is a castling.
+                this[castlingRook.position] = new square(castlingRook.position);
+// ReSharper restore PossibleNullReferenceException
+                if (castlingRook.position.x == 3)
                 {
-                    addPiece(rook, new squarePos(0, rook.position.y));
-                    //this[0, rook.position.y] = rook;
-                    //rook.position = new squarePos(0, rook.position.y);
+                    addPiece(castlingRook, new squarePos(0, castlingRook.position.y));
                 }
-                else if (rook.position.x == 5)
+                else if (castlingRook.position.x == 5)
                 {
-                    addPiece(rook, new squarePos(7, rook.position.y));
-                    //this[7, rook.position.y] = rook;
-                    //rook.position = new squarePos(7, rook.position.y);                    
+                    addPiece(castlingRook, new squarePos(7, castlingRook.position.y));
                 }
                 else
                     Assert.Fail("While uncastling, could not find castled rook");

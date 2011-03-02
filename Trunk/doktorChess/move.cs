@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Web.Script.Serialization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -13,22 +14,23 @@ namespace doktorChess
         public readonly squarePos dstPos;
         public readonly squarePos capturedSquarePos;
         public readonly bool isCapture = false;
+        public bool isACastling = false;
         public readonly square capturedSquare;
-        private pieceType _type;
         private readonly square _srcSquare;
-        public rookSquare castlingRook;
-        public bool isPawnPromotion;
-        public pieceType typeToPromoteTo;
+        public squarePos castlingRookSrcPos;
+        public squarePos castlingRookDstPos;
+        public readonly bool isPawnPromotion;
+        public readonly pieceType typeToPromoteTo;
 
         public static move fromJSON(string JSON, Board parentBoard)
         {
             minimalMove json = new JavaScriptSerializer().Deserialize<minimalMove>(JSON);
 
             // Don't forget that the board is inverted, as we show it to the user
-            json.srcSquarePos.y = 7 - json.srcSquarePos.y;
-            json.dstSquarePos.y = 7 - json.dstSquarePos.y;
+            json.srcSquarePos = new squarePos(json.srcSquarePos.x, 7 - json.srcSquarePos.y);
+            json.dstSquarePos = new squarePos(json.dstSquarePos.x, 7 - json.dstSquarePos.y);
 
-            move toRet = new move( parentBoard[json.srcSquarePos], parentBoard[json.dstSquarePos] );
+            move toRet = new move( parentBoard[json.srcSquarePos], parentBoard[json.dstSquarePos]);
 
             return toRet;
         }
@@ -37,7 +39,6 @@ namespace doktorChess
         {
             srcPos = src.position;
             dstPos = dst.position;
-            _type = src.type;
             _srcSquare = src;
 
             // If we are capturing, fill in relevant info.
@@ -47,13 +48,14 @@ namespace doktorChess
                 capturedSquare = dst;
                 capturedSquarePos = dst.position;
             }
+
+            findCastlingRookPositions();
         }
 
         public move(square src, square dst, square captured)
         {
             srcPos = src.position;
             dstPos = dst.position;
-            _type = src.type;
             _srcSquare = src;
 
             Debug.Assert(dst.type == pieceType.none);
@@ -64,13 +66,14 @@ namespace doktorChess
                 capturedSquare = captured;
                 capturedSquarePos = captured.position;
             }
+
+            findCastlingRookPositions();
         }
 
         public move(square src, square dst, pieceType toPromoteTo)
         {
             srcPos = src.position;
             dstPos = dst.position;
-            _type = src.type;
             _srcSquare = src;
 
             if (src.type != pieceType.pawn)
@@ -88,23 +91,15 @@ namespace doktorChess
                 isCapture = true;
                 capturedSquare = dst;
                 capturedSquarePos = dst.position;
-            }        
-        }
+            }
 
-        /// <summary>
-        /// Check for the same start and end square co-ordinates
-        /// </summary>
-        /// <param name="toCompare"></param>
-        /// <returns></returns>
-        public bool isSameSquaresAs(move toCompare)
-        {
-            return (toCompare.srcPos.isSameSquareAs(srcPos) && toCompare.dstPos.isSameSquareAs(dstPos));
+            findCastlingRookPositions();
         }
 
         /// <summary>
         /// Is this move legal according to the rules of chess?
         /// </summary>
-        /// <param name="ourBaord"></param>
+        /// <param name="ourBoard">Board to examine</param>
         /// <returns></returns>
         public bool isLegal(Board ourBoard)
         {
@@ -112,15 +107,11 @@ namespace doktorChess
                 return false;
 
             sizableArray<move> possibleMovesWithMovingPiece = _srcSquare.getPossibleMoves(ourBoard);
+            IEnumerable<move> casted = possibleMovesWithMovingPiece.Cast<move>();
 
-            foreach (move possibleMove in possibleMovesWithMovingPiece)
-            {
-                if (possibleMove.srcPos.isSameSquareAs(srcPos) &&
-                    possibleMove.dstPos.isSameSquareAs(dstPos)) 
-                return true;
-            }
-
-            return false;
+            return casted.Any(
+                possibleMove => possibleMove.srcPos.isSameSquareAs(srcPos) && 
+                possibleMove.dstPos.isSameSquareAs(dstPos)                      );
         }
 
         /// <summary>
@@ -131,33 +122,49 @@ namespace doktorChess
         public move sanitize(Board ourBoard)
         {
             sizableArray<move> possibleMovesWithMovingPiece = _srcSquare.getPossibleMoves(ourBoard);
+            IEnumerable<move> casted = possibleMovesWithMovingPiece.Cast<move>();
 
-            foreach (move possibleMove in possibleMovesWithMovingPiece)
-            {
-                if (possibleMove.srcPos.isSameSquareAs(srcPos) &&
-                    possibleMove.dstPos.isSameSquareAs(dstPos))
-                {
-                    return  possibleMove;
-                }
-            }
-            return null;
+            return casted.FirstOrDefault(a => a.srcPos.isSameSquareAs(srcPos) && a.dstPos.isSameSquareAs(dstPos));
         }
 
-        public bool isACastling()
+        private void setCastling()
         {
+            // Castlings are denoted by a king moving two spaces.
             if (_srcSquare.type == pieceType.king &&
-                (
-                 srcPos.x - dstPos.x == 2 || 
-                 dstPos.x - srcPos.x ==2 
+                    (
+                     srcPos.x - dstPos.x == 2 ||
+                     dstPos.x - srcPos.x == 2
+                    )
                 )
-                )
-                return true;
-            return false;
+                isACastling = true;
+            else
+                isACastling = false;
+        }
+
+        private void findCastlingRookPositions()
+        {
+            setCastling();
+
+            if (!isACastling)
+                return;
+
+            if (dstPos.x > srcPos.x)
+            {
+                castlingRookSrcPos = new squarePos(7, dstPos.y) ;
+                castlingRookDstPos = new squarePos(dstPos.x - 1, dstPos.y);
+            }
+            else if (srcPos.x > dstPos.x)
+            {
+                castlingRookSrcPos = new squarePos(0, dstPos.y);
+                castlingRookDstPos = new squarePos(dstPos.x + 1, dstPos.y);
+            }
+            else
+                throw new AssertFailedException("Malformed castling");
         }
 
         public rookSquare findCastlingRook(Board theBoard)
         {
-            if (!isACastling())
+            if (!isACastling)
                 throw new AssertFailedException("Asked to find castling rook of a move not a castle");
 
             if (dstPos.x > srcPos.x)
@@ -170,7 +177,7 @@ namespace doktorChess
 
         public squarePos findNewPosForCastlingRook()
         {
-            if (!isACastling())
+            if (!isACastling)
                 throw new AssertFailedException("Asked to find new pos of a castling rook of a move not a castle");
 
             // The rook moves one space past the king in the direction of travel.
@@ -196,7 +203,7 @@ namespace doktorChess
                 case moveStringStyle.chessNotation:
                     return toChessNotation();
                 default:
-                    throw new ArgumentOutOfRangeException("move style unrecognised");
+                    throw new ArgumentOutOfRangeException("chessNotation");
             }
         }
 
@@ -204,14 +211,14 @@ namespace doktorChess
         {
             StringBuilder toRet = new StringBuilder();
 
-            if (isACastling())
+            if (isACastling)
             {
                 if (dstPos.x > srcPos.x)
                     return "O-O";
                 else if (srcPos.x > dstPos.x)
                     return "O-O-O";
                 else
-                    throw new ArgumentOutOfRangeException("Unrecognised castle");
+                    throw new Exception("Unrecognised castle");
             }
 
             if (!isCapture)

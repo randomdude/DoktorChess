@@ -14,39 +14,9 @@ namespace Tests
         }
 
         [TestMethod]
-        public void testDepthThreeAsWhiteToPlay()
-        {
-            testAsWhiteToPlay(3, false);
-        }
-
-        [TestMethod]
-        public void testDepthFourAsWhiteToPlay()
-        {
-            testAsWhiteToPlay(4, false);
-        }
-
-        [TestMethod]
         public void testAlphaBetaDepthTwoAsWhiteToPlay()
         {
             testAsWhiteToPlay(2, true);
-        }
-
-        [TestMethod]
-        public void testAlphaBetaDepthThreeAsWhiteToPlay()
-        {
-            testAsWhiteToPlay(3, true);
-        }
-
-        [TestMethod]
-        public void testAlphaBetaDepthFourAsWhiteToPlay()
-        {
-            testAsWhiteToPlay(4, true);
-        }
-
-        [TestMethod]
-        public void testAlphaBetaDepthFiveAsWhiteToPlay()
-        {
-            testAsWhiteToPlay(5, true);
         }
 
         public static void testAsWhiteToPlay(int depth, bool useAlphaBeta)
@@ -56,6 +26,7 @@ namespace Tests
             config.killerHeuristic = false;
             config.useAlphaBeta = useAlphaBeta;
             config.searchDepth = depth;
+            config.scoreConfig.danglingModifier = 0;
             Board ourBoard = Board.makeQueenAndPawnsStartPosition(config);
 
             // We are white, and it is white's move. What is the (our) best move? It should

@@ -111,7 +111,7 @@ namespace Tests
             ourBoard.addPiece(pieceType.king, pieceColour.black, 0, 0);
 
             // Make our castling move..
-            move castlingMove = new move(ourKing, ourBoard[6, 0]) ;
+            move castlingMove = new move(ourKing, ourBoard[6, 0]);
             ourBoard.doMove(castlingMove);
 
             // Verify that the rook and king have both moved to their correct squares.

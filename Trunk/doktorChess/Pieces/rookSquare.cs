@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace doktorChess
+﻿namespace doktorChess
 {
     public class rookSquare : square
     {
@@ -10,7 +8,7 @@ namespace doktorChess
             type = pieceType.rook;
         }
 
-        public override string getPieceNotation()
+        protected override string getPieceNotation()
         {
             return "r";
         }

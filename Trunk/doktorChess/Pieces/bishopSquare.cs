@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace doktorChess
+﻿namespace doktorChess
 {
     public class bishopSquare : square
     {
@@ -10,7 +7,7 @@ namespace doktorChess
             type = pieceType.bishop;
         }
 
-        public override string getPieceNotation()
+        protected override string getPieceNotation()
         {
             return "b";
         }

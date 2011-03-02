@@ -13,22 +13,17 @@ namespace Tests
             // Generate a boardScorer and present it with a queen (ours), and two pawns
             // (enemy). Verify the resultant score as 8-2 = 6.
 
-            List<square> us = new List<square>
-                                  {
-                                      new queenSquare(new squarePos(1, 1), pieceColour.white)
-                                  };
+            Board ourboard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
 
-            List<square> them = new List<square>
-                                    {
-                                        new pawnSquare(new squarePos(3, 4), pieceColour.black),
-                                        new pawnSquare(new squarePos(3, 5), pieceColour.black)
-                                    };
+            ourboard.addPiece(pieceType.queen, pieceColour.white, 1, 1);
+            ourboard.addPiece(pieceType.pawn, pieceColour.black, 3, 4);
+            ourboard.addPiece(pieceType.pawn, pieceColour.black, 3, 5);
 
-            BoardScorer myscorer = new BoardScorer(null, us, them);
+            BoardScorer myscorer = new BoardScorer(ourboard, pieceColour.white, new scoreModifiers());
 
             // Check only material advantage
-            myscorer.danglingModifier = 0;
-            myscorer.materialModifier = 1;
+            myscorer.modifiers.danglingModifier = 0;
+            myscorer.modifiers.materialModifier = 1;
             Assert.AreEqual(8 - 2, myscorer.getScore());
         }
 
@@ -42,17 +37,15 @@ namespace Tests
             ourboard.addPiece(pieceType.king, pieceColour.black, 7, 7);
             ourboard.addPiece(pieceType.king, pieceColour.white, 5, 5);
 
-            BoardScorer whiteScorer = new BoardScorer(ourboard, pieceColour.white);
+            BoardScorer whiteScorer = new BoardScorer(ourboard, pieceColour.white, new scoreModifiers());
 
             // White's queen is dangling, as is blacks pawn.
-            int expected = whiteScorer.materialModifier * (8 - 1);
-            expected -= whiteScorer.danglingModifier * 8;
-            //expected += whiteScorer.danglingModifier * 1;
+            int expected = whiteScorer.modifiers.materialModifier * (8 - 1);
+            expected -= whiteScorer.modifiers.danglingModifier * 8;
+            expected += whiteScorer.modifiers.danglingModifier * 1;
 
             Assert.AreEqual(expected, whiteScorer.getScore());
-
         }
-
 
         [TestMethod]
         public void testFinishedGameScoreNoPieces()
@@ -63,11 +56,11 @@ namespace Tests
             ourboard.addPiece(pieceType.pawn, pieceColour.black, 1, 1);
 
             // position is lost for white..
-            BoardScorer whiteScorer = new BoardScorer(ourboard, pieceColour.white);
+            BoardScorer whiteScorer = new BoardScorer(ourboard, pieceColour.white, new scoreModifiers());
             Assert.AreEqual(BoardScorer.lowest, whiteScorer.getScore());
 
             // and won for black.
-            BoardScorer blackScorer = new BoardScorer(ourboard, pieceColour.black);
+            BoardScorer blackScorer = new BoardScorer(ourboard, pieceColour.black, new scoreModifiers());
             Assert.AreEqual(BoardScorer.highest, blackScorer.getScore());
         }
 
@@ -80,20 +73,20 @@ namespace Tests
             pawnAt0.addPiece(pieceType.pawn, pieceColour.black, 1, 0);
 
             // position is lost for white..
-            BoardScorer whiteScorer = new BoardScorer(pawnAt0, pieceColour.white);
+            BoardScorer whiteScorer = new BoardScorer(pawnAt0, pieceColour.white, new scoreModifiers());
             Assert.AreEqual(BoardScorer.lowest, whiteScorer.getScore());
 
             // and won for black.
-            BoardScorer blackScorer = new BoardScorer(pawnAt0, pieceColour.black);
+            BoardScorer blackScorer = new BoardScorer(pawnAt0, pieceColour.black, new scoreModifiers());
             Assert.AreEqual(BoardScorer.highest, blackScorer.getScore());
 
             // Now the white pawn at rank 7.
             Board pawnAt7 = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             pawnAt7.addPiece(pieceType.pawn, pieceColour.white, 1, 7);
 
-            whiteScorer = new BoardScorer(pawnAt7, pieceColour.white);
+            whiteScorer = new BoardScorer(pawnAt7, pieceColour.white, new scoreModifiers());
             Assert.AreEqual(BoardScorer.highest, whiteScorer.getScore());
-            blackScorer = new BoardScorer(pawnAt7, pieceColour.black);
+            blackScorer = new BoardScorer(pawnAt7, pieceColour.black, new scoreModifiers());
             Assert.AreEqual(BoardScorer.lowest, blackScorer.getScore());
         }
 
@@ -113,9 +106,9 @@ namespace Tests
             Assert.IsTrue(ourboard.getGameStatus(pieceColour.white) == gameStatus.drawn);
             Assert.IsTrue(ourboard.getGameStatus(pieceColour.black) != gameStatus.drawn);
 
-            BoardScorer whiteScorer = new BoardScorer(ourboard, pieceColour.white);
+            BoardScorer whiteScorer = new BoardScorer(ourboard, pieceColour.white, new scoreModifiers());
             Assert.AreEqual(0, whiteScorer.getScore());
-            BoardScorer blackScorer = new BoardScorer(ourboard, pieceColour.black);
+            BoardScorer blackScorer = new BoardScorer(ourboard, pieceColour.black, new scoreModifiers());
             Assert.AreNotEqual(0, blackScorer.getScore());
         }
     }
