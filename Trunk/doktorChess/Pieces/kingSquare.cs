@@ -40,9 +40,9 @@
             return possibleMoves;
         }
 
-        public override sizableArray<move> getCoveredSquares(Board parentBoard)
+        public override sizableArray<square> getCoveredSquares(Board parentBoard)
         {
-            sizableArray<move> toRet = new sizableArray<move>(8);
+            sizableArray<square> toRet = new sizableArray<square>(8);
 
             foreach (squarePosOffset potentialSquare in potentialSquares)
             {
@@ -50,7 +50,7 @@
                 int posY = position.y + potentialSquare.y;
 
                 if (IsOnBoard(potentialSquare.x, potentialSquare.y))
-                    toRet.Add(new move(this, parentBoard[posX, posY]));
+                    toRet.Add( parentBoard[posX, posY] );
             }
 
             return toRet;

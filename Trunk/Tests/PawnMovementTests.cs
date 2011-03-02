@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using doktorChess;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -285,8 +284,8 @@ namespace Tests
                 {
                     Assert.IsTrue(thisMove.srcPos.isSameSquareAs(ourPiece.position));
                     Assert.IsTrue(thisMove.dstPos.isSameSquareAs(enemyPiece.position));
-                    Assert.AreSame(thisMove.dstPos, enemyPiece.position);
-                    Assert.AreSame(thisMove.capturedSquare, enemyPiece);
+                    Assert.AreEqual(thisMove.dstPos, enemyPiece.position);
+                    Assert.AreEqual(thisMove.capturedSquare, enemyPiece);
 
                     if (captureFound)
                         throw new AssertFailedException("Multiple captures found, one expected");

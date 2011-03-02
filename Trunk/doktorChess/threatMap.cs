@@ -13,9 +13,9 @@ namespace doktorChess
         private readonly int[,] threats = new int[Board.sizeX,Board.sizeY];
 
         /// <summary>
-        /// 64 lists of pieces, each holding a list of squares which cover it
+        /// 64 lists of squarePos, each holding a list of squares which cover it
         /// </summary>
-        public readonly Dictionary<int, square>[,] piecesWhichThreatenSquare = new Dictionary<int, square>[Board.sizeX, Board.sizeY];
+        public readonly speedySquareList[,] piecesWhichThreatenSquare = new speedySquareList[Board.sizeX, Board.sizeY];
         private readonly Board _parentBoard;
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace doktorChess
                 for (int x = 0; x < Board.sizeX; x++)
                 {
                     // Spawn lists of pieces which threaten each square
-                    piecesWhichThreatenSquare[x, y] = new Dictionary<int, square>();
+                    piecesWhichThreatenSquare[x, y] = new speedySquareList();
                 }
             }
         }
@@ -52,11 +52,11 @@ namespace doktorChess
 
             // Find squares which threaten the square we are placing in to, and stash them in another
             // list
-            sizableArray<square> piecesToRecalc = new sizableArray<square>(piecesWhichThreatenSquare[x, y].Count);
-            piecesToRecalc.AddRange( piecesWhichThreatenSquare[x, y].Values );
+            sizableArray<int> piecesToRecalc = new sizableArray<int>(piecesWhichThreatenSquare[x, y].Count);
+            piecesToRecalc.AddRange( piecesWhichThreatenSquare[x, y] );
 
             // Now, add the new pieces threatened squares
-            sizableArray<move> potentialMoves = _parentBoard[x, y].getCoveredSquares(_parentBoard);
+            sizableArray<square> potentialDestSquares = _parentBoard[x, y].getCoveredSquares(_parentBoard);
 
             // Since our threat map is always stored from white's viewpoint, we should add or subtract
             // depending if threatened pieces are white or black.
@@ -64,28 +64,25 @@ namespace doktorChess
 
             // Now cycle through each move and apply them to our map, and to the piece.
             //_parentBoard[x, y].coveredSquares.Clear();
-            foreach (move potentialMove in potentialMoves)
+            foreach (square potentialDstSq in potentialDestSquares)
             {
-                if (potentialMove == null)
-                    break;
-
                 // Add the threatened squares to our threat map
-                this[potentialMove.dstPos] += mapAddition;
+                this[potentialDstSq.position] += mapAddition;
 
+                speedySquareList piecesWhichThreatenThisSq = piecesWhichThreatenSquare[potentialDstSq.position.x, potentialDstSq.position.y];
                 // update our list of pieces threatening each square
-                if (piecesWhichThreatenSquare[potentialMove.dstPos.x, potentialMove.dstPos.y].ContainsKey(x + (y * Board.sizeX)))
-                    throw new AssertFailedException("Duplicate threatened square " + potentialMove.dstPos.ToString());
-
-                piecesWhichThreatenSquare[potentialMove.dstPos.x, potentialMove.dstPos.y].Add( x + (y * Board.sizeX), _parentBoard[x, y]);
+                piecesWhichThreatenThisSq[squarePos.flatten(x, y)] = true;
 
                 // and our list of squares covered by piece
-                _parentBoard[x, y].coveredSquares.Add(potentialMove.dstPos.flatten());
+                _parentBoard[x, y].coveredSquares[potentialDstSq.position.flatten()] = true;
             }
 
             // and then recalculate pieces that need it. To save time, we don't re-evaluate everything-
             // we just remove extra squares based on the piece.
-            foreach (square toRecalc in piecesToRecalc)
+            foreach (int toRecalcPos in piecesToRecalc)
             {
+                square toRecalc = _parentBoard[toRecalcPos];
+
                 int toRecalcAddition = toRecalc.colour == pieceColour.white ? 1 : -1;
 
                 // Knights can never be blocked from accessing squares.
@@ -143,8 +140,10 @@ namespace doktorChess
 
                     this[toRemoveSqPos] -= toRecalcAddition;
 
-                    piecesWhichThreatenSquare[removex, removey].Remove(toRecalc.position.x + (toRecalc.position.y * Board.sizeX));
-                    toRecalc.coveredSquares.Remove( toRemoveSqPos.flatten() );
+                    speedySquareList piecesWhichThreatenThisSq = piecesWhichThreatenSquare[removex, removey];
+
+                    piecesWhichThreatenThisSq[toRecalc.position] = false;
+                    toRecalc.coveredSquares[ toRemoveSqPos ] = false;
 
                     //Debug.WriteLine("Removed now-blocked " + pos);
 
@@ -169,23 +168,26 @@ namespace doktorChess
         {
             int posDirection = toRemove.colour == pieceColour.white ? 1 : -1;
 
-            // Remove the actual piece, and what it threatens
+            // Remove the actual piece, and what it threatens.
             foreach (int threatenedSquareFlat in toRemove.coveredSquares )
             {
                 squarePos threatenedSquare = squarePos.unflatten(threatenedSquareFlat);
+
                 this[threatenedSquare] -= posDirection;
 
                 // The removed piece no longer threatens this square.
-                piecesWhichThreatenSquare[threatenedSquare.x, threatenedSquare.y].Remove( toRemove.position.flatten() );
+                piecesWhichThreatenSquare[threatenedSquare.x, threatenedSquare.y][toRemove.position] = false;
             }
             toRemove.coveredSquares.Clear();
             
             // and now force a re-evaluation of things that threatened this square.
-            sizableArray<square> piecesToRecalc = new sizableArray<square>(piecesWhichThreatenSquare[toRemove.position.x, toRemove.position.y].Count);
-            piecesToRecalc.AddRange(piecesWhichThreatenSquare[toRemove.position.x, toRemove.position.y].Values);
+            sizableArray<int> piecesToRecalc = new sizableArray<int>(piecesWhichThreatenSquare[toRemove.position.x, toRemove.position.y].Count);
+            piecesToRecalc.AddRange(piecesWhichThreatenSquare[toRemove.position.x, toRemove.position.y]);
 
-            foreach (square toRecalc in piecesToRecalc)
+            foreach (int toRecalcFlat in piecesToRecalc)
             {
+                square toRecalc = _parentBoard[squarePos.unflatten(toRecalcFlat)];
+
                 // Knights can never be blocked from accessing squares.
                 if (toRecalc.type == pieceType.knight)
                     continue;
@@ -241,8 +243,8 @@ namespace doktorChess
                     squarePos pos = new squarePos(removex, removey);
 
                     this[pos] += toRecalcAddition;
-                    piecesWhichThreatenSquare[removex, removey].Add(toRecalc.position.flatten(), toRecalc );
-                    toRecalc.coveredSquares.Add( pos.flatten() );
+                    piecesWhichThreatenSquare[removex, removey][toRecalc.position] = true;
+                    toRecalc.coveredSquares[pos.flatten()] = true;
 
                     //Debug.WriteLine("Added discovered " + pos);
 
@@ -277,7 +279,7 @@ namespace doktorChess
             // Return true if the square is covered by at least one enemy piece. Ignore if we are 
             // covering it or not.
             pieceColour otherSide = Board.getOtherSide(sideToExamine);
-            return piecesWhichThreatenSquare[squareToCheck.position.x, squareToCheck.position.y].Any(squareKVP => squareKVP.Value.colour == otherSide);
+            return piecesWhichThreatenSquare[squareToCheck.position.x, squareToCheck.position.y].Any(sp => _parentBoard[squarePos.unflatten(sp)].colour == otherSide);
         }
 
         private void sanityCheck()
@@ -290,14 +292,12 @@ namespace doktorChess
                 for (int x = 0; x < Board.sizeX; x++)
                 {
                     int calculated = 0;
-                    foreach (KeyValuePair<int, square> threatKVP in piecesWhichThreatenSquare[x, y])
+                    foreach (int flatSqPos in piecesWhichThreatenSquare[x, y])
                     {
-                        if (threatKVP.Key != threatKVP.Value.position.flatten())
-                            throw new AssertFailedException("square threat entry has incorrect hash");
-
-                        if (threatKVP.Value.colour == pieceColour.white)
+                        square sq = _parentBoard[squarePos.unflatten(flatSqPos)];
+                        if (sq.colour == pieceColour.white)
                             calculated++;
-                        else if (threatKVP.Value.colour == pieceColour.black)
+                        else if (sq.colour == pieceColour.black)
                             calculated--;
                         else
                             throw new AssertFailedException("square threat has strange colour");

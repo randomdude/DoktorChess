@@ -78,7 +78,7 @@ namespace Tests
             foreach (squarePos thisPos in expectedPos)
                 expectedmoves.Add(new move((square) queenie, ourBoard[thisPos]));
 
-            sizableArray<move> possibleMoves = queenie.getMovesForVector(null, ourBoard, dir, false);
+            sizableArray<move> possibleMoves = queenie.getMovesForVector(null, ourBoard, dir);
 
             testListsAreOfSameMoves(expectedmoves, possibleMoves);
 

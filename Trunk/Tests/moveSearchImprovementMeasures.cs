@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using doktorChess;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -86,7 +87,7 @@ namespace Tests
             boardSearchConfig configThreatMap = new boardSearchConfig() { useAlphaBeta = true, killerHeuristic = true, useThreatMap = true };
             boardSearchConfig configNonThreatMap = new boardSearchConfig() { useAlphaBeta = true, killerHeuristic = true, useThreatMap = false };
 
-            for (int depth = 0; depth < MaxDepthForAB; depth++)
+            for (int depth = MaxDepthForAB - 1; depth < MaxDepthForAB; depth++)
             {
                 configThreatMap.searchDepth = depth;
                 configNonThreatMap.searchDepth = depth;

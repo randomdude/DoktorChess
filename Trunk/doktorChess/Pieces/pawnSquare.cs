@@ -15,7 +15,7 @@
 
         public override sizableArray<move> getPossibleMoves(Board onThis)
         {
-            sizableArray<move> toRet = new sizableArray<move>(10);
+            sizableArray<move> toRet = new sizableArray<move>(40);
 
             int direction;
             if (colour == pieceColour.white)
@@ -129,22 +129,22 @@
             return false;
         }
 
-        public override sizableArray<move> getCoveredSquares(Board parentBoard)
+        public override sizableArray<square> getCoveredSquares(Board parentBoard)
         {
-            sizableArray<move> toRet = new sizableArray<move>(2);
+            sizableArray<square> toRet = new sizableArray<square>(2);
             int direction = (colour == pieceColour.white) ? 1 : -1;
 
             if ((position.y + direction < Board.sizeY) &&
-                           (position.y + direction > -1))
+                (position.y + direction > -1))
             {
                 // Check the two diagonals
                 if (position.x > 0)
                 {
-                    toRet.Add(new move( this, parentBoard[position.up(direction).leftOne()]));
+                    toRet.Add( parentBoard[position.up(direction).leftOne()] );
                 }
                 if (position.x < Board.sizeX - 1)
                 {
-                    toRet.Add(new move( this, parentBoard[position.up(direction).rightOne()]));
+                    toRet.Add( parentBoard[position.up(direction).rightOne()] );
                 }
             }
             return toRet;

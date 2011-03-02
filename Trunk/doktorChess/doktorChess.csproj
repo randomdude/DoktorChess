@@ -61,6 +61,8 @@
     <Compile Include="IEnableableThreatMap.cs" />
     <Compile Include="killerMoveStore.cs" />
     <Compile Include="moveSearchStats.cs" />
+    <Compile Include="speedySquareListEnumerator.cs" />
+    <Compile Include="speedySquareList.cs" />
     <Compile Include="sizableArray.cs" />
     <Compile Include="squarePosOffset.cs" />
     <Compile Include="serialisationClasses\minimalMove.cs" />

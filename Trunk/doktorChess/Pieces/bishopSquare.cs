@@ -16,22 +16,22 @@
         {
             sizableArray<move> toRet = new sizableArray<move>(20);
 
-            getMovesForVector(toRet, onThis, vectorDirection.leftup, false);
-            getMovesForVector(toRet, onThis, vectorDirection.leftdown, false);
-            getMovesForVector(toRet, onThis, vectorDirection.rightup, false);
-            getMovesForVector(toRet, onThis, vectorDirection.rightdown, false);
+            getMovesForVector(toRet, onThis, vectorDirection.leftup);
+            getMovesForVector(toRet, onThis, vectorDirection.leftdown);
+            getMovesForVector(toRet, onThis, vectorDirection.rightup);
+            getMovesForVector(toRet, onThis, vectorDirection.rightdown);
 
             return toRet;
         }
 
-        public override sizableArray<move> getCoveredSquares(Board onThis)
+        public override sizableArray<square> getCoveredSquares(Board onThis)
         {
-            sizableArray<move> toRet = new sizableArray<move>(20);
+            sizableArray<square> toRet = new sizableArray<square>(20);
 
-            getMovesForVector(toRet, onThis, vectorDirection.leftup, true);
-            getMovesForVector(toRet, onThis, vectorDirection.leftdown, true);
-            getMovesForVector(toRet, onThis, vectorDirection.rightup, true);
-            getMovesForVector(toRet, onThis, vectorDirection.rightdown, true);
+            getSquaresCoveredForVector(toRet, onThis, vectorDirection.leftup);
+            getSquaresCoveredForVector(toRet, onThis, vectorDirection.leftdown);
+            getSquaresCoveredForVector(toRet, onThis, vectorDirection.rightup);
+            getSquaresCoveredForVector(toRet, onThis, vectorDirection.rightdown);
 
             return toRet;
         }

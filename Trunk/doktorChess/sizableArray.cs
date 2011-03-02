@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace doktorChess
 {
-    public class sizableArray<T> : IEnumerable where T : class
+    public class sizableArray<T> : IEnumerable<T>
     {
         private readonly T[] elements;
 
@@ -45,6 +46,11 @@ namespace doktorChess
                 Add(thisToAdd);
         }
 
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return new sizableArrayEnumerator<T>(this);
+        }
+
         public IEnumerator GetEnumerator()
         {
             return new sizableArrayEnumerator<T>(this);
@@ -52,9 +58,16 @@ namespace doktorChess
 
         public bool Exists(Predicate<T> match)
         {
-            T[] nonNulls = Array.FindAll(elements, a => a != null);
+            if (typeof(T).IsValueType)
+            {
+                T[] nonNulls = Array.FindAll(elements, a => a != null);
 
-            return (Array.Exists(nonNulls, match));
+                return (Array.Exists(nonNulls, match));
+            }
+            else
+            {
+                return (Array.Exists(elements, match));                
+            }
         }
 
         public void bringToPosition(int posToMove, int newPos)
@@ -70,7 +83,7 @@ namespace doktorChess
         }
     }
 
-    public class sizableArrayEnumerator<T> : IEnumerator where T : class
+    public class sizableArrayEnumerator<T> : IEnumerator<T>
     {
         private readonly sizableArray<T> _parent;
         private int i = -1;
@@ -94,9 +107,16 @@ namespace doktorChess
             i = -1;
         }
 
+        T IEnumerator<T>.Current
+        {
+            get { return _parent[i]; }
+        }
+
         public object Current
         {
             get { return _parent[i]; }
         }
+
+        public void Dispose() { }
     }
 }

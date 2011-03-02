@@ -24,8 +24,8 @@ namespace doktorChess
         public pieceColour colour { get; private set; }
         public squarePos position { get; set; }
 
-        // flattened dst to dst hashtable
-        public readonly List<int> coveredSquares = new List<int>(20);
+        // This array of bools contains a bool for each square, set to 'true' if it is covered by this piece.
+        public readonly speedySquareList coveredSquares = new speedySquareList();
 
         public static square makeSquare(pieceType newType, pieceColour newColour, squarePos newPos)
         {
@@ -109,93 +109,17 @@ namespace doktorChess
         /// <param name="addTo"></param>
         /// <param name="onThis">The board to move on</param>
         /// <param name="dir">The vectorDirection to move in</param>
-        /// <param name="asCovering"></param>
         /// <returns>A List&lt;move&gt; of moves</returns>
-        public sizableArray<move> getMovesForVector(sizableArray<move> addTo, Board onThis, vectorDirection dir, bool asCovering)
+        public sizableArray<move> getMovesForVector(sizableArray<move> addTo, Board onThis, vectorDirection dir)
         {
             if (addTo == null)
                 addTo = new sizableArray<move>(8);
 
-            int startX;
-            int finishX;
-            int startY;
-            int finishY;
-            int directionX;
-            int directionY;
+            loopConfig lcfg = new loopConfig(position, dir);
 
-            switch (dir)
-            {
-                case vectorDirection.left:
-                    startX = position.x - 1;
-                    finishX = -1;
-                    startY = position.y;
-                    finishY = startY + 1;
-                    directionX = -1;
-                    directionY = 0;
-                    break;
-                case vectorDirection.right:
-                    startX = position.x + 1;
-                    finishX = Board.sizeX;
-                    startY = position.y;
-                    finishY = startY + 1;
-                    directionX = +1;
-                    directionY = 0;
-                    break;
-                case vectorDirection.up:
-                    startY = position.y + 1;
-                    finishY = Board.sizeY;
-                    startX = position.x;
-                    finishX = position.x + 1;
-                    directionX = 0;
-                    directionY = +1;
-                    break;
-                case vectorDirection.down:
-                    startY = position.y - 1;
-                    finishY = -1;
-                    startX = position.x;
-                    finishX = position.x+1;
-                    directionX = 0;
-                    directionY = -1;
-                    break;
-                case vectorDirection.leftup:
-                    startY = position.y + 1;
-                    startX = position.x - 1;
-                    finishY = Board.sizeY;
-                    finishX = -1;
-                    directionY = +1;
-                    directionX = -1;
-                    break;
-                case vectorDirection.leftdown:
-                    startY = position.y - 1;
-                    startX = position.x - 1;
-                    finishY = -1;
-                    finishX = -1;
-                    directionY = -1;
-                    directionX = -1;
-                    break;
-                case vectorDirection.rightup:
-                    startY = position.y + 1;
-                    startX = position.x + 1;
-                    finishY = Board.sizeY;
-                    finishX = Board.sizeX;
-                    directionY = +1;
-                    directionX = +1;
-                    break;
-                case vectorDirection.rightdown:
-                    startY = position.y - 1;
-                    startX = position.x + 1;
-                    finishY = -1;
-                    finishX = Board.sizeX;
-                    directionY = -1;
-                    directionX = +1;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("dir");
-            }
-
-            int x = startX;
-            int y = startY;
-            while ((x != finishX) && (y != finishY))
+            int x = lcfg.startX;
+            int y = lcfg.startY;
+            while ((x != lcfg.finishX) && (y != lcfg.finishY))
             {
                 squarePos sqPos = new squarePos(x, y);
 
@@ -206,16 +130,7 @@ namespace doktorChess
                 }
                 else
                 {
-                    if (onThis[sqPos].colour == colour )
-                    {
-                        if (asCovering)
-                        {
-                            // the square is occupied by one of our pieces, so we are covering it, 
-                            // but we cannot go any further.
-                            addTo.Add(new move(onThis[position], onThis[sqPos]));
-                        }
-                    }
-                    else
+                    if (onThis[sqPos].colour != colour )
                     {
                         // the square is occupied by an enemy piece. we can move to it, 
                         // but no further.
@@ -224,8 +139,40 @@ namespace doktorChess
                     break;
                 }
 
-                x += directionX;
-                y += directionY;
+                x += lcfg.directionX;
+                y += lcfg.directionY;
+            }
+
+            return addTo;
+        }
+
+        public sizableArray<square> getSquaresCoveredForVector(sizableArray<square> addTo, Board onThis, vectorDirection dir)
+        {
+            if (addTo == null)
+                addTo = new sizableArray<square>(8);
+
+            loopConfig lcfg = new loopConfig(position, dir);
+
+            int x = lcfg.startX;
+            int y = lcfg.startY;
+            while ((x != lcfg.finishX) && (y != lcfg.finishY))
+            {
+                squarePos sqPos = new squarePos(x, y);
+
+                // If the square is empty, we can move to it..
+                if (onThis[sqPos].type == pieceType.none)
+                {
+                    addTo.Add( onThis[sqPos] );
+                }
+                else
+                {
+                    // the square is occupied by some piece. We are covering it, but we cannot go any further.
+                    addTo.Add( onThis[sqPos] );
+                    break;
+                }
+
+                x += lcfg.directionX;
+                y += lcfg.directionY;
             }
 
             return addTo;
@@ -277,9 +224,93 @@ namespace doktorChess
                        offY < 0));
         }
 
-        public virtual sizableArray<move> getCoveredSquares(Board parentBoard)
+        public virtual sizableArray<square> getCoveredSquares(Board parentBoard)
         {
-            return getPossibleMoves(parentBoard);
+            return new sizableArray<square>(0);
+        }
+    }
+
+    public class loopConfig
+    {
+        public int startX;
+        public int startY;
+        public int finishX;
+        public int finishY;
+        public int directionX;
+        public int directionY;
+
+        public loopConfig(squarePos position, vectorDirection dir)
+        {
+            switch (dir)
+            {
+                case vectorDirection.left:
+                    startX = position.x - 1;
+                    finishX = -1;
+                    startY = position.y;
+                    finishY = startY + 1;
+                    directionX = -1;
+                    directionY = 0;
+                    break;
+                case vectorDirection.right:
+                    startX = position.x + 1;
+                    finishX = Board.sizeX;
+                    startY = position.y;
+                    finishY = startY + 1;
+                    directionX = +1;
+                    directionY = 0;
+                    break;
+                case vectorDirection.up:
+                    startY = position.y + 1;
+                    finishY = Board.sizeY;
+                    startX = position.x;
+                    finishX = position.x + 1;
+                    directionX = 0;
+                    directionY = +1;
+                    break;
+                case vectorDirection.down:
+                    startY = position.y - 1;
+                    finishY = -1;
+                    startX = position.x;
+                    finishX = position.x + 1;
+                    directionX = 0;
+                    directionY = -1;
+                    break;
+                case vectorDirection.leftup:
+                    startY = position.y + 1;
+                    startX = position.x - 1;
+                    finishY = Board.sizeY;
+                    finishX = -1;
+                    directionY = +1;
+                    directionX = -1;
+                    break;
+                case vectorDirection.leftdown:
+                    startY = position.y - 1;
+                    startX = position.x - 1;
+                    finishY = -1;
+                    finishX = -1;
+                    directionY = -1;
+                    directionX = -1;
+                    break;
+                case vectorDirection.rightup:
+                    startY = position.y + 1;
+                    startX = position.x + 1;
+                    finishY = Board.sizeY;
+                    finishX = Board.sizeX;
+                    directionY = +1;
+                    directionX = +1;
+                    break;
+                case vectorDirection.rightdown:
+                    startY = position.y - 1;
+                    startX = position.x + 1;
+                    finishY = -1;
+                    finishX = Board.sizeX;
+                    directionY = -1;
+                    directionX = +1;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("dir");
+            }
+            
         }
     }
 }

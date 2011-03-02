@@ -49,7 +49,8 @@ namespace doktorChess
                 capturedSquarePos = dst.position;
             }
 
-            findCastlingRookPositions();
+            if (src.type == pieceType.king)
+                findCastlingRookPositions();
         }
 
         public move(square src, square dst, square captured)
@@ -67,7 +68,8 @@ namespace doktorChess
                 capturedSquarePos = captured.position;
             }
 
-            findCastlingRookPositions();
+            if (src.type == pieceType.king)
+                findCastlingRookPositions();
         }
 
         public move(square src, square dst, pieceType toPromoteTo)
@@ -93,7 +95,8 @@ namespace doktorChess
                 capturedSquarePos = dst.position;
             }
 
-            findCastlingRookPositions();
+            if (src.type == pieceType.king)
+                findCastlingRookPositions();
         }
 
         /// <summary>

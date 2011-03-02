@@ -7,13 +7,6 @@ namespace doktorChess
         public readonly int x;
         public readonly int y;
 
-// ReSharper disable UnusedMember.Global
-        /// <summary>
-        /// This parameterless constructor is only to be called by deserialisation methods! 
-        /// </summary>
-        public squarePos() { }
-// ReSharper restore UnusedMember.Global
-
         public squarePos(int newX, int newY)
         {
             if (newX+1 > Board.sizeX || newY+1 > Board.sizeY)
@@ -139,6 +132,6 @@ namespace doktorChess
         {
             return x + ", " + y;
         }
-
     }
+
 }

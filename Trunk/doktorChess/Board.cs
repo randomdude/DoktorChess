@@ -90,6 +90,22 @@ namespace doktorChess
 // ReSharper restore UnusedMember.Local
         }
 
+        public square this[int flatPos]
+        {
+// ReSharper disable UnusedMember.Local
+            get
+            {
+                squarePos pos = squarePos.unflatten(flatPos);
+                return _squares[pos.x, pos.y]; 
+            }
+            private set 
+            {
+                squarePos pos = squarePos.unflatten(flatPos);
+                _squares[pos.x, pos.y] = value; 
+            }
+// ReSharper restore UnusedMember.Local
+        }
+
         public square this[int x, int y]
         {
 // ReSharper disable UnusedMember.Local
@@ -262,9 +278,11 @@ namespace doktorChess
 
         private void addNewPieceToArrays(square newSq)
         {
+#if DEBUG
             if (whitePieceSquares.Contains(newSq) ||
                 blackPieceSquares.Contains(newSq))
                 throw new Exception("Duplicate square");
+#endif
 
             switch (newSq.colour)
             {
@@ -390,7 +408,15 @@ namespace doktorChess
                 return myCol == pieceColour.black ? gameStatus.lost : gameStatus.won;
 
             // If the current player cannot move, then the game is a draw.
-            bool movesFound = myPieces.Any(a => a.getPossibleMoves(this).Length != 0);
+            bool movesFound = false;
+            foreach (square myPiece in myPieces)
+            {
+                if (myPiece.getPossibleMoves(this).Length != 0)
+                {
+                    movesFound = true;
+                    break;
+                }
+            }
 
             if (!movesFound)
                 return gameStatus.drawn;

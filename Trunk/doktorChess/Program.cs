@@ -11,7 +11,7 @@ namespace doktorChess
             //Board myBoard = Board.makeQueenAndPawnsStartPosition();
             boardSearchConfig config = new boardSearchConfig();
             config.searchDepth = 4;
-            config.checkLots = true;
+            //config.checkLots = true;
             Board myBoard = Board.makeNormalStartPosition(config);
 
             pieceColour toPlay = pieceColour.white;
