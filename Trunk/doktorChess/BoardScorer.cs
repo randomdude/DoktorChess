@@ -18,8 +18,8 @@ namespace doktorChess
         public readonly scoreModifiers modifiers;
 
         // Don't use min and maxval, because they are used by searches. This keeps things clean.
-        public const int lowest = int.MinValue + 1;
-        public const int highest = int.MaxValue - 1;
+        public const int lowest = int.MinValue + 1000;
+        public const int highest = int.MaxValue - 1000;
      
         public BoardScorer(Board toScore, pieceColour newViewpoint, scoreModifiers newModifiers)
         {

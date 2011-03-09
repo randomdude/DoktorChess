@@ -63,13 +63,15 @@
             // * A rook is on the same rank as the king and has not moved
             // * The squares between the king and the rook are empty
             // * The first two spaces between the king and the rook are not threatened by anything (the rook can move through 'check' but the king cannot)
+            // * The partnering rook has not been flagged as uncastlable
 
             // If we are castling kingside, examine row 7 - otherwise, row 0.
             square potentialRookSquare = theBoard[ kingSide ? 7 : 0 , position.y];
 
             if (movedCount == 0                                 // King has not moved
                 && potentialRookSquare.type == pieceType.rook   // Rook is present
-                && potentialRookSquare.movedCount == 0)         // Rook has not moved
+                && potentialRookSquare.movedCount == 0          // Rook has not moved
+                && potentialRookSquare.excludeFromCastling == false )
             {
                 // Verify that king spaces are free
                 int startx;

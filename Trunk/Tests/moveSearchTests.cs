@@ -34,7 +34,7 @@ namespace Tests
             // the following move sequence being considered:
             // D3 QxD3 D4xQ
             // and thus needs a search depth that deep or more.
-            lineAndScore bestLine = ourBoard.findBestMove(pieceColour.white);
+            lineAndScore bestLine = ourBoard.findBestMove();
 
             for (int i = 0; i < bestLine.line.Length; i++)
             {
@@ -61,7 +61,7 @@ namespace Tests
 
             // We are white, and it is white's move. Analyze a situation in which pushing
             // a pawn will result in a win. Ensure that the AI does not push the wrong pawn.
-            lineAndScore bestLine = ourBoard.findBestMove(pieceColour.white);
+            lineAndScore bestLine = ourBoard.findBestMove();
 
             for (int i = 0; i < bestLine.line.Length; i++)
             {
@@ -76,23 +76,23 @@ namespace Tests
 
         [Ignore]
         [TestMethod]
-        public void testSpecificPosition()
+        public void testThatKingWillNotMoveInToCheck()
         {
             boardSearchConfig config = boardSearchConfig.getDebugConfig();
-            config.searchDepth = 3;
-            // Test a  specific position which is giving me trouble.
-            Board ourboard = new Board(gameType.queenAndPawns, config);
+            config.searchDepth = 0;
+            Board ourBoard = new Board(gameType.normal, config);
+            square blackKing = ourBoard.addPiece(pieceType.king, pieceColour.black, 0, 0);
+            ourBoard.addPiece(pieceType.rook, pieceColour.white, 1, 7);
+            ourBoard.addPiece(pieceType.king, pieceColour.white, 7, 7);
 
-            ourboard.addPiece(pieceType.pawn, pieceColour.white, 0, 4).movedCount++;
-            ourboard.addPiece(pieceType.pawn, pieceColour.white, 1, 1).movedCount++;
-            ourboard.addPiece(pieceType.pawn, pieceColour.white, 3, 5).movedCount++;
+            // Ensure that black cannot move in to the rook's line of fire.
+            sizableArray<move> moves = blackKing.getPossibleMoves(ourBoard);
 
-            ourboard.addPiece(pieceType.queen, pieceColour.black, 3, 2).movedCount++;
+            foreach (move thisMove in moves)
+                Assert.IsTrue(thisMove.dstPos.x == 0, "King moved in to check");
 
-            lineAndScore best = ourboard.findBestMove(pieceColour.black);
-
-            Debug.WriteLine("Best line:");
-            Debug.WriteLine(best.ToString());
+            Assert.IsTrue(moves.Length == 1);
         }
+
     }
 }

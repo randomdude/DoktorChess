@@ -108,7 +108,7 @@ namespace Tests
         {
             Board ourBoard = Board.makeNormalStartPosition(searchConfig);
 
-            ourBoard.findBestMove(pieceColour.white);
+            ourBoard.findBestMove();
 
             return ourBoard.stats;
         }

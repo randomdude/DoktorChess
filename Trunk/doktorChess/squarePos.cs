@@ -7,6 +7,9 @@ namespace doktorChess
         public readonly int x;
         public readonly int y;
 
+        // Used by deserialisation code.
+        public squarePos() { }
+
         public squarePos(int newX, int newY)
         {
             if (newX+1 > Board.sizeX || newY+1 > Board.sizeY)

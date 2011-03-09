@@ -142,6 +142,29 @@ namespace Tests
         }
 
         [TestMethod]
+        public void testThreatMapDeep_discoveredPromotion()
+        {
+            Board ourBoard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
+            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 3, 6);
+            square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 3, 7);
+            square ourRook = ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 7);
+
+            move ourMove = new move(ourPawn, ourBoard[3, 7], pieceType.queen);
+            ourBoard.doMove(ourMove);
+
+            // Observe the squares to the right of our pawn - they should not be accessible to the rook
+            for (int x = 4; x < 7; x++)
+            {
+                if (ourBoard.getCoverLevel(new squarePos(x, 7), pieceColour.white) != 1)
+                    throw new AssertFailedException("Threatmap did not update cover levels correctly");
+            }
+
+            // the pawn itself is protected once.
+            if (ourBoard.getCoverLevel(new squarePos(3, 7), pieceColour.white) != 1)
+                throw new AssertFailedException("Threatmap did not update cover levels of promoted piece correctly");
+        }
+
+        [TestMethod]
         public void testThreatMapDeep_discoveredCapture()
         {
             Board ourBoard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());

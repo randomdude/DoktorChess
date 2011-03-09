@@ -58,7 +58,7 @@ namespace doktorChess
 
         public bool Exists(Predicate<T> match)
         {
-            if (typeof(T).IsValueType)
+            if (!typeof(T).IsValueType)
             {
                 T[] nonNulls = Array.FindAll(elements, a => a != null);
 

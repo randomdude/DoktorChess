@@ -81,7 +81,7 @@ namespace WebFrontend
             }
 
             // Now, find our best move, and play it
-            lineAndScore bestLine = theBoard.findBestMove(computerCol);
+            lineAndScore bestLine = theBoard.findBestMove();
             theBoard.advanceKillerTables();
             move bestMove = bestLine.line[0];
             theBoard.doMove(bestMove);

@@ -14,7 +14,8 @@ namespace WebFrontend
                 // Initialise a new board
                 boardSearchConfig config = new boardSearchConfig();
                 config.searchDepth = 4;
-                Board newBoard = Board.makeNormalStartPosition(config);
+                Board newBoard = Board.makeNormalFromFEN(@"8/8/8/8/8/8/4KP2/R1Qn3k w - - 0 0", config);
+                //Board.makeNormalStartPosition(config);
 
                 Session["playerCol"] = pieceColour.white;
                 Session["board"] = newBoard;

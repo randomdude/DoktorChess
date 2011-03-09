@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using doktorChess;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -72,22 +73,15 @@ namespace Tests
             Board pawnAt0 = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             pawnAt0.addPiece(pieceType.pawn, pieceColour.black, 1, 0);
 
-            // position is lost for white..
-            BoardScorer whiteScorer = new BoardScorer(pawnAt0, pieceColour.white, new scoreModifiers());
-            Assert.AreEqual(BoardScorer.lowest, whiteScorer.getScore());
-
-            // and won for black.
-            BoardScorer blackScorer = new BoardScorer(pawnAt0, pieceColour.black, new scoreModifiers());
-            Assert.AreEqual(BoardScorer.highest, blackScorer.getScore());
+            // Should be a black win.
+            verifyWonForWhite(pawnAt0, pieceColour.black);
 
             // Now the white pawn at rank 7.
             Board pawnAt7 = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             pawnAt7.addPiece(pieceType.pawn, pieceColour.white, 1, 7);
 
-            whiteScorer = new BoardScorer(pawnAt7, pieceColour.white, new scoreModifiers());
-            Assert.AreEqual(BoardScorer.highest, whiteScorer.getScore());
-            blackScorer = new BoardScorer(pawnAt7, pieceColour.black, new scoreModifiers());
-            Assert.AreEqual(BoardScorer.lowest, blackScorer.getScore());
+            // Should be a white win.
+            verifyWonForWhite(pawnAt7, pieceColour.white);
         }
 
         [TestMethod]
@@ -104,12 +98,69 @@ namespace Tests
             ourboard.addPiece(pieceType.pawn, pieceColour.black, 4, 4);
 
             Assert.IsTrue(ourboard.getGameStatus(pieceColour.white) == gameStatus.drawn);
-            Assert.IsTrue(ourboard.getGameStatus(pieceColour.black) != gameStatus.drawn);
+            Assert.IsTrue(ourboard.getGameStatus(pieceColour.black) == gameStatus.drawn);
 
             BoardScorer whiteScorer = new BoardScorer(ourboard, pieceColour.white, new scoreModifiers());
             Assert.AreEqual(0, whiteScorer.getScore());
             BoardScorer blackScorer = new BoardScorer(ourboard, pieceColour.black, new scoreModifiers());
-            Assert.AreNotEqual(0, blackScorer.getScore());
+            Assert.AreEqual(0, blackScorer.getScore());
+        }
+
+        [TestMethod]
+        public void testFinishedGameScoreStalemate_example()
+        {
+            // Specific situation that was broken. It's black-to-play stalemate.
+            Board ourboard = Board.makeNormalFromFEN("5B2/6P1/8/1p6/1N6/kP6/2K5/8 b - - 0 0",
+                                                     boardSearchConfig.getDebugConfig());
+
+            Assert.IsTrue(ourboard.getGameStatus(pieceColour.white) == gameStatus.drawn);
+            Assert.IsTrue(ourboard.getGameStatus(pieceColour.black) == gameStatus.drawn);
+
+            BoardScorer whiteScorer = new BoardScorer(ourboard, pieceColour.white, new scoreModifiers());
+            Assert.AreEqual(0, whiteScorer.getScore());
+            BoardScorer blackScorer = new BoardScorer(ourboard, pieceColour.black, new scoreModifiers());
+            Assert.AreEqual(0, blackScorer.getScore());
+        }
+
+
+        [TestMethod]
+        public void testFinishedGameScore_example1()
+        {
+            // This specific situation was being mis-detected as not a win, so here's a unit test to sort it out.
+            testFinishedGameScore_example(@"8/8/8/8/8/8/4KPk1/R6Q b - - 0 1");
+        }
+
+        [TestMethod]
+        public void testFinishedGameScore_example2()
+        {
+            // This specific situation was also being mis-detected as not a win, so here's a unit test to sort it out.
+            testFinishedGameScore_example(@"R6k/6rp/5B2/8/8/8/7P/7K b - - 0 1");
+        }
+        
+        public void testFinishedGameScore_example(string toTestFEN)
+        {
+            // Verify a situation is a win for white from a FEN.
+            Board ourBoard = Board.makeNormalFromFEN(toTestFEN, new boardSearchConfig());
+
+            // Game should be won for white and lost for black.
+            verifyWonForWhite(ourBoard, pieceColour.white);
+        }
+
+        private void verifyWonForWhite(Board ourBoard, pieceColour wonCol)
+        {
+            pieceColour lostCol = Board.getOtherSide(wonCol);
+
+            // The position should be won/lost for white/black, respectively
+            Assert.IsTrue(ourBoard.getGameStatus(wonCol) == gameStatus.won);
+            Assert.IsTrue(ourBoard.getGameStatus(lostCol) == gameStatus.lost);
+
+            // and this should be reflected in the scores
+            BoardScorer whiteScorer = new BoardScorer(ourBoard, wonCol, new scoreModifiers());
+            Assert.AreEqual(BoardScorer.highest, whiteScorer.getScore());
+
+            // and won for black.
+            BoardScorer blackScorer = new BoardScorer(ourBoard, lostCol, new scoreModifiers());
+            Assert.AreEqual(BoardScorer.lowest, blackScorer.getScore());            
         }
     }
 }

@@ -55,12 +55,16 @@
     <Compile Include="Board.cs" />
     <Compile Include="BoardScorer.cs" />
     <Compile Include="boardSearchConfig.cs" />
+    <Compile Include="chessGame.cs" />
+    <Compile Include="ChessPlayer.cs" />
     <Compile Include="disabledThreatMap.cs" />
     <Compile Include="gameStatus.cs" />
     <Compile Include="gameType.cs" />
     <Compile Include="IEnableableThreatMap.cs" />
     <Compile Include="killerMoveStore.cs" />
     <Compile Include="moveSearchStats.cs" />
+    <Compile Include="parsedFEN.cs" />
+    <Compile Include="Pieces\loopConfig.cs" />
     <Compile Include="speedySquareListEnumerator.cs" />
     <Compile Include="speedySquareList.cs" />
     <Compile Include="sizableArray.cs" />

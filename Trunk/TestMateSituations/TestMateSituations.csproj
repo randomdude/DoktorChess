@@ -4,11 +4,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{8289FFE2-580D-45DE-89A0-D0EF3790EAE9}</ProjectGuid>
+    <ProjectGuid>{A95B00E7-9311-4A70-AFCE-F4430CD29A71}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tests</RootNamespace>
-    <AssemblyName>Tests</AssemblyName>
+    <RootNamespace>TestMateSituations</RootNamespace>
+    <AssemblyName>TestMateSituations</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -38,19 +38,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="boardScorerTests.cs" />
-    <Compile Include="boardTests.cs" />
-    <Compile Include="FENNotationTests.cs" />
-    <Compile Include="KingsideCastlingMovementTests.cs" />
-    <Compile Include="moveSearchImprovementMeasures.cs" />
-    <Compile Include="moveSearchTests.cs" />
-    <Compile Include="moveTests.cs" />
-    <Compile Include="PawnMovementTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueenMovementTests.cs" />
-    <Compile Include="queensideCastlingMovementTests.cs" />
-    <Compile Include="threatMapTests.cs" />
-    <Compile Include="VectorMovementTests.cs" />
+    <Compile Include="UnitTest1.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\doktorChess\doktorChess.csproj">

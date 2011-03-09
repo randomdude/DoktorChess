@@ -109,12 +109,12 @@ namespace doktorChess
             if (_srcSquare.type == pieceType.none)
                 return false;
 
+            // Is the move possible according to the piece?
             sizableArray<move> possibleMovesWithMovingPiece = _srcSquare.getPossibleMoves(ourBoard);
-            IEnumerable<move> casted = possibleMovesWithMovingPiece.Cast<move>();
 
-            return casted.Any(
+            return possibleMovesWithMovingPiece.Any(
                 possibleMove => possibleMove.srcPos.isSameSquareAs(srcPos) && 
-                possibleMove.dstPos.isSameSquareAs(dstPos)                      );
+                                possibleMove.dstPos.isSameSquareAs(dstPos)                      );
         }
 
         /// <summary>
@@ -197,16 +197,16 @@ namespace doktorChess
             return ToString(moveStringStyle.coord);
         }
 
-        public string ToString(moveStringStyle chessNotation)
+        public string ToString(moveStringStyle style)
         {
-            switch (chessNotation)
+            switch (style)
             {
                 case moveStringStyle.coord:
                     return string.Format("[{0},{1}] -> [{2},{3}]", srcPos.x, srcPos.y, dstPos.x, dstPos.y);
                 case moveStringStyle.chessNotation:
                     return toChessNotation();
                 default:
-                    throw new ArgumentOutOfRangeException("chessNotation");
+                    throw new ArgumentOutOfRangeException("style");
             }
         }
 

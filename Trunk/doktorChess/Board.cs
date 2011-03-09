@@ -15,7 +15,7 @@ namespace doktorChess
         /// <summary>
         /// How many moves have been played on this board
         /// </summary>
-        public int moveCount = 0;
+        public int moveCount;
 
         /// <summary>
         /// Rules in effect for this game
@@ -51,11 +51,16 @@ namespace doktorChess
 
         private readonly boardSearchConfig searchConfig;
 
-        public killerMoveStore killerStore;
+        private killerMoveStore killerStore;
         public readonly IEnableableThreatMap coverLevel;
 
         // Keep some search stats in here
         public moveSearchStats stats;
+
+        /// <summary>
+        /// Whose move it is
+        /// </summary>
+        public pieceColour colToMove = pieceColour.white;
 
         public Board (gameType newType, boardSearchConfig newSearchConfig)
         {
@@ -154,6 +159,74 @@ namespace doktorChess
 
             newBoard._blackKingCaptured = false;
             newBoard._whiteKingCaptured = false;
+
+            return newBoard;
+        }
+
+        public static Board makeNormalFromFEN(string FENString, boardSearchConfig searchConfig)
+        {
+            Board newBoard = new Board(gameType.normal, searchConfig);
+
+            parsedFEN fen = new parsedFEN(FENString);
+
+            // Now create the board from the parsed output.
+            for (int y = 0; y < sizeY; y++)
+            {
+                for (int x = 0; x < sizeX; x++)
+                {
+                    switch (fen.boardRepresentation[x,y])
+                    {
+                        case 'p':
+                            newBoard.addPiece(pieceType.pawn, pieceColour.black, x, y);
+                            break;
+                        case 'r':
+                            newBoard.addPiece(pieceType.rook, pieceColour.black, x, y);
+                            break;
+                        case 'n':
+                            newBoard.addPiece(pieceType.knight, pieceColour.black, x, y);
+                            break;
+                        case 'b':
+                            newBoard.addPiece(pieceType.bishop, pieceColour.black, x, y);
+                            break;
+                        case 'q':
+                            newBoard.addPiece(pieceType.queen, pieceColour.black, x, y);
+                            break;
+                        case 'k':
+                            newBoard.addPiece(pieceType.king, pieceColour.black, x, y);
+                            break;
+                        case 'P':
+                            newBoard.addPiece(pieceType.pawn, pieceColour.white, x, y);
+                            break;
+                        case 'R':
+                            newBoard.addPiece(pieceType.rook, pieceColour.white, x, y);
+                            break;
+                        case 'N':
+                            newBoard.addPiece(pieceType.knight, pieceColour.white, x, y);
+                            break;
+                        case 'B':
+                            newBoard.addPiece(pieceType.bishop, pieceColour.white, x, y);
+                            break;
+                        case 'Q':
+                            newBoard.addPiece(pieceType.queen, pieceColour.white, x, y);
+                            break;
+                        case 'K':
+                            newBoard.addPiece(pieceType.king, pieceColour.white, x, y);
+                            break;
+                        case ' ':
+                            break;
+                        default:
+                            throw new Exception();
+                    }
+                }
+            }
+
+            // Pull in castling rights
+            newBoard[7, 7].excludeFromCastling = !fen.blackCanCastleKingside;
+            newBoard[0, 7].excludeFromCastling = !fen.blackCanCastleQueenside;
+            newBoard[7, 0].excludeFromCastling = !fen.whiteCanCastleKingside;
+            newBoard[0, 0].excludeFromCastling = !fen.whiteCanCastleQueenside;
+
+            newBoard.colToMove = fen.toPlay;
 
             return newBoard;
         }
@@ -343,6 +416,7 @@ namespace doktorChess
             // Generously guess the size of this array
             sizableArray<move> possibleMoves = new sizableArray<move>(occupiedSquares.Count * 50);
 
+            // Add all moves from all pieces
             foreach (square occupiedSquare in occupiedSquares)
                 possibleMoves.AddRange(occupiedSquare.getPossibleMoves(this) );
 
@@ -394,32 +468,42 @@ namespace doktorChess
         private gameStatus getGameStatusForNormal(List<square> myPieces, List<square> enemyPieces)
         {
             // If either side has no pieces, the game is undefined.
-            if (myPieces.Count == 0)
-                return gameStatus.lost;
-            if (enemyPieces.Count == 0)
-                return gameStatus.won;
+            if (myPieces.Count == 0 || enemyPieces.Count == 0)
+                throw new Exception("Chess rules violated - a side has no pieces");
 
             // Now we are certain we have pieces, we can identify our side.
             pieceColour myCol = myPieces[0].colour;
 
-            if (_whiteKingCaptured)
-                return myCol == pieceColour.white ? gameStatus.lost : gameStatus.won;
-            if (_blackKingCaptured)
-                return myCol == pieceColour.black ? gameStatus.lost : gameStatus.won;
+            if (_whiteKingCaptured || _blackKingCaptured)
+                throw new Exception("Chess rules violated - no king is present");
 
-            // If the current player cannot move, then the game is a draw.
-            bool movesFound = false;
-            foreach (square myPiece in myPieces)
+            // Todo: optimise lots.
+            bool nonCheckMoves = false;
+            sizableArray<move> moves = getMoves(colToMove);
+            foreach (move thisMove in moves)
             {
-                if (myPiece.getPossibleMoves(this).Length != 0)
+                doMove(thisMove);
+
+                if (!playerIsInCheck(colToMove))
                 {
-                    movesFound = true;
+                    nonCheckMoves = true;
+                    undoMove(thisMove);
                     break;
                 }
+
+                undoMove(thisMove);
             }
 
-            if (!movesFound)
+            if (!nonCheckMoves)
+            {
+                // urghhhh. If  the player to move is in check, then the game is finished if they have no moves
+                // which get out of check.
+                if (playerIsInCheck(colToMove))
+                    return (colToMove == myCol) ? gameStatus.lost : gameStatus.won;
+
+                // If the current player cannot move without being in check, then the game is a draw.
                 return gameStatus.drawn;
+            }
 
             return gameStatus.inProgress;
         }
@@ -436,7 +520,11 @@ namespace doktorChess
             pieceColour myCol = myPieces[0].colour;
 
             // If the current player cannot move, it is a draw.
-            bool movesFound = myPieces.Any(myPiece => myPiece.getPossibleMoves(this).Length != 0);
+            bool movesFound;
+            if (colToMove == myCol)
+                movesFound = myPieces.Any(myPiece => myPiece.getPossibleMoves(this).Length != 0);
+            else
+                movesFound = enemyPieces.Any(myPiece => myPiece.getPossibleMoves(this).Length != 0);
 
             if (!movesFound)
                 return gameStatus.drawn;
@@ -445,12 +533,10 @@ namespace doktorChess
             List<square> allPieces = new List<square>( whitePieceSquares.Count + blackPieceSquares.Count );
             allPieces.AddRange(getPiecesForColour(pieceColour.white));
             allPieces.AddRange(getPiecesForColour(pieceColour.black));
+            List<square> pawns = allPieces.FindAll(a => a.type == pieceType.pawn);
 
-            foreach (square piece in allPieces)
+            foreach (square piece in pawns)
             {
-                if (piece.type != pieceType.pawn)
-                    continue;
-
                 if ( (piece.position.y == sizeY - 1 && piece.colour == pieceColour.white ) ||
                      (piece.position.y == 0 && piece.colour == pieceColour.black ) )
                 {
@@ -465,10 +551,9 @@ namespace doktorChess
             return gameStatus.inProgress;
         }
 
-        public lineAndScore findBestMove(pieceColour playerCol)
+        public lineAndScore findBestMove()
         {
             stats = new moveSearchStats();
-            // Assume it is our move.
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
@@ -476,7 +561,7 @@ namespace doktorChess
                  (searchConfig.killerHeuristic && killerStore == null))
                 killerStore = new killerMoveStore(searchConfig.searchDepth);
 
-            lineAndScore toRet = findBestMove(playerCol, true, searchConfig.searchDepth, int.MinValue, int.MaxValue);
+            lineAndScore toRet = findBestMove(true, searchConfig.searchDepth, int.MinValue, int.MaxValue);
 
             watch.Stop();
             stats.totalSearchTime = watch.ElapsedMilliseconds;
@@ -489,17 +574,16 @@ namespace doktorChess
             killerStore.advanceOne(searchConfig.searchDepth);
         }
 
-        private lineAndScore findBestMove(pieceColour playerCol, bool usToPlay, int depthLeft, int min, int max)
+        private lineAndScore findBestMove(bool usToPlay, int depthLeft, int min, int max)
         {
-            pieceColour enemyCol = getOtherSide(playerCol);
-            pieceColour toPlay = usToPlay ? playerCol : enemyCol;
-
-            if (getGameStatus(toPlay) != gameStatus.inProgress)
+            if (getGameStatus(colToMove) != gameStatus.inProgress)
             {
                 // The game is over. Return a score immediately, and no moves.
                 stats.boardsScored++;
-                BoardScorer scorer = new BoardScorer(this, toPlay, searchConfig.scoreConfig);
-                return new lineAndScore(new move[] { }, scorer.getScore(), scorer);
+                BoardScorer scorer = new BoardScorer(this, colToMove, searchConfig.scoreConfig);
+                //return new lineAndScore(new move[] { }, scorer.getScore() - (searchConfig.searchDepth - depthLeft), scorer);
+                int score = scorer.getScore() * -1;
+                return new lineAndScore(new move[] { }, score, scorer);
             }
 
             // Find our best move and its score. Initialise the best score to max or min,
@@ -511,16 +595,36 @@ namespace doktorChess
                 bestLineSoFar = new lineAndScore(new move[searchConfig.searchDepth + 1], int.MaxValue, null);
 
             // Find a list of possible moves..
-            sizableArray<move> movesToConsider = getMoves(toPlay);
+            sizableArray<move> movesToConsider = getMoves(colToMove);
 
-#if DEBUG
-            if (movesToConsider.Length == 0)
+
+            if (searchConfig.checkLots)
             {
-                // This should totally and absolutely not happen after we've verified that the
-                // game is still in progress.
-                throw new ArgumentException();
+                if (movesToConsider.Length == 0)
+                {
+                    // This should totally and absolutely not happen after we've verified that the
+                    // game is still in progress.
+                    throw new ArgumentException();
+                }
+
+                bool valid = false;
+                foreach (move thisMove in movesToConsider)
+                {
+                    if (valid)
+                        break;
+
+                    doMove(thisMove);
+
+                    if (!playerIsInCheck(colToMove))
+                        valid = true;
+
+                    undoMove(thisMove);
+                }
+
+                // Niether should this.
+                if (!valid)
+                    throw new ArgumentException();
             }
-#endif
 
             // Move any good (possibly killer) moves to the top of our search 
             prioritizeMoves(movesToConsider, depthLeft);
@@ -539,23 +643,36 @@ namespace doktorChess
 
                 doMove(consideredMove);
 
+                // If this move would leave us in check, we can ignore it
+                // TODO: optimise this.
+                if (playerIsInCheck(colToMove))
+                {
+                    undoMove(consideredMove);
+                    continue;
+                }
+
+                colToMove = getOtherSide(colToMove);
+
                 if (depthLeft == 0)
                 {
                     stats.boardsScored++;
-                    BoardScorer scorer = new BoardScorer(this, toPlay, searchConfig.scoreConfig);
-                    int score = scorer.getScore();
+                    BoardScorer scorer = new BoardScorer(this, getOtherSide(colToMove), searchConfig.scoreConfig);
+                    int score = scorer.getScore() ;
 
+                    // Modify our score based on how deep we are, so that we prefer shallower moves over deeper
+                    //score += (searchConfig.searchDepth - depthLeft) * (usToPlay ? +1 : -1);
+                    
                     if ((usToPlay && (score > bestLineSoFar.finalScore)) ||
                          (!usToPlay && (score < bestLineSoFar.finalScore)))
                     {
-                        bestLineSoFar.finalScore = scorer.getScore();
+                        bestLineSoFar.finalScore = score;
                         bestLineSoFar.line[searchConfig.searchDepth] = consideredMove;
                         bestLineSoFar._scorer = scorer;
                     }
                 }
                 else
                 {
-                    lineAndScore thisMove = findBestMove(playerCol, !usToPlay, depthLeft - 1, min, max);
+                    lineAndScore thisMove = findBestMove(!usToPlay, depthLeft - 1, min, max);
 
                     if ((usToPlay && (thisMove.finalScore > bestLineSoFar.finalScore)) ||
                         (!usToPlay && (thisMove.finalScore < bestLineSoFar.finalScore)))
@@ -572,6 +689,7 @@ namespace doktorChess
                 }
 
                 undoMove(consideredMove);
+                colToMove = getOtherSide(colToMove);
 
                 // Verify that the board has been restored to its former state correctly.
                 if (searchConfig.checkLots)
@@ -765,6 +883,7 @@ namespace doktorChess
                 removePiece(promoted);
                 this[move.dstPos] = promoted.pastLife;
                 addNewPieceToArrays(promoted.pastLife);
+                coverLevel.add(move.dstPos);
             }
 
             // dec the move counters
@@ -833,6 +952,10 @@ namespace doktorChess
 
         public bool playerIsInCheck(pieceColour playerPossiblyInCheck)
         {
+            // Check does not exist in queen-and-pawns.
+            if (_type == gameType.queenAndPawns)
+                return false;
+
             sizableArray<move> moves = getMoves(getOtherSide(playerPossiblyInCheck));
 
             return moves.Exists(a => a.isCapture && a.capturedSquare.type == pieceType.king);
@@ -863,5 +986,6 @@ namespace doktorChess
             // covering it or not.
             return coverLevel.isThreatened(squareToCheck, sideToExamine);
         }
+
     }
 }
