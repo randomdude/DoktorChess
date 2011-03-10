@@ -771,11 +771,12 @@ namespace doktorChess
                 }
             }
 
-            // Consider any capturing moves first, too
+            // Consider any capturing or pawn promotions first, too
             n = 0;
             foreach (move thisMove in movesToConsider)
             {
-                if (thisMove.isCapture)
+                if ( thisMove.isCapture ||      // captures are good.
+                     thisMove.isPawnPromotion)  // pawn promotions are good.
                 {
                     if (movesReordered[n] == false)
                     {
