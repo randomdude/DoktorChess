@@ -29,7 +29,7 @@
                 <div class="statusPanelDiv"> 
                 
                     <div class="progressIndicator" style="position: relative; visibility: hidden; width: 100px; float: right; top: 45%" >
-                        <img src="images/spinny.gif" alt="please wait.."/>
+                        <img src="images/status_anim.gif" alt="please wait.."/>
                         <br />
                         <span>Thinking..</span>
                     </div>

@@ -230,5 +230,6 @@ namespace doktorChess
         {
             return new sizableArray<square>(0);
         }
+
     }
 }
