@@ -240,7 +240,7 @@ namespace doktorChessGameEngine
             // which avoids listing moves for many pieces.
             bool nonCheckMoves = false;
             pieceColour movingSide = colToMove;
-            List<square> occupiedSquares = getPiecesForColour(colToMove);
+            square[] occupiedSquares = getPiecesForColour(colToMove).ToArray();
             foreach (square occupiedSquare in occupiedSquares)
             {
                 sizableArray<move> moves = occupiedSquare.getPossibleMoves(this);
@@ -263,8 +263,8 @@ namespace doktorChessGameEngine
 
             if (!nonCheckMoves)
             {
-                // urghhhh. If  the player to move is in check, then the game is finished if they have no moves
-                // which get out of check.
+                // If  the player to move is in check, then the game is finished if they have no 
+                // moves which get out of check.
                 if (playerIsInCheck(movingSide))
                     return (colToMove == myCol) ? gameStatus.lost : gameStatus.won;
 
