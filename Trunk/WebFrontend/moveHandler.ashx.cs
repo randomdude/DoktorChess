@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Web;
 using System.Web.Script.Serialization;
 using System.Web.Services;
 using System.Web.SessionState;
-using System.Web.UI;
 using System.Web.UI.WebControls;
 using doktorChess;
 using doktorChessGameEngine;
@@ -28,9 +25,9 @@ namespace WebFrontend
 
         public void ProcessRequest(HttpContext context)
         {
-            Board theBoard = (Board) context.Session["board"];
+            baseBoard theBoard = (baseBoard)context.Session["board"];
             pieceColour playerCol = (pieceColour) context.Session["playerCol"];
-            pieceColour computerCol = Board.getOtherSide(playerCol);
+            pieceColour computerCol = baseBoard.getOtherSide(playerCol);
             moveResponse resp = new moveResponse();
 
             // Find the move that the user has just input.
@@ -83,7 +80,6 @@ namespace WebFrontend
 
             // Now, find our best move, and play it
             lineAndScore bestLine = theBoard.findBestMove();
-            theBoard.advanceKillerTables();
             move bestMove = bestLine.line[0];
             theBoard.doMove(bestMove);
             resp.blackMove = bestMove.ToString(moveStringStyle.chessNotation);
@@ -118,7 +114,7 @@ namespace WebFrontend
             context.Response.Write(ser.Serialize(resp));
         }
 
-        static public Table makeTable(Board board)
+        static public Table makeTable(baseBoard board)
         {
             Table htmlTable = new Table();
             htmlTable.CellPadding = 0;

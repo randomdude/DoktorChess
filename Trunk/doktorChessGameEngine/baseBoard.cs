@@ -35,12 +35,12 @@ namespace doktorChessGameEngine
         /// <summary>
         /// Lookaside list of squares occupied by white pieces
         /// </summary>
-        protected readonly List<square> whitePieceSquares = new List<square>(20);
+        public readonly List<square> whitePieceSquares = new List<square>(20);
 
         /// <summary>
         /// Lookaside list of squares occupied by black pieces
         /// </summary>
-        protected readonly List<square> blackPieceSquares = new List<square>(20);
+        public readonly List<square> blackPieceSquares = new List<square>(20);
         protected baseBoard(gameType newType)
         {
             // Set the game type
@@ -101,15 +101,17 @@ namespace doktorChessGameEngine
             }
         }
 
-        protected void makeQueenAndPawnsStartPosition()
+        private void makeQueenAndPawnsStartPosition()
         {
             for (int x = 0; x < sizeX; x++)
                 this.addPiece(pieceType.pawn, pieceColour.white, x, 1);
 
             this.addPiece(pieceType.queen, pieceColour.black, 3, 7);
+
+            colToMove = pieceColour.white;
         }
 
-        protected void makeNormalStartPosition()
+        private void makeNormalStartPosition()
         {
             // Apply two rows of pawns
             for (int x = 0; x < sizeX; x++)
@@ -132,6 +134,8 @@ namespace doktorChessGameEngine
                 addPiece(pieceType.knight, col, 6, y);
                 addPiece(pieceType.rook, col, 7, y);
             }
+
+            colToMove = pieceColour.white;
         }
 
         protected void makeFromFEN(string FENString)
@@ -367,7 +371,11 @@ namespace doktorChessGameEngine
         /// <returns></returns>
         public virtual square addPiece(pieceType newType, pieceColour newColour, int x, int y)
         {
-            return addPiece(newType, newColour, new squarePos(x, y));
+            square newSquare = addPiece(newType, newColour, new squarePos(x, y));
+
+            addToArrays(newSquare);
+
+            return newSquare;
         }
 
         /// <summary>
@@ -379,6 +387,33 @@ namespace doktorChessGameEngine
         {
             newSquare.position = newSquarePos;
             this[newSquarePos] = newSquare;
+
+            addToArrays(newSquare);
+        }
+
+        /// <summary>
+        /// Add the given piece to the whitePieceSquares or blackPieceSquares array.
+        /// </summary>
+        /// <param name="newSquare"></param>
+        private void addToArrays(square newSquare)
+        {
+#if DEBUG
+            if (whitePieceSquares.Contains(newSquare) ||
+                blackPieceSquares.Contains(newSquare))
+                throw new Exception("Duplicate square");
+#endif
+
+            switch (newSquare.colour)
+            {
+                case pieceColour.white:
+                    whitePieceSquares.Add(newSquare);
+                    break;
+                case pieceColour.black:
+                    blackPieceSquares.Add(newSquare);
+                    break;
+                default:
+                    throw new ArgumentException();
+            }            
         }
 
         /// <summary>
@@ -388,11 +423,28 @@ namespace doktorChessGameEngine
         protected virtual void removePiece(square toRemove)
         {
             this[toRemove.position] = new square(toRemove.position);
+
+            switch (toRemove.colour)
+            {
+                case pieceColour.white:
+                    whitePieceSquares.Remove(toRemove);
+                    break;
+                case pieceColour.black:
+                    blackPieceSquares.Remove(toRemove);
+                    break;
+                default:
+                    throw new ArgumentException();
+            }
         }
 
         public virtual void doMove(move move)
         {
             sanityCheck();
+
+#if DEBUG
+            if (this[move.srcPos].colour != colToMove)
+                throw new ArgumentException("Moving peice of wrong colour");
+#endif
 
             // Update movedness count for the moving piece
             this[move.srcPos].moveNumbers.Push(moveCount);
@@ -446,6 +498,7 @@ namespace doktorChessGameEngine
                 this[move.dstPos].pastLife = movingSquare;
             }
 
+            colToMove = getOtherSide(colToMove);
 
             sanityCheck();
         }
@@ -486,6 +539,11 @@ namespace doktorChessGameEngine
         public virtual void undoMove(move move)
         {
             sanityCheck();
+
+#if DEBUG
+            if (this[move.dstPos].colour == colToMove)
+                throw new ArgumentException("Unmoving peice of wrong colour");
+#endif
 
             // Revert any promotion
             if (move.isPawnPromotion)
@@ -538,6 +596,8 @@ namespace doktorChessGameEngine
             // Restore any captured piece
             if (move.isCapture)
                 addPiece(move.capturedSquare, move.capturedSquarePos);
+
+            colToMove = getOtherSide(colToMove);
 
             sanityCheck();
         }

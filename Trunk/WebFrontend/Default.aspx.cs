@@ -2,6 +2,7 @@
 using System.Web.UI.WebControls;
 using doktorChess;
 using doktorChessGameEngine;
+using exampleMiniMax;
 
 namespace WebFrontend
 {
@@ -12,10 +13,7 @@ namespace WebFrontend
             if (!IsPostBack || !moveHandler.sessionValid(Context) )
             {
                 // Initialise a new board
-                boardSearchConfig config = new boardSearchConfig();
-                config.searchDepth = 4;
-                //Board newBoard = Board.makeNormalFromFEN(@"8/8/8/8/8/8/4KP2/R1Qn3k w - - 0 0", config);
-                Board newBoard = Board.makeNormalStartPosition(config);
+                baseBoard newBoard = exampleMiniMaxBoard.makeNormalStartPosition();
 
                 Session["playerCol"] = pieceColour.white;
                 Session["board"] = newBoard;

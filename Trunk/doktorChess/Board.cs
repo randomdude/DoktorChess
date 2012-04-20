@@ -25,9 +25,9 @@ namespace doktorChess
         /// </summary>
         public int blackMaterialAdvantage;
 
-        private readonly boardSearchConfig searchConfig;
+        private readonly boardSearchConfig _searchConfig;
 
-        private killerMoveStore killerStore;
+        private killerMoveStore _killerStore;
         public readonly IEnableableThreatMap coverLevel;
 
         // Keep some search stats in here
@@ -46,7 +46,7 @@ namespace doktorChess
                 coverLevel = new disabledThreatMap();
 
             coverLevel.checkStuff = newSearchConfig.checkThreatMapLots;
-            searchConfig = newSearchConfig;
+            _searchConfig = newSearchConfig;
         }
 
         public static Board makeQueenAndPawnsStartPosition(boardSearchConfig searchConfig)
@@ -54,6 +54,20 @@ namespace doktorChess
             Board newBoard = new Board(gameType.queenAndPawns, searchConfig);
 
             newBoard.makeStartPosition();
+
+            return newBoard;
+        }
+
+        public static Board makeNormalStartPosition()
+        {
+            boardSearchConfig config = new boardSearchConfig();
+            Board newBoard = new Board(gameType.normal, config);
+
+            newBoard.makeStartPosition();
+
+            // Both kings are present in the new board.
+            newBoard._blackKingCaptured = false;
+            newBoard._whiteKingCaptured = false;
 
             return newBoard;
         }
@@ -82,7 +96,7 @@ namespace doktorChess
 
         protected override void sanityCheck()
         {
-            if (!searchConfig.checkLots)
+            if (!_searchConfig.checkLots)
                 return;
 
             for (int x = 0; x < sizeX; x++)
@@ -221,20 +235,12 @@ namespace doktorChess
 
         private void addNewPieceToArrays(square newSq)
         {
-#if DEBUG
-            if (whitePieceSquares.Contains(newSq) ||
-                blackPieceSquares.Contains(newSq))
-                throw new Exception("Duplicate square");
-#endif
-
             switch (newSq.colour)
             {
                 case pieceColour.white:
                     whiteMaterialAdvantage += BoardScorer.getMaterialAdvantage(newSq);
-                    whitePieceSquares.Add(newSq);
                     break;
                 case pieceColour.black:
-                    blackPieceSquares.Add(newSq);
                     blackMaterialAdvantage += BoardScorer.getMaterialAdvantage(newSq);
                     break;
                 default:
@@ -257,11 +263,9 @@ namespace doktorChess
             switch (newSq.colour)
             {
                 case pieceColour.white:
-                    whitePieceSquares.Remove(newSq);
                     whiteMaterialAdvantage -= BoardScorer.getMaterialAdvantage(newSq);
                     break;
                 case pieceColour.black:
-                    blackPieceSquares.Remove(newSq);
                     blackMaterialAdvantage -= BoardScorer.getMaterialAdvantage(newSq);
                     break;
                 default:
@@ -285,14 +289,14 @@ namespace doktorChess
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            if ((searchConfig.killerHeuristic && !searchConfig.killerHeuristicPersists) ||
-                (searchConfig.killerHeuristic && killerStore == null))
+            if ((_searchConfig.killerHeuristic && !_searchConfig.killerHeuristicPersists) ||
+                (_searchConfig.killerHeuristic && _killerStore == null))
             {
-                if (searchConfig.searchDepth > 0)
-                    killerStore = new killerMoveStore(searchConfig.searchDepth);
+                if (_searchConfig.searchDepth > 0)
+                    _killerStore = new killerMoveStore(_searchConfig.searchDepth);
             }
 
-            lineAndScore toRet = findBestMove(true, searchConfig.searchDepth, int.MinValue, int.MaxValue);
+            lineAndScore toRet = findBestMove(true, _searchConfig.searchDepth, int.MinValue, int.MaxValue);
 
             watch.Stop();
             stats.totalSearchTime = watch.ElapsedMilliseconds;
@@ -302,19 +306,13 @@ namespace doktorChess
             return toRet;
         }
 
-        public void advanceKillerTables()
-        {
-            if (killerStore != null)
-                killerStore.advanceOne(searchConfig.searchDepth);
-        }
-
         private lineAndScore findBestMove(bool usToPlay, int depthLeft, int min, int max)
         {
             if (getGameStatus(colToMove) != gameStatus.inProgress)
             {
                 // The game is over. Return a score immediately, and no moves.
                 stats.boardsScored++;
-                BoardScorer scorer = new BoardScorer(this, colToMove, searchConfig.scoreConfig);
+                BoardScorer scorer = new BoardScorer(this, colToMove, _searchConfig.scoreConfig);
                 //return new lineAndScore(new move[] { }, scorer.getScore() - (searchConfig.searchDepth - depthLeft), scorer);
                 int score = scorer.getScore() * -1;
                 return new lineAndScore(new move[] { }, score, scorer);
@@ -324,14 +322,14 @@ namespace doktorChess
             // depending if we're searching for the minimum or maximum score.
             lineAndScore bestLineSoFar;
             if (usToPlay)
-                bestLineSoFar = new lineAndScore(new move[searchConfig.searchDepth + 1], int.MinValue, null);
+                bestLineSoFar = new lineAndScore(new move[_searchConfig.searchDepth + 1], int.MinValue, null);
             else
-                bestLineSoFar = new lineAndScore(new move[searchConfig.searchDepth + 1], int.MaxValue, null);
+                bestLineSoFar = new lineAndScore(new move[_searchConfig.searchDepth + 1], int.MaxValue, null);
 
             // Find a list of possible moves..
             sizableArray<move> movesToConsider = getMoves(colToMove);
 
-            if (searchConfig.checkLots)
+            if (_searchConfig.checkLots)
             {
                 if (movesToConsider.Length == 0)
                 {
@@ -368,7 +366,7 @@ namespace doktorChess
                 // undo any move.
                 string origThreatMap = null;
                 string origPieces = null;
-                if (searchConfig.checkLots)
+                if (_searchConfig.checkLots)
                 {
                     origThreatMap = coverLevel.ToString();
                     origPieces = ToString();
@@ -384,12 +382,10 @@ namespace doktorChess
                     continue;
                 }
 
-                colToMove = getOtherSide(colToMove);
-
                 if (depthLeft == 0)
                 {
                     stats.boardsScored++;
-                    BoardScorer scorer = new BoardScorer(this, getOtherSide(colToMove), searchConfig.scoreConfig);
+                    BoardScorer scorer = new BoardScorer(this, getOtherSide(colToMove), _searchConfig.scoreConfig);
                     int score = scorer.getScore();
 
                     // Modify our score based on how deep we are, so that we prefer shallower moves over deeper
@@ -399,7 +395,7 @@ namespace doktorChess
                         (!usToPlay && (score < bestLineSoFar.finalScore)))
                     {
                         bestLineSoFar.finalScore = score;
-                        bestLineSoFar.line[searchConfig.searchDepth] = consideredMove;
+                        bestLineSoFar.line[_searchConfig.searchDepth] = consideredMove;
                         bestLineSoFar._scorer = scorer;
                     }
                 }
@@ -412,7 +408,7 @@ namespace doktorChess
                     {
                         bestLineSoFar.finalScore = thisMove.finalScore;
                         bestLineSoFar._scorer = thisMove._scorer;
-                        bestLineSoFar.line[searchConfig.searchDepth - depthLeft] = consideredMove;
+                        bestLineSoFar.line[_searchConfig.searchDepth - depthLeft] = consideredMove;
                         for (int index = 0; index < thisMove.line.Length; index++)
                         {
                             if (thisMove.line[index] != null)
@@ -425,7 +421,7 @@ namespace doktorChess
                 colToMove = getOtherSide(colToMove);
 
                 // Verify that the board has been restored to its former state correctly.
-                if (searchConfig.checkLots)
+                if (_searchConfig.checkLots)
                 {
                     if (origPieces != ToString())
                         throw new Exception("Board pieces were not restored correctly");
@@ -441,7 +437,7 @@ namespace doktorChess
                     }
                 }
 
-                if (searchConfig.useAlphaBeta)
+                if (_searchConfig.useAlphaBeta)
                 {
                     if (depthLeft > 0)
                     {
@@ -452,9 +448,9 @@ namespace doktorChess
 
                             if (min >= max)
                             {
-                                if (searchConfig.killerHeuristic)
+                                if (_searchConfig.killerHeuristic)
                                 {
-                                    killerStore.add(depthLeft, consideredMove);
+                                    _killerStore.add(depthLeft, consideredMove);
                                 }
                                 break;
                             }
@@ -466,9 +462,9 @@ namespace doktorChess
 
                             if (max <= min)
                             {
-                                if (searchConfig.killerHeuristic)
+                                if (_searchConfig.killerHeuristic)
                                 {
-                                    killerStore.add(depthLeft, consideredMove);
+                                    _killerStore.add(depthLeft, consideredMove);
                                 }
                                 break;
                             }
@@ -481,6 +477,12 @@ namespace doktorChess
             return bestLineSoFar;
         }
 
+        public void advanceKillerTables()
+        {
+            if (_killerStore != null)
+                _killerStore.advanceOne(_searchConfig.searchDepth);
+        }
+
         private void prioritizeMoves(sizableArray<move> movesToConsider, int depthLeft)
         {
             // Bring any moves which are 'probably good' to the top of our list. Hold an array of bools, and set
@@ -490,12 +492,12 @@ namespace doktorChess
             int reorderedCount = 0;
 
             int n = 0;
-            if (killerStore != null)
+            if (_killerStore != null)
             {
                 // If one of these moves caused a cutoff last time, consider that move first.
                 foreach (move consideredMove in movesToConsider)
                 {
-                    if (killerStore.contains(consideredMove, depthLeft))
+                    if (_killerStore.contains(consideredMove, depthLeft))
                     {
                         movesReordered[n] = true;
                         reorderedMovesToConsider[reorderedCount++] = n;
