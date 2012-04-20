@@ -190,9 +190,10 @@ namespace Tests
         [TestMethod]
         public void testThatEnPassantOccursWhenItShouldAsWhite()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
-            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 7, 4);
-            square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 6, 6);
+            Board ourBoard = Board.makeFromFEN("8/6p1/8/7P/8/8/8/8 b - - 0 1", gameType.normal, boardSearchConfig.getDebugConfig());
+
+            square enemyPawn = ourBoard[6, 6];
+            square ourPawn = ourBoard[7, 4];
 
             // Advance the enemy pawn
             move advanceTwo = new move(enemyPawn, ourBoard[enemyPawn.position.down(2)]);
@@ -226,16 +227,17 @@ namespace Tests
         [TestMethod]
         public void testThatEnPassantDoesNotOccurAfterTwoPawnAdvances()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            Board ourBoard = Board.makeFromFEN("8/8/8/8/6P1/8/7p/8 b - - 0 1", gameType.normal, boardSearchConfig.getDebugConfig());
             // Verify that we cannot en passant after our opponent has moved a pawn forward one, not two, squares.
-            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 6, 3);
-            square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 7, 1);
+            square ourPawn = ourBoard[6, 3];
+            square enemyPawn = ourBoard[7, 1];
 
             square ourNewSquare = ourBoard[ourPawn.position.rightOne().upOne()];
 
             // Advance the enemy pawn twice
             move advanceOne = new move(enemyPawn, ourBoard[enemyPawn.position.upOne()]);
             ourBoard.doMove(advanceOne);
+            ourBoard.colToMove = pieceColour.black;
             advanceOne = new move(enemyPawn, ourBoard[enemyPawn.position.upOne()]);
             ourBoard.doMove(advanceOne);
 
@@ -247,11 +249,11 @@ namespace Tests
         [TestMethod]
         public void testThatEnPassantDoesNotOccurAfterExtraMove()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            Board ourBoard = Board.makeFromFEN("8/8/8/8/6P1/8/1P5p/8 b - - 0 1", gameType.normal, boardSearchConfig.getDebugConfig());
             // Verify that we cannot en passant after we move a piece
-            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 6, 3);
-            square ourKing = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 1);
-            square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 7, 1);
+            square ourPawn = ourBoard[6, 3];
+            square ourKing = ourBoard[1, 1];
+            square enemyPawn = ourBoard[7, 1];
 
             // Advance the enemy pawn two squares, and then move our king. This should cause en passant to be impossible.
             move advanceTwo = new move(enemyPawn, ourBoard[enemyPawn.position.up(2)]);

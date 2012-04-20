@@ -85,13 +85,18 @@ namespace doktorChess
             return newBoard;
         }
 
-        public static Board makeNormalFromFEN(string FENString, boardSearchConfig searchConfig)
+        public static Board makeFromFEN(string FENString, gameType newType, boardSearchConfig searchConfig)
         {
-            Board newBoard = new Board(gameType.normal, searchConfig);
+            Board newBoard = new Board(newType, searchConfig);
 
             newBoard.makeFromFEN(FENString);
 
             return newBoard;
+        }
+
+        public static Board makeNormalFromFEN(string FENString, boardSearchConfig searchConfig)
+        {
+            return makeFromFEN(FENString, gameType.normal, searchConfig);
         }
 
         protected override void sanityCheck()
@@ -372,11 +377,13 @@ namespace doktorChess
                     origPieces = ToString();
                 }
 
+                pieceColour movingSide = colToMove;
+
                 doMove(consideredMove);
 
                 // If this move would leave us in check, we can ignore it
                 // TODO: optimise this.
-                if (playerIsInCheck(colToMove))
+                if (playerIsInCheck(movingSide))
                 {
                     undoMove(consideredMove);
                     continue;
@@ -385,7 +392,7 @@ namespace doktorChess
                 if (depthLeft == 0)
                 {
                     stats.boardsScored++;
-                    BoardScorer scorer = new BoardScorer(this, getOtherSide(colToMove), _searchConfig.scoreConfig);
+                    BoardScorer scorer = new BoardScorer(this, movingSide, _searchConfig.scoreConfig);
                     int score = scorer.getScore();
 
                     // Modify our score based on how deep we are, so that we prefer shallower moves over deeper
@@ -418,7 +425,6 @@ namespace doktorChess
                 }
 
                 undoMove(consideredMove);
-                colToMove = getOtherSide(colToMove);
 
                 // Verify that the board has been restored to its former state correctly.
                 if (_searchConfig.checkLots)
@@ -579,9 +585,11 @@ namespace doktorChess
 
         protected override gameStatus getGameStatusForNormal(List<square> myPieces, List<square> enemyPieces)
         {
+#if DEBUG
             // 'normal' rule games must always have one king for each side.
             if (_whiteKingCaptured || _blackKingCaptured)
-                throw new Exception("Chess rules violated - no king is present for at least one side");
+                throw new chessRuleViolationException("No king is present for at least one side");
+#endif
 
             return base.getGameStatusForNormal(myPieces, enemyPieces);
         }

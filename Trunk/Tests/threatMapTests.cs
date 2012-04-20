@@ -203,9 +203,9 @@ namespace Tests
         [TestMethod]
         public void testMoveUndoingThreatmapWithCapture()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
-            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 4, 3);
-            square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 5, 2);
+            Board ourBoard = Board.makeFromFEN("8/8/8/8/4p3/5P2/8/8 b - - 0 1", gameType.normal, boardSearchConfig.getDebugConfig());
+            square ourPawn = ourBoard[4, 3];
+            square enemyPawn = ourBoard[5, 2];
 
             string origThreatMap = ourBoard.coverLevel.ToString();
 

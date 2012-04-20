@@ -53,6 +53,7 @@
     <Compile Include="baseBoard.cs" />
     <Compile Include="chessGame.cs" />
     <Compile Include="ChessPlayer.cs" />
+    <Compile Include="chessRuleViolationException.cs" />
     <Compile Include="gameStatus.cs" />
     <Compile Include="gameType.cs" />
     <Compile Include="lineAndScore.cs" />

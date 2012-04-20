@@ -55,10 +55,7 @@ namespace Tests
         {
             boardSearchConfig config = boardSearchConfig.getDebugConfig();
             config.searchDepth = 0;
-            Board ourBoard = new Board(gameType.queenAndPawns, config);
-            ourBoard.addPiece(pieceType.queen, pieceColour.black, 3, 4);
-            ourBoard.addPiece(pieceType.pawn, pieceColour.white, 0, 4);
-            ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 6);
+            Board ourBoard = Board.makeFromFEN("8/1P6/8/P2q4/8/8/8/8 w - - 0 1", gameType.queenAndPawns, config);
 
             // We are white, and it is white's move. Analyze a situation in which pushing
             // a pawn will result in a win. Ensure that the AI does not push the wrong pawn.

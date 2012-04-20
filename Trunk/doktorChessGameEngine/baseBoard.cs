@@ -188,7 +188,7 @@ namespace doktorChessGameEngine
                         case ' ':
                             break;
                         default:
-                            throw new Exception();
+                            throw new ArgumentException();
                     }
                 }
             }
@@ -222,35 +222,50 @@ namespace doktorChessGameEngine
 
         protected virtual gameStatus getGameStatusForNormal(List<square> myPieces, List<square> enemyPieces)
         {
+#if DEBUG
             // If either side has no pieces, the game is undefined.
             if (myPieces.Count == 0 || enemyPieces.Count == 0)
-                throw new Exception("Chess rules violated - a side has no pieces");
-
+                throw new chessRuleViolationException("Chess rules violated - a side has no pieces");
+#endif
             // Now we are certain we have pieces, we can identify our side.
             pieceColour myCol = myPieces[0].colour;
 
-            // Todo: optimise lots.
+#if DEBUG
+            // It is nonsensical to move out of check.
+            if (playerIsInCheck(getOtherSide(colToMove)))
+                throw new chessRuleViolationException("Player has moved in to check");
+#endif
+            // Since it is likely that most pieces will have moves, we don't call getMoves, which
+            // would create a move list involving each piece. Instead, we check each piece in turn
+            // which avoids listing moves for many pieces.
             bool nonCheckMoves = false;
-            sizableArray<move> moves = getMoves(colToMove);
-            foreach (move thisMove in moves)
+            pieceColour movingSide = colToMove;
+            List<square> occupiedSquares = getPiecesForColour(colToMove);
+            foreach (square occupiedSquare in occupiedSquares)
             {
-                doMove(thisMove);
-
-                if (!playerIsInCheck(colToMove))
+                sizableArray<move> moves = occupiedSquare.getPossibleMoves(this);
+                foreach (move thisMove in moves)
                 {
-                    nonCheckMoves = true;
-                    undoMove(thisMove);
-                    break;
-                }
+                    doMove(thisMove);
 
-                undoMove(thisMove);
+                    if (!playerIsInCheck(movingSide))
+                    {
+                        nonCheckMoves = true;
+                        undoMove(thisMove);
+                        break;
+                    }
+
+                    undoMove(thisMove);
+                }
+                if (nonCheckMoves)
+                    break;
             }
 
             if (!nonCheckMoves)
             {
                 // urghhhh. If  the player to move is in check, then the game is finished if they have no moves
                 // which get out of check.
-                if (playerIsInCheck(colToMove))
+                if (playerIsInCheck(movingSide))
                     return (colToMove == myCol) ? gameStatus.lost : gameStatus.won;
 
                 // If the current player cannot move without being in check, then the game is a draw.
@@ -335,6 +350,8 @@ namespace doktorChessGameEngine
 
             sizableArray<move> moves = getMoves(getOtherSide(playerPossiblyInCheck));
 
+            IEnumerable<move> captures = moves.Where(a => a.isCapture);
+
             return moves.Exists(a => a.isCapture && a.capturedSquare.type == pieceType.king);
         }
 
@@ -358,6 +375,8 @@ namespace doktorChessGameEngine
         {
             this[dstPos] = square.makeSquare(newType, newColour, dstPos);
 
+            addToArrays(this[dstPos]);
+
             return this[dstPos];
         }
 
@@ -372,8 +391,6 @@ namespace doktorChessGameEngine
         public virtual square addPiece(pieceType newType, pieceColour newColour, int x, int y)
         {
             square newSquare = addPiece(newType, newColour, new squarePos(x, y));
-
-            addToArrays(newSquare);
 
             return newSquare;
         }
@@ -400,7 +417,7 @@ namespace doktorChessGameEngine
 #if DEBUG
             if (whitePieceSquares.Contains(newSquare) ||
                 blackPieceSquares.Contains(newSquare))
-                throw new Exception("Duplicate square");
+                throw new Exception("Duplicate square at " + newSquare.position.ToString());
 #endif
 
             switch (newSquare.colour)
@@ -442,6 +459,8 @@ namespace doktorChessGameEngine
             sanityCheck();
 
 #if DEBUG
+            if (this[move.srcPos].type == pieceType.none)
+                throw new ArgumentException("Moving empty space");
             if (this[move.srcPos].colour != colToMove)
                 throw new ArgumentException("Moving peice of wrong colour");
 #endif

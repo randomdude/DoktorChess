@@ -100,9 +100,9 @@ namespace Tests
         [TestMethod]
         public void testMoveUndoingEnPassant()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
-            square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 7, 4);
-            square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 6, 6);
+            Board ourBoard = Board.makeFromFEN("8/6p1/8/7P/8/8/8/8 b - - 0 1", gameType.normal, boardSearchConfig.getDebugConfig());
+
+            square enemyPawn = ourBoard[6, 6];
 
             // Advance the enemy pawn, so we can capture it via en passant
             move advanceTwo = new move(enemyPawn, ourBoard[enemyPawn.position.down(2)]);
