@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using doktorChessGameEngine;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace doktorChess
+namespace doktorChessGameEngine
 {
     /// <summary>
     /// This 'list' contains a grid of squarePos, which are enumerable as flat co-ordinates of set values.
@@ -10,13 +11,13 @@ namespace doktorChess
     public class speedySquareList : IEnumerable<int>
     {
         // This array of squares contains a each square or null.
-        private bool[] squares = new bool[Board.sizeX * Board.sizeY];
+        private bool[] squares = new bool[baseBoard.sizeX * baseBoard.sizeY];
 
         // We keep a linked-list of set squares so that we can iterate really quickly over them.
         private LinkedList<int> llTrueSquares = new LinkedList<int>();
         // And because we're really performance-critical, we have a lookup of flattened squarePos to linkedList
         // elements so we don't need to search our linked list.
-        private LinkedListNode<int>[] llTrueSquareIndexes = new LinkedListNode<int>[Board.sizeX * Board.sizeY]; 
+        private LinkedListNode<int>[] llTrueSquareIndexes = new LinkedListNode<int>[baseBoard.sizeX * baseBoard.sizeY]; 
 
         private int count = 0;
 
@@ -45,7 +46,7 @@ namespace doktorChess
 
         public void Clear()
         {
-            squares = new bool[Board.sizeX * Board.sizeY];
+            squares = new bool[baseBoard.sizeX * baseBoard.sizeY];
             llTrueSquares.Clear();
             count = 0;
         }

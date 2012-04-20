@@ -1,4 +1,4 @@
-﻿namespace doktorChess
+﻿namespace doktorChessGameEngine
 {
     public class squarePosOffset
     {

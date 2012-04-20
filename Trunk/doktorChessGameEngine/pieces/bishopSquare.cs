@@ -1,4 +1,6 @@
-﻿namespace doktorChess
+﻿using doktorChessGameEngine;
+
+namespace doktorChessGameEngine
 {
     public class bishopSquare : square
     {
@@ -12,7 +14,7 @@
             return "b";
         }
 
-        public override sizableArray<move> getPossibleMoves(Board onThis)
+        public override sizableArray<move> getPossibleMoves(baseBoard onThis)
         {
             sizableArray<move> toRet = new sizableArray<move>(20);
 
@@ -24,7 +26,7 @@
             return toRet;
         }
 
-        public override sizableArray<square> getCoveredSquares(Board onThis)
+        public override sizableArray<square> getCoveredSquares(baseBoard onThis)
         {
             sizableArray<square> toRet = new sizableArray<square>(20);
 

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using doktorChess;
+using doktorChessGameEngine;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TestMateSituations

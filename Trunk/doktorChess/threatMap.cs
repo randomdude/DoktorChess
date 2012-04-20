@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using doktorChessGameEngine;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace doktorChess

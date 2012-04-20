@@ -1,4 +1,6 @@
-﻿namespace doktorChess
+﻿using doktorChessGameEngine;
+
+namespace doktorChessGameEngine
 {
     public class kingSquare : square
     {
@@ -20,7 +22,7 @@
             return "k";
         }
 
-        public override sizableArray<move> getPossibleMoves(Board onThis)
+        public override sizableArray<move> getPossibleMoves(baseBoard onThis)
         {
             sizableArray<move> possibleMoves = new sizableArray<move>(potentialSquares.Length + 2);
 
@@ -40,7 +42,7 @@
             return possibleMoves;
         }
 
-        public override sizableArray<square> getCoveredSquares(Board parentBoard)
+        public override sizableArray<square> getCoveredSquares(baseBoard parentBoard)
         {
             sizableArray<square> toRet = new sizableArray<square>(8);
 
@@ -56,7 +58,7 @@
             return toRet;
         }
 
-        private bool canCastle(Board theBoard, bool kingSide)
+        private bool canCastle(baseBoard theBoard, bool kingSide)
         {
             // We can castle under specific circumstances:
             // * Our king has not moved
@@ -101,7 +103,7 @@
                 for (int n = 1; n < 3; n++)
                 {
                     square perhapsThreatened = theBoard[ kingSide ? position.right(n) : position.left(n)];
-                    if ( theBoard.isThreatened(perhapsThreatened, colour)  )
+                    if ( theBoard.isThreatenedHint(perhapsThreatened, colour)  )
                     {
                         // Intermediate squares are threatened - castling is impossible.
                         return false;

@@ -1,4 +1,6 @@
-﻿namespace doktorChess
+﻿using doktorChessGameEngine;
+
+namespace doktorChess
 {
     public class disabledThreatMap : IEnableableThreatMap
     {

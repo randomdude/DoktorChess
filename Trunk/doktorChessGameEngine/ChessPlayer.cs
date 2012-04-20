@@ -1,13 +1,14 @@
 ﻿using System;
+using doktorChessGameEngine;
 
-namespace doktorChess
+namespace doktorChessGameEngine
 {
     public class ChessPlayer
     {
-        public Board board;
+        public readonly baseBoard board;
         public Single score;
 
-        public ChessPlayer(Board newBoard)
+        public ChessPlayer(baseBoard newBoard)
         {
             board = newBoard;
         }

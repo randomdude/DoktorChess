@@ -1,4 +1,6 @@
-﻿namespace doktorChess
+﻿using doktorChessGameEngine;
+
+namespace doktorChessGameEngine
 {
     public class knightSquare : square
     {
@@ -21,12 +23,12 @@
             return "n";
         }
 
-        public override sizableArray<move> getPossibleMoves(Board onThis)
+        public override sizableArray<move> getPossibleMoves(baseBoard onThis)
         {
             return findFreeOrCapturableIfOnBoard(null, onThis, potentialSquares);
         }
 
-        public override sizableArray<square> getCoveredSquares(Board parentBoard)
+        public override sizableArray<square> getCoveredSquares(baseBoard parentBoard)
         {
             sizableArray<square> toRet = new sizableArray<square>(8);
 

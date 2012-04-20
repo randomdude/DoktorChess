@@ -1,6 +1,7 @@
 ﻿using System;
+using doktorChessGameEngine;
 
-namespace doktorChess
+namespace doktorChessGameEngine
 {
     public class loopConfig
     {
@@ -25,7 +26,7 @@ namespace doktorChess
                     break;
                 case vectorDirection.right:
                     startX = position.x + 1;
-                    finishX = Board.sizeX;
+                    finishX = baseBoard.sizeX;
                     startY = position.y;
                     finishY = startY + 1;
                     directionX = +1;
@@ -33,7 +34,7 @@ namespace doktorChess
                     break;
                 case vectorDirection.up:
                     startY = position.y + 1;
-                    finishY = Board.sizeY;
+                    finishY = baseBoard.sizeY;
                     startX = position.x;
                     finishX = position.x + 1;
                     directionX = 0;
@@ -50,7 +51,7 @@ namespace doktorChess
                 case vectorDirection.leftup:
                     startY = position.y + 1;
                     startX = position.x - 1;
-                    finishY = Board.sizeY;
+                    finishY = baseBoard.sizeY;
                     finishX = -1;
                     directionY = +1;
                     directionX = -1;
@@ -66,8 +67,8 @@ namespace doktorChess
                 case vectorDirection.rightup:
                     startY = position.y + 1;
                     startX = position.x + 1;
-                    finishY = Board.sizeY;
-                    finishX = Board.sizeX;
+                    finishY = baseBoard.sizeY;
+                    finishX = baseBoard.sizeX;
                     directionY = +1;
                     directionX = +1;
                     break;
@@ -75,7 +76,7 @@ namespace doktorChess
                     startY = position.y - 1;
                     startX = position.x + 1;
                     finishY = -1;
-                    finishX = Board.sizeX;
+                    finishX = baseBoard.sizeX;
                     directionY = -1;
                     directionX = +1;
                     break;

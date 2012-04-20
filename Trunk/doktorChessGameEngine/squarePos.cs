@@ -1,6 +1,7 @@
 ﻿using System;
+using doktorChessGameEngine;
 
-namespace doktorChess
+namespace doktorChessGameEngine
 {
     public class squarePos
     {
@@ -12,7 +13,7 @@ namespace doktorChess
 
         public squarePos(int newX, int newY)
         {
-            if (newX+1 > Board.sizeX || newY+1 > Board.sizeY)
+            if (newX + 1 > baseBoard.sizeX || newY + 1 > baseBoard.sizeY)
                 throw new ArgumentOutOfRangeException();
 
             x = newX;
@@ -120,13 +121,13 @@ namespace doktorChess
 
         public static int flatten(int x, int y)
         {
-            return x + (y * Board.sizeX);
+            return x + (y * baseBoard.sizeX);
         }
 
         public static squarePos unflatten(int flattened)
         {
-            int y = flattened / Board.sizeX;
-            int x = flattened % Board.sizeX;
+            int y = flattened / baseBoard.sizeX;
+            int x = flattened % baseBoard.sizeX;
 
             return new squarePos(x, y);
         }

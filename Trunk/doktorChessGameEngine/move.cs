@@ -6,7 +6,7 @@ using System.Text;
 using System.Web.Script.Serialization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace doktorChess
+namespace doktorChessGameEngine
 {
     public class move
     {
@@ -22,7 +22,7 @@ namespace doktorChess
         public readonly bool isPawnPromotion;
         public readonly pieceType typeToPromoteTo;
 
-        public static move fromJSON(string JSON, Board parentBoard)
+        public static move fromJSON(string JSON, baseBoard parentBoard)
         {
             minimalMove json = new JavaScriptSerializer().Deserialize<minimalMove>(JSON);
 
@@ -104,7 +104,7 @@ namespace doktorChess
         /// </summary>
         /// <param name="ourBoard">Board to examine</param>
         /// <returns></returns>
-        public bool isLegal(Board ourBoard)
+        public bool isLegal(baseBoard ourBoard)
         {
             if (_srcSquare.type == pieceType.none)
                 return false;
@@ -122,7 +122,7 @@ namespace doktorChess
         /// </summary>
         /// <param name="ourBoard"></param>
         /// <returns>null if move is illegal</returns>
-        public move sanitize(Board ourBoard)
+        public move sanitize(baseBoard ourBoard)
         {
             sizableArray<move> possibleMovesWithMovingPiece = _srcSquare.getPossibleMoves(ourBoard);
             IEnumerable<move> casted = possibleMovesWithMovingPiece.Cast<move>();
@@ -165,7 +165,7 @@ namespace doktorChess
                 throw new AssertFailedException("Malformed castling");
         }
 
-        public rookSquare findCastlingRook(Board theBoard)
+        public rookSquare findCastlingRook(baseBoard theBoard)
         {
             if (!isACastling)
                 throw new AssertFailedException("Asked to find castling rook of a move not a castle");

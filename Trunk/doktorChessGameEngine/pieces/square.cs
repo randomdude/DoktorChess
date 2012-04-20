@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using doktorChessGameEngine;
 
-namespace doktorChess
+namespace doktorChessGameEngine
 {
     public class square
     {
@@ -24,7 +25,9 @@ namespace doktorChess
         public pieceColour colour { get; private set; }
         public squarePos position { get; set; }
 
-        // This array of bools contains a bool for each square, set to 'true' if it is covered by this piece.
+        // This array of bools contains a bool for each square, which can be set to 'true' by a 
+        // board implementation if it this square covered by this piece.
+        // FIXME: Should really be in the theatMap itself!
         public readonly speedySquareList coveredSquares = new speedySquareList();
 
         public bool excludeFromCastling = false;
@@ -99,7 +102,7 @@ namespace doktorChess
             return ".";
         }
 
-        virtual public sizableArray<move> getPossibleMoves(Board onThis)
+        virtual public sizableArray<move> getPossibleMoves(baseBoard onThis)
         {
             // Empty squares can't move, silly.
             return new sizableArray<move>(0);
@@ -112,7 +115,7 @@ namespace doktorChess
         /// <param name="onThis">The board to move on</param>
         /// <param name="dir">The vectorDirection to move in</param>
         /// <returns>A List&lt;move&gt; of moves</returns>
-        public sizableArray<move> getMovesForVector(sizableArray<move> addTo, Board onThis, vectorDirection dir)
+        public sizableArray<move> getMovesForVector(sizableArray<move> addTo, baseBoard onThis, vectorDirection dir)
         {
             if (addTo == null)
                 addTo = new sizableArray<move>(8);
@@ -148,7 +151,7 @@ namespace doktorChess
             return addTo;
         }
 
-        protected void getSquaresCoveredForVector(sizableArray<square> addTo, Board onThis, vectorDirection dir)
+        protected void getSquaresCoveredForVector(sizableArray<square> addTo, baseBoard onThis, vectorDirection dir)
         {
             if (addTo == null)
                 addTo = new sizableArray<square>(8);
@@ -185,7 +188,7 @@ namespace doktorChess
             return ((type != pieceType.none) && (colour != ourColour));
         }
 
-        protected sizableArray<move> findFreeOrCapturableIfOnBoard(sizableArray<move> returnArray, Board onThis, squarePosOffset[] potentialSquareOffsets)
+        protected sizableArray<move> findFreeOrCapturableIfOnBoard(sizableArray<move> returnArray, baseBoard onThis, squarePosOffset[] potentialSquareOffsets)
         {
             if (returnArray == null)
                 returnArray = new sizableArray<move>(potentialSquareOffsets.Length);
@@ -220,13 +223,13 @@ namespace doktorChess
             int offX = x + position.x;
             int offY = y + position.y;
 
-            return (! (offX > Board.sizeX - 1 ||
+            return (!(offX > baseBoard.sizeX - 1 ||
                        offX < 0 ||
-                       offY > Board.sizeY - 1 ||
+                       offY > baseBoard.sizeY - 1 ||
                        offY < 0));
         }
 
-        public virtual sizableArray<square> getCoveredSquares(Board parentBoard)
+        public virtual sizableArray<square> getCoveredSquares(baseBoard parentBoard)
         {
             return new sizableArray<square>(0);
         }

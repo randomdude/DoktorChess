@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 
-namespace doktorChess
+namespace doktorChessGameEngine
 {
     public class speedySquareListEnumerator : IEnumerator<int>
     {
-        private readonly bool[] squares;
+        private readonly bool[] _squares;
 
         private int i = -1;
 
         public speedySquareListEnumerator(bool[] newSquares)
         {
-            squares = newSquares;
+            _squares = newSquares;
         }
 
         public bool MoveNext()
@@ -19,9 +19,9 @@ namespace doktorChess
             do
             {
                 i++;
-                if (i == squares.Length)
+                if (i == _squares.Length)
                     return false;
-            } while ( !squares[i] );
+            } while ( !_squares[i] );
 
             return true;
         }

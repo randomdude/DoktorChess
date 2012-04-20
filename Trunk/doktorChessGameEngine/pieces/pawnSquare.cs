@@ -1,4 +1,6 @@
-﻿namespace doktorChess
+﻿using doktorChessGameEngine;
+
+namespace doktorChessGameEngine
 {
     public class pawnSquare : square
     {
@@ -13,7 +15,7 @@
             return "p";
         }
 
-        public override sizableArray<move> getPossibleMoves(Board onThis)
+        public override sizableArray<move> getPossibleMoves(baseBoard onThis)
         {
             sizableArray<move> toRet = new sizableArray<move>(40);
 
@@ -25,7 +27,7 @@
             
             // We can capture upward diagonally, if immediate diagonal upward squares 
             // contain an enemy piece.
-            if ((position.y + direction < Board.sizeY ) && 
+            if ((position.y + direction < baseBoard.sizeY) && 
                 (position.y + direction > -1) )
             {
                 // Check for en passant. En passant can never cause a promotion.
@@ -35,7 +37,7 @@
                     if (canEnPassantTo(adjacentLeft, onThis))
                         toRet.Add(new move(onThis[position], onThis[position.up(direction).leftOne()], adjacentLeft));
                 }
-                if (position.x < Board.sizeX - 1)
+                if (position.x < baseBoard.sizeX - 1)
                 {
                     square adjacentRight = onThis[position.rightOne()];
                     if (canEnPassantTo(adjacentRight, onThis))
@@ -47,7 +49,7 @@
                 // prevent this move from moving in to the back row.
                 if (movedCount == 0)
                 {
-                    if (position.y + (direction * 2) < Board.sizeY &&
+                    if (position.y + (direction * 2) < baseBoard.sizeY &&
                         position.y + (direction * 2) > -1)
                     {
                         // check back row
@@ -69,7 +71,7 @@
                     if (onThis[position.up(direction).leftOne()].containsPieceNotOfColour(colour))
                         addPawnMovesToSquare(toRet, onThis[position], onThis[position.up(direction).leftOne()]);
                 }
-                if (position.x < Board.sizeX -1 )
+                if (position.x < baseBoard.sizeX - 1)
                 {
                     if (onThis[position.up(direction).rightOne()].containsPieceNotOfColour(colour))
                         addPawnMovesToSquare(toRet, onThis[position], onThis[position.up(direction).rightOne()]);
@@ -110,7 +112,7 @@
             }
         }
 
-        private bool canEnPassantTo(square adjacent, Board theBoard)
+        private bool canEnPassantTo(square adjacent, baseBoard theBoard)
         {
             // We can capture via en passant if:
             // * An enemy pawn is on our right/left
@@ -129,12 +131,12 @@
             return false;
         }
 
-        public override sizableArray<square> getCoveredSquares(Board parentBoard)
+        public override sizableArray<square> getCoveredSquares(baseBoard parentBoard)
         {
             sizableArray<square> toRet = new sizableArray<square>(2);
             int direction = (colour == pieceColour.white) ? 1 : -1;
 
-            if ((position.y + direction < Board.sizeY) &&
+            if ((position.y + direction < baseBoard.sizeY) &&
                 (position.y + direction > -1))
             {
                 // Check the two diagonals
@@ -142,7 +144,7 @@
                 {
                     toRet.Add( parentBoard[position.up(direction).leftOne()] );
                 }
-                if (position.x < Board.sizeX - 1)
+                if (position.x < baseBoard.sizeX - 1)
                 {
                     toRet.Add( parentBoard[position.up(direction).rightOne()] );
                 }

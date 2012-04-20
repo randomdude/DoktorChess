@@ -8,6 +8,7 @@ using System.Web.SessionState;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using doktorChess;
+using doktorChessGameEngine;
 
 namespace WebFrontend
 {

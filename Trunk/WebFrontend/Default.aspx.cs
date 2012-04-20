@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Web.UI.WebControls;
 using doktorChess;
+using doktorChessGameEngine;
 
 namespace WebFrontend
 {

@@ -2,7 +2,7 @@
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace doktorChess
+namespace doktorChessGameEngine
 {
     /// <summary>
     /// This class is used by serialisation stuff.

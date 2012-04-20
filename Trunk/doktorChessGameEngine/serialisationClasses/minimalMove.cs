@@ -1,4 +1,4 @@
-﻿namespace doktorChess
+﻿namespace doktorChessGameEngine
 {
     /// <summary>
     /// This class is used by the JSON code to express a move intended. It is then used to

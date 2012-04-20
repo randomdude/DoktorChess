@@ -1,4 +1,5 @@
 ﻿using doktorChess;
+using doktorChessGameEngine;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests

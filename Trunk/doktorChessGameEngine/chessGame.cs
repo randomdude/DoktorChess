@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using doktorChessGameEngine;
 
 namespace doktorChess
 {
@@ -31,7 +32,7 @@ namespace doktorChess
             {
                 doMove(playerToPlay.board);
 
-                toPlay = Board.getOtherSide(toPlay);
+                toPlay = baseBoard.getOtherSide(toPlay);
                 playerToPlay = playerToPlay == p1 ? p2 : p1;
 
             } while (playerToPlay.board.getGameStatus(toPlay) == gameStatus.inProgress);
@@ -63,13 +64,12 @@ namespace doktorChess
 
         }
 
-        private void doMove(Board boardToMove)
+        private void doMove(baseBoard boardToMove)
         {
             lineAndScore bestMove = boardToMove.findBestMove();
-            boardToMove.advanceKillerTables();
 
             Console.WriteLine(string.Format("Best line for {0}: {1}", toPlay, bestMove.ToString(moveStringStyle.chessNotation)));
-            Console.WriteLine(bestMove._scorer.ToString());
+            Console.WriteLine(bestMove.ToString());
             //Console.WriteLine("{0} boards scored in {1} ms, {2}/sec. {3} ms in board scoring.", myBoard.stats.boardsScored, myBoard.stats.totalSearchTime, myBoard.stats.scoredPerSecond, myBoard.stats.boardScoreTime );
 
             //Console.Write(String.Format("{0},", myBoard.stats.boardsScored));

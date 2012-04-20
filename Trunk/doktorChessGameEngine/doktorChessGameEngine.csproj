@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{6B583D3F-16E3-4CFB-8B4A-8CE786724534}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{E0E25E55-D11C-4957-856F-3CD291FD1831}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>doktorChess</RootNamespace>
-    <AssemblyName>doktorChess</AssemblyName>
+    <RootNamespace>doktorChessGameEngine</RootNamespace>
+    <AssemblyName>doktorChessGameEngine</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -21,8 +21,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
-    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -52,21 +50,35 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Board.cs" />
-    <Compile Include="BoardScorer.cs" />
-    <Compile Include="boardSearchConfig.cs" />
-    <Compile Include="disabledThreatMap.cs" />
-    <Compile Include="IEnableableThreatMap.cs" />
-    <Compile Include="killerMoveStore.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="baseBoard.cs" />
+    <Compile Include="chessGame.cs" />
+    <Compile Include="ChessPlayer.cs" />
+    <Compile Include="gameStatus.cs" />
+    <Compile Include="gameType.cs" />
+    <Compile Include="lineAndScore.cs" />
+    <Compile Include="move.cs" />
+    <Compile Include="moveSearchStats.cs" />
+    <Compile Include="moveStringStyle.cs" />
+    <Compile Include="parsedFEN.cs" />
+    <Compile Include="pieceColour.cs" />
+    <Compile Include="pieces\bishopSquare.cs" />
+    <Compile Include="pieces\kingSquare.cs" />
+    <Compile Include="pieces\knightSquare.cs" />
+    <Compile Include="pieces\loopConfig.cs" />
+    <Compile Include="pieces\pawnSquare.cs" />
+    <Compile Include="pieces\queenSquare.cs" />
+    <Compile Include="pieces\rookSquare.cs" />
+    <Compile Include="pieces\square.cs" />
+    <Compile Include="pieceType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="threatMap.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\doktorChessGameEngine\doktorChessGameEngine.csproj">
-      <Project>{E0E25E55-D11C-4957-856F-3CD291FD1831}</Project>
-      <Name>doktorChessGameEngine</Name>
-    </ProjectReference>
+    <Compile Include="serialisationClasses\minimalMove.cs" />
+    <Compile Include="serialisationClasses\moveResponse.cs" />
+    <Compile Include="sizableArray.cs" />
+    <Compile Include="speedySquareList.cs" />
+    <Compile Include="speedySquareListEnumerator.cs" />
+    <Compile Include="squarePos.cs" />
+    <Compile Include="squarePosOffset.cs" />
+    <Compile Include="vectorDirection.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

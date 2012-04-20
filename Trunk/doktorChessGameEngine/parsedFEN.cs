@@ -2,11 +2,11 @@
 using System.Linq;
 using doktorChessGameEngine;
 
-namespace doktorChess
+namespace doktorChessGameEngine
 {
     public class parsedFEN
     {
-        public readonly char[,] boardRepresentation = new char[Board.sizeX, Board.sizeY];
+        public readonly char[,] boardRepresentation = new char[baseBoard.sizeX, baseBoard.sizeY];
         public pieceColour toPlay;
         public bool whiteCanCastleKingside ;
         public bool blackCanCastleKingside ;
@@ -65,12 +65,12 @@ namespace doktorChess
             string[] piecePlacementInRows = piecePlacement.Split('/');
 
             // And extract individual pieces.
-            for (int y = 0; y != Board.sizeY; y++)
+            for (int y = 0; y != baseBoard.sizeY; y++)
             {
-                string thisRow = piecePlacementInRows[Board.sizeY - 1 - y];
+                string thisRow = piecePlacementInRows[baseBoard.sizeY - 1 - y];
 
                 int xCharPos = 0;
-                for (int x = 0; x < Board.sizeX; )
+                for (int x = 0; x < baseBoard.sizeX; )
                 {
                     char thisChar = thisRow[xCharPos];
 
