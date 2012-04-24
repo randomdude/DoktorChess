@@ -7,6 +7,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace doktorChessGameEngine
 {
+    public class chessAIAttribute : Attribute
+    {
+        
+    }
+
     public abstract class baseBoard
     {
         public const int sizeX = 8;

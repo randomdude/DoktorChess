@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Web.UI.WebControls;
 using doktorChess;
@@ -12,20 +13,18 @@ namespace tournament
 {
     public partial class _Default : System.Web.UI.Page
     {
-        public static tournamentThread _tournament = null;
-        public static object _tournamentLock = new object();
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (_tournament == null)
+            if (runningTournament._tournament == null)
             {
                 lblStatus.Text = "No tournament in progress";
                 return;
             }
 
-            lock (_tournamentLock)
+            lock (runningTournament._tournamentLock)
             {
-                IEnumerable<tournamentGame> queued = _tournament.gameQueue.Where(x => !x.isRunning && !x.isFinished);
+                IEnumerable<tournamentGame> queued = runningTournament._tournament.gameQueue.Where(x => !x.isRunning && !x.isFinished);
 
                 lblStatus.Text = queued.Count() + " games in queue:" ;
 
@@ -43,7 +42,7 @@ namespace tournament
                     gameRow.Cells.Add(cell2);
                 }
 
-                IEnumerable<tournamentGame> inProgress = _tournament.gameQueue.Where(x => x.isRunning && !x.isFinished);
+                IEnumerable<tournamentGame> inProgress = runningTournament._tournament.gameQueue.Where(x => x.isRunning && !x.isFinished);
 
                 if (inProgress.Count() > 0)
                 {
@@ -55,7 +54,7 @@ namespace tournament
                     string moveListHTML = makeMoveList(thisGame.moveList);
                     resp.Append(
                         string.Format("<table><tr><td>{1}</td><td>{0}</td></tr></table>", 
-                            moveListHTML,thisGame.boardRepresentation));
+                            moveListHTML, thisGame.boardRepresentation));
                     lblCurrentGame.Text = resp.ToString();
                 }
             }
@@ -87,14 +86,8 @@ namespace tournament
 
         protected void Button1_Click(object sender, EventArgs e)
         {
-
-            _tournament = new tournamentThread();
-
-            _tournament.addContender(new contender(typeof(exampleRandom)));
-            _tournament.addContender(new contender(typeof(exampleMiniMaxBoard)));
-            _tournament.addContender(new contender(typeof(Board)));
-            
-            _tournament.startInNewThread();
+            runningTournament.startNewTournament();
         }
+
     }
 }

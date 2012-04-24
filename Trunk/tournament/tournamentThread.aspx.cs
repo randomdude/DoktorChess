@@ -12,6 +12,8 @@ namespace tournament
         public readonly List<contender> _contenders = new List<contender>();
         public readonly List<tournamentGame> gameQueue = new List<tournamentGame>();
 
+        private tournamentGame currentGame = null;
+
         private static void staticThreadStart(Object instance)
         {
             ((tournamentThread)instance).threadStart();
@@ -19,28 +21,35 @@ namespace tournament
 
         private void threadStart()
         {
-            lock(_contenders)
+            lock (gameQueue)
             {
-                // Make a queue of potential matches!
-                foreach (contender contenderWhite in _contenders)
+                lock (_contenders)
                 {
-                    foreach (contender contenderBlack in _contenders)
+                    // Make a queue of potential matches!
+                    foreach (contender contenderWhite in _contenders)
                     {
-                        // Don't make engines play themselves!
-                        if (contenderWhite == contenderBlack)
-                            continue;
-                        gameQueue.Add(new tournamentGame(contenderWhite, contenderBlack) { OnGameFinished = gameFinished});
+                        foreach (contender contenderBlack in _contenders)
+                        {
+                            // Don't make engines play themselves!
+                            if (contenderWhite == contenderBlack)
+                                continue;
+                            gameQueue.Add(new tournamentGame(contenderWhite, contenderBlack)
+                                              {OnGameFinished = gameFinished});
+                        }
                     }
                 }
-            }
 
-            // Now start the first game.
-            tournamentGame[] pendingGames = gameQueue.Where(x => !x.isRunning && !x.isFinished).ToArray();
-            if (pendingGames.Length > 0)
-                pendingGames[0].startInNewThread();
+                // Now start the first game.
+                tournamentGame[] pendingGames = gameQueue.Where(x => !x.isRunning && !x.isFinished).ToArray();
+                if (pendingGames.Length > 0)
+                {
+                    currentGame = pendingGames[0];
+                    currentGame.startInNewThread();
+                }
+            }
         }
 
-        private void gameFinished(tournamentGame recentlyfinished)
+        private void gameFinished(tournamentGame recentlyfinished, baseBoard fromWhitesView)
         {
             // Change the score of each player
             if (recentlyfinished.isErrored)
@@ -82,11 +91,12 @@ namespace tournament
             gameInfo.isErrored = recentlyfinished.white.isErrored;
             gameInfo.errorMessage = recentlyfinished.white.errorMessage;
             gameInfo.opponentID = recentlyfinished.black.ID;
-            gameInfo.opponentName = recentlyfinished.white.typeName;
+            gameInfo.opponentName = recentlyfinished.black.typeName;
             gameInfo.exception = recentlyfinished.white.exception;
             gameInfo.moveList = recentlyfinished.moveList;
             gameInfo.didWin = recentlyfinished.winningSide == pieceColour.white;
             gameInfo.col = pieceColour.white;
+            gameInfo.board = fromWhitesView;
             recentlyfinished.white.gamesPlayed.Add(gameInfo);
 
             playedGame gameInfoBlack = new playedGame();
@@ -99,6 +109,7 @@ namespace tournament
             gameInfoBlack.moveList = recentlyfinished.moveList;
             gameInfoBlack.didWin = recentlyfinished.winningSide == pieceColour.black;
             gameInfoBlack.col = pieceColour.black;
+            gameInfoBlack.board = fromWhitesView;
             recentlyfinished.black.gamesPlayed.Add(gameInfoBlack);
 
             // Start the next!
@@ -106,7 +117,14 @@ namespace tournament
             {
                 tournamentGame[] pendingGames = gameQueue.Where(x => !x.isRunning && !x.isFinished).ToArray();
                 if (pendingGames.Length > 0)
+                {
+                    currentGame = pendingGames[0];
                     pendingGames[0].startInNewThread();
+                }
+                else
+                {
+                    currentGame = null;
+                }
             }
         }
 
@@ -124,6 +142,18 @@ namespace tournament
                 _contenders.Add(contender);
             }
         }
+
+        public void abort()
+        {
+            lock (gameQueue)
+            {
+                if (currentGame != null)
+                {
+                    currentGame.abort();
+                    currentGame = null;
+                }
+            }
+        }
     }
 
     public class playedGame
@@ -137,5 +167,6 @@ namespace tournament
         public bool didWin;
         public Exception exception;
         public pieceColour col;
+        public baseBoard board;
     }
 }

@@ -7,6 +7,7 @@
     <title></title>
     <link rel="stylesheet" href="style/styles.css" type="text/css" />
     <link rel="stylesheet" href="style/roundedbox.css" type="text/css" />
+    <link rel="stylesheet" href="style/ui-darkness/jquery-ui-1.8.19.custom.css" type="text/css" />
 
     <script src="js/jquery.js" type="text/javascript"></script>
     <script src="js/jquery-ui.js" type="text/javascript"></script>

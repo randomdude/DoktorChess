@@ -17,11 +17,19 @@ namespace tournament
         public bool isErrored { get; private set; }
         public bool isDraw { get; private set; }
         public pieceColour winningSide { get; private set; }
+        public pieceColour colToMove { get; private set; }
         private Thread _gameThread;
         public readonly List<move> moveList = new List<move>();
         public string boardRepresentation { get; private set; }
+        private baseBoard gameBoardWhite;
+        private baseBoard gameBoardBlack;
 
-        public delegate void gameFinishedDelegate(tournamentGame recentlyFinished);
+        public readonly int id;
+
+        private static int nextID = 0;
+        private static object nextIDLock = new object();
+
+        public delegate void gameFinishedDelegate(tournamentGame recentlyFinished, baseBoard fromWhitesView);
         public gameFinishedDelegate OnGameFinished;
 
         public tournamentGame(contender contenderWhite, contender contenderBlack)
@@ -29,12 +37,16 @@ namespace tournament
             white = contenderWhite;
             black = contenderBlack;
             boardRepresentation = string.Empty;
+
+            lock (nextIDLock)
+            {
+                id = nextID;
+                nextID++;
+            }
         }
 
         public void startInNewThread()
         {
-            isRunning = true;
-
             _gameThread = new Thread(staticThreadStart);
             _gameThread.Name = "Tournament thread: " + white.typeName + " vs " + black.typeName;
             _gameThread.Priority = ThreadPriority.BelowNormal;
@@ -64,18 +76,15 @@ namespace tournament
                 isFinished = true;
                 isRunning = false;
 
-                gameFinished();
+                gameFinished(gameBoardWhite);
             }
         }
 
         private void ThreadStartInner()
         {
-            pieceColour colToMove = pieceColour.white;
+            colToMove = pieceColour.white;
 
             // Make new players
-            baseBoard gameBoardWhite;
-            baseBoard gameBoardBlack;
-
             try
             {
                 gameBoardWhite = white.makeNewBoard();
@@ -93,6 +102,10 @@ namespace tournament
             {
                 throw new PlayerException(black, pieceColour.black, "While attempting to make board: ", e);
             }
+
+            this.boardRepresentation = gameBoardWhite.ToString();
+
+            isRunning = true;
 
             while (true)
             {
@@ -194,13 +207,26 @@ namespace tournament
             isFinished = true;
             isRunning = false;
 
-            gameFinished();
+            gameFinished(gameBoardWhite);
         }
 
-        private void gameFinished()
+        private void gameFinished(baseBoard board)
         {
             if (OnGameFinished != null)
-                OnGameFinished.Invoke(this);
+                OnGameFinished.Invoke(this, board);
+        }
+
+        public void abort()
+        {
+            try
+            {
+                // HEERURTTT! 
+                // We shouldn't Thread.Abort, in an ideal world, but I think it is inevitable for now. 
+                _gameThread.Abort();
+            }
+            catch (Exception)
+            {
+            }
         }
     }
 

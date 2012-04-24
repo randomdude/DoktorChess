@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace doktorChess
 {
+    [chessAIAttribute]
     public class Board : baseBoard
     {
         private bool _whiteKingCaptured = false;

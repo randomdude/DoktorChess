@@ -9,6 +9,21 @@ $(document).ready(function() {
     // Hide children of 'expandable' links, and show them on click to the parent item
     $("a.expandable").parent().children('.expandableChild').hide();
     $("a.expandable").click(function() {
-    $(this).parent().children('.expandableChild').toggle("slow");
+        $(this).parent().children('.expandableChild').toggle("slow");
     });
+
+    // Make dialogs for each finish position
+    $("a.dialogable").each(function() {
+
+        // Create a new dialog containing the relevant elements
+        dlgParent = $(this).parent().children('.dialogChild')
+        var dlg = dlgParent.dialog({ modal: true, autoOpen: false, minWidth: 650, title: 'Final position' });
+
+        // Add a handler on this element to open the dialog we just made
+        $(this).click(function() {
+            dlg.dialog("open");
+            return false;
+        });
+    });
+
 });

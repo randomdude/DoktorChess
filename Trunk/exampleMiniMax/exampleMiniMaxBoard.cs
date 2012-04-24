@@ -5,6 +5,7 @@ using doktorChessGameEngine;
 
 namespace exampleMiniMax
 {
+    [chessAIAttribute]
     public class exampleMiniMaxBoard : baseBoard
     {
         const int searchDepth = 2;
