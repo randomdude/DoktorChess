@@ -55,10 +55,15 @@
   <ItemGroup>
     <Content Include="images\bishop-black.png" />
     <Content Include="images\bishop-white.png" />
+    <Content Include="images\bl.gif" />
+    <Content Include="images\br.gif" />
     <Content Include="images\king-black.png" />
     <Content Include="images\king-white.png" />
     <Content Include="images\knight-black.png" />
     <Content Include="images\knight-white.png" />
+    <Content Include="images\ml.gif" />
+    <Content Include="images\mr.gif" />
+    <Content Include="images\ms.jpg" />
     <Content Include="images\pawn-black.png" />
     <Content Include="images\pawn-white.png" />
     <Content Include="images\queen-black.png" />
@@ -66,8 +71,9 @@
     <Content Include="images\rook-black.png" />
     <Content Include="images\rook-white.png" />
     <Content Include="images\status_anim.gif" />
-    <Content Include="js\doktorChess.js" />
-    <Content Include="js\json.js" />
+    <Content Include="images\tl.gif" />
+    <Content Include="images\tr.gif" />
+    <Content Include="js\tournament.js" />
     <Content Include="overview.aspx" />
     <Content Include="playerDetail.aspx" />
     <Content Include="scoreboard.aspx" />

@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" >
 <head runat="server">
     <title></title>
-        <link rel="stylesheet" href="style/styles.css" type="text/css" />
-        <link rel="stylesheet" href="style/roundedbox.css" type="text/css" />
+    <link rel="stylesheet" href="style/styles.css" type="text/css" />
+    <link rel="stylesheet" href="style/roundedbox.css" type="text/css" />
 
-        <script src="js/json.js" type="text/javascript"></script>
-        <script src="js/jquery.js" type="text/javascript"></script>
-        <script src="js/jquery-ui.js" type="text/javascript"></script>
-        <script src="js/doktorChess.js" type="text/javascript" ></script>        
+    <script src="js/json.js" type="text/javascript"></script>
+    <script src="js/jquery.js" type="text/javascript"></script>
+    <script src="js/jquery-ui.js" type="text/javascript"></script>
+    <script src="js/doktorChess.js" type="text/javascript" ></script>        
 </head>
 <body>
     <form id="form1" runat="server">

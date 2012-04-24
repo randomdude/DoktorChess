@@ -38,28 +38,39 @@ namespace tournament
                     }
                     else if (gameResult.isDraw)
                     {
-                        row.Cells.Add(makeCell("Draw"));
+                        row.Cells.Add(makeCell("Draw", "resultCellDraw"));
                     }
                     else if (gameResult.didWin)
                     {
-                        row.Cells.Add(makeCell("Win"));
+                        row.Cells.Add(makeCell("Win", "resultCellWin"));
                     }
                     else
                     {
-                        row.Cells.Add(makeCell("Loss"));
+                        row.Cells.Add(makeCell("Loss", "resultCellLoss"));
                     }
 
                     row.Cells.Add(makeCell(gameResult.moveList.Count.ToString()));
-                    row.Cells.Add(makeCell(_Default.makeMoveList(gameResult.moveList)));
+                    TableCell moveList = new TableCell();
+                    string moveText = _Default.makeMoveList(gameResult.moveList);
+                    string linkCaption = "Click to expand " + gameResult.moveList.Count + " moves";
+                    moveList.Text = "<div><a href=\"#\" class=\"expandable\">" + linkCaption + "</a><p class=\"expandableChild\">" + moveText + "</p></div>"; 
+                    row.Cells.Add(moveList);
                 }
             }
 
         }
 
-        private TableCell makeCell(string text)
+        public static TableCell makeCell(string text)
         {
             TableCell optCell = new TableCell();
             optCell.Text = text;
+            return optCell;
+        }
+
+        public static TableCell makeCell(string text, string cssStyle)
+        {
+            TableCell optCell = makeCell(text);
+            optCell.CssClass = cssStyle;
             return optCell;
         }
     }

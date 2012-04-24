@@ -40,11 +40,11 @@ namespace tournament
                     cell1.Controls.Add(playerDetailLink);
                     newRow.Cells.Add(cell1);
 
-                    newRow.Cells.Add(makeCell(thisContender.score.ToString()));
+                    newRow.Cells.Add(playerDetail.makeCell(thisContender.score.ToString()));
 
-                    newRow.Cells.Add(makeCell(thisContender.wins.ToString()));
-                    newRow.Cells.Add(makeCell(thisContender.losses.ToString()));
-                    newRow.Cells.Add(makeCell(thisContender.draws.ToString()));
+                    newRow.Cells.Add(playerDetail.makeCell(thisContender.wins.ToString()));
+                    newRow.Cells.Add(playerDetail.makeCell(thisContender.losses.ToString()));
+                    newRow.Cells.Add(playerDetail.makeCell(thisContender.draws.ToString()));
 
                     TableCell errorCell = new TableCell();
                     errorCell.Text = thisContender.errorCount.ToString();
@@ -62,11 +62,14 @@ namespace tournament
                 // Top legend
                 TableRow legendRow = new TableRow();
                 resultGrid.Rows.Add(legendRow);
-                legendRow.Cells.Add(new TableCell());
+                TableCell spacer = new TableCell();
+                spacer.CssClass = "spacer";
+                legendRow.Cells.Add(spacer);
                 foreach (contender contRow in containersByName)
                 {
                     TableCell cell = new TableCell();
                     cell.Text = contRow.typeName;
+                    cell.CssClass = "legendRow";
                     legendRow.Cells.Add(cell);
                 }
 
@@ -79,6 +82,7 @@ namespace tournament
                     // Add the left-hand legend
                     TableCell legendCell = new TableCell();
                     legendCell.Text = contRow.typeName;
+                    legendCell.CssClass = "legendCol";
                     row.Cells.Add(legendCell);
                     
                     contRowIndex++;
@@ -92,7 +96,7 @@ namespace tournament
 
                         if (contColIndex == contRowIndex)
                         {
-                            cell.BackColor = Color.LightGray;
+                            cell.CssClass = "disabled";
                             continue;
                         }
 
@@ -101,27 +105,88 @@ namespace tournament
                         if (intersection.Count() == 0)
                         {
                             // Game is pending
+                            cell.CssClass = "pending";
                             cell.Text = "...";
                         }
                         else
                         {
                             playedGame gameRes = intersection.Single();
                             if (gameRes.isDraw)
+                            {
+                                cell.CssClass = "draw";
                                 cell.Text = "Draw";
+                            }
                             else
-                                cell.Text = gameRes.didWin ? "White win" : "White loss";
+                            {
+                                if (gameRes.didWin)
+                                {
+                                    cell.CssClass = "whitewin";
+                                    cell.Text = "White win";
+                                }
+                                else
+                                {
+                                    cell.CssClass = "whiteloss";
+                                    cell.Text = "White loss";
+                                }
+                            }
                         }
                     }
+                }
+
+                // Now the league table.
+                IOrderedEnumerable<tournamentGame> gamesByWhiteName = _Default._tournament.gameQueue.OrderBy(x => x.white.typeName);
+
+                foreach (tournamentGame game in gamesByWhiteName)
+                {
+                    TableRow newRow = new TableRow();
+                    matchList.Rows.Add(newRow);
+
+                    TableCell whiteRes, blackRes;
+                    if (!game.isFinished)
+                    {
+                        if (game.isRunning)
+                        {
+                            whiteRes = playerDetail.makeCell("Playing now");
+                            blackRes = playerDetail.makeCell("Playing now");
+                        }
+                        else
+                        {
+                            whiteRes = playerDetail.makeCell("...");
+                            blackRes = playerDetail.makeCell("...");                            
+                        }
+                    }
+                    else
+                    {
+                        // The game is finished.
+                        if (game.isDraw)
+                        {
+                            whiteRes = playerDetail.makeCell("½", "resultCellDraw");
+                            blackRes = playerDetail.makeCell("½", "resultCellDraw");
+                        }
+                        else
+                        {
+                            if (game.winningSide == pieceColour.white)
+                            {
+                                whiteRes = playerDetail.makeCell("1", "resultCellWin");
+                                blackRes = playerDetail.makeCell("0", "resultCellLoss");
+                            }
+                            else
+                            {
+                                whiteRes = playerDetail.makeCell("0", "resultCellLoss");
+                                blackRes = playerDetail.makeCell("1", "resultCellWin");
+                                
+                            }
+                        }
+                    }
+
+                    newRow.Cells.Add(playerDetail.makeCell(game.white.typeName));
+                    newRow.Cells.Add(whiteRes);
+                    newRow.Cells.Add(playerDetail.makeCell(" - "));
+                    newRow.Cells.Add(blackRes);
+                    newRow.Cells.Add(playerDetail.makeCell(game.black.typeName));
                 }
             }
         }
 
-
-        private TableCell makeCell(string text)
-        {
-            TableCell optCell = new TableCell();
-            optCell.Text = text;
-            return optCell;
-        }
     }
 }
