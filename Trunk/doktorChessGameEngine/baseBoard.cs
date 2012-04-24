@@ -252,6 +252,10 @@ namespace doktorChessGameEngine
                 return gameStatus.drawn;
 
             // If this position has been seen three times, then the game is a draw.
+            // Note that this does not _exactly_ match the FIDE rules, since in order for a 
+            // position to be considered 'the same' under FIDE, it must be the same side's 
+            // move, and the range of possible moves must be the same (ie, if a pawn could be
+            // captured via en passant and cannot later, that is not the same move).
             string thisPos = this.ToString();
             if (positionsSoFar != null && positionsSoFar.Contains(thisPos))
             {

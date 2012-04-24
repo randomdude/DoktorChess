@@ -15,11 +15,23 @@ namespace TestMateSituations
         }
 
         [TestMethod]
+        public void testMateFinding_position001_asBlack()
+        {
+            testMateFinding(@"r1qN3K/4kp2/8/8/8/8/8/8 b - - 0 0", 2, null);
+        }
+        
+        [TestMethod]
         public void testMateFinding_position002()
         {
             testMateFinding(@"r5rk/5p1p/5R2/4B3/8/8/7P/7K w - - 0 0", 3, "Ra6,f6,BxP,Rg7,RxR");
         }
 
+        [TestMethod]
+        public void testMateFinding_position002_asBlack()
+        {
+            testMateFinding(@"7k/7p/8/8/4b3/5r2/5P1P/R5RK b - - 0 0", 3, "Ra3,f3,BxP,Rg2,RxR");
+        }
+        
         [TestMethod]
         public void testMateFinding_position003()
         {
@@ -55,6 +67,8 @@ namespace TestMateSituations
             boardSearchConfig cfg = boardSearchConfig.getDebugConfig();
             cfg.searchDepth = (ourmoves + (ourmoves - 1) ) - 1;
             Board testBoard = Board.makeNormalFromFEN(testFEN, cfg);
+
+            testBoard.disableThreeFoldRule();
 
             lineAndScore bestLine = testBoard.findBestMove();
 

@@ -323,7 +323,7 @@ namespace doktorChess
                 stats.boardsScored++;
                 BoardScorer scorer = new BoardScorer(this, colToMove, _searchConfig.scoreConfig);
                 //return new lineAndScore(new move[] { }, scorer.getScore() - (searchConfig.searchDepth - depthLeft), scorer);
-                int score = scorer.getScore() * 1;
+                int score = scorer.getScore() * -1;
                 return new lineAndScore(new move[] { }, score, scorer);
             }
 
