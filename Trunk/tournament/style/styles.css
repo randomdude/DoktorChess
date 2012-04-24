@@ -1,0 +1,101 @@
+﻿
+.piece
+{
+	position: absolute;
+}
+
+.dimming
+{
+	filter:alpha(opacity=15);      
+    -moz-opacity:0.15;             
+    -khtml-opacity: 0.15;          
+    opacity: 0.15;
+}
+
+.progressIndicator
+{
+	font-style: italic;
+}
+
+.gameStatusLabel
+{
+	font-family: Aharoni;
+	font-size: large;
+}
+
+.board
+{	
+	padding: 0px;
+	border-color: #B8860B;
+	border-style: solid;
+	border-width: thick;
+	border-collapse: collapse;
+	border-spacing: 0px;
+	width: 600px;
+}
+
+.statusPanel
+{
+	display: inline; 
+	position: fixed; 
+	height: 623px;
+	width: 300px; 
+}
+
+.statusPanelDiv
+{
+	display:inline; 
+	top: 0px; 
+	width: 300px; 
+	position: absolute; 
+	height: 100%;
+}
+
+.statusPanelBox
+{
+	width: 200px; 
+}
+
+.statusPanelTextArea
+{
+	width: 150px;
+}
+
+.boardTable
+{	
+	padding: 0px;
+	border-collapse: collapse;
+	border-spacing: 0px;
+	border-style: none;
+	border-width: 0px;
+}
+
+
+.boardSquareHover
+{
+	background-color: Aqua;
+}
+
+.boardSquareEven,
+.boardSquareOdd,
+.boardSquare
+{
+	padding: 0px;
+	border-color: Black;
+	border-style: solid;
+	border-width: thin;
+	width: 75px;
+	height: 75px;
+	vertical-align: top;
+	align: left;
+}
+
+.boardSquareEven
+{
+	background-color: #138F6A;
+}
+
+.boardSquareOdd
+{
+	background-color: #FDE8CC ;
+}

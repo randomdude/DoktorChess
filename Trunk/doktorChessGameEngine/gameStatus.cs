@@ -2,6 +2,6 @@
 {
     public enum gameStatus
     {
-        inProgress, won, drawn, lost
+        inProgress, won, drawn, lost, errored
     }
 }

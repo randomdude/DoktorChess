@@ -4,4 +4,9 @@
     {
         coord, chessNotation
     }
+
+    public enum boardStringStyle
+    {
+        text, html
+    }
 }

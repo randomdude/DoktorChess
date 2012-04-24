@@ -13,7 +13,11 @@ namespace WebFrontend
             if (!IsPostBack || !moveHandler.sessionValid(Context) )
             {
                 // Initialise a new board
-                baseBoard newBoard = exampleMiniMaxBoard.makeNormalStartPosition();
+                //baseBoard newBoard = exampleMiniMaxBoard.makeNormalStartPosition();
+                boardSearchConfig config = new boardSearchConfig();
+                config.useThreatMap = false;
+                config.searchDepth = 4;
+                baseBoard newBoard = Board.makeNormalStartPosition(config);
 
                 Session["playerCol"] = pieceColour.white;
                 Session["board"] = newBoard;

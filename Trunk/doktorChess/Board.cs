@@ -33,6 +33,24 @@ namespace doktorChess
         // Keep some search stats in here
         public moveSearchStats stats;
 
+        public Board(gameType newType)
+            : base(newType)
+        {
+            boardSearchConfig newSearchConfig = new boardSearchConfig();
+
+            // Note that kings are captured, since none exist.
+            _blackKingCaptured = true;
+            _whiteKingCaptured = true;
+
+            if (newSearchConfig.useThreatMap)
+                coverLevel = new threatMap(this);
+            else
+                coverLevel = new disabledThreatMap();
+
+            coverLevel.checkStuff = newSearchConfig.checkThreatMapLots;
+            _searchConfig = newSearchConfig;
+        }
+
         public Board(gameType newType, boardSearchConfig newSearchConfig)
             : base(newType)
         {
@@ -61,6 +79,7 @@ namespace doktorChess
         public static Board makeNormalStartPosition()
         {
             boardSearchConfig config = new boardSearchConfig();
+            config.searchDepth = 2;
             Board newBoard = new Board(gameType.normal, config);
 
             newBoard.makeStartPosition();
@@ -169,21 +188,6 @@ namespace doktorChess
                 throw new Exception("Black king capture status incorrect");
             if (whiteKingSeen != !_whiteKingCaptured)
                 throw new Exception("White king capture status incorrect");
-        }
-
-        public override string ToString()
-        {
-            StringBuilder toRet = new StringBuilder(sizeX * sizeY * 2);
-
-            for (int y = sizeY - 1; y > -1; y--)
-            {
-                for (int x = 0; x < sizeX; x++)
-                    toRet.Append(_squares[x, y].ToString());
-                toRet.Append(Environment.NewLine);
-            }
-            toRet.Append(Environment.NewLine);
-
-            return toRet.ToString();
         }
 
         protected override square addPiece(pieceType newType, pieceColour newColour, squarePos dstPos)
@@ -319,7 +323,7 @@ namespace doktorChess
                 stats.boardsScored++;
                 BoardScorer scorer = new BoardScorer(this, colToMove, _searchConfig.scoreConfig);
                 //return new lineAndScore(new move[] { }, scorer.getScore() - (searchConfig.searchDepth - depthLeft), scorer);
-                int score = scorer.getScore() * -1;
+                int score = scorer.getScore() * 1;
                 return new lineAndScore(new move[] { }, score, scorer);
             }
 
@@ -367,6 +371,7 @@ namespace doktorChess
 
             foreach (move consideredMove in movesToConsider)
             {
+
                 // If we're checking heavily, we check that the board is restored correctly after we
                 // undo any move.
                 string origThreatMap = null;
@@ -394,9 +399,6 @@ namespace doktorChess
                     stats.boardsScored++;
                     BoardScorer scorer = new BoardScorer(this, movingSide, _searchConfig.scoreConfig);
                     int score = scorer.getScore();
-
-                    // Modify our score based on how deep we are, so that we prefer shallower moves over deeper
-                    //score += (searchConfig.searchDepth - depthLeft) * (usToPlay ? +1 : -1);
 
                     if ((usToPlay && (score > bestLineSoFar.finalScore)) ||
                         (!usToPlay && (score < bestLineSoFar.finalScore)))

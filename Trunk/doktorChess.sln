@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "doktorChessGameEngine", "do
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "exampleMiniMax", "exampleMiniMax\exampleMiniMax.csproj", "{F636E53D-38CA-4201-B514-DEE66B85E5E9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tournament", "tournament\tournament.csproj", "{69BB55B4-E12C-49DB-BFD0-6BEAD850E72C}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = doktorChess.vsmdi
@@ -58,6 +60,10 @@ Global
 		{F636E53D-38CA-4201-B514-DEE66B85E5E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F636E53D-38CA-4201-B514-DEE66B85E5E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F636E53D-38CA-4201-B514-DEE66B85E5E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69BB55B4-E12C-49DB-BFD0-6BEAD850E72C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69BB55B4-E12C-49DB-BFD0-6BEAD850E72C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69BB55B4-E12C-49DB-BFD0-6BEAD850E72C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69BB55B4-E12C-49DB-BFD0-6BEAD850E72C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

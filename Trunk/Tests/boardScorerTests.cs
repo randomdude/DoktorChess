@@ -123,6 +123,76 @@ namespace Tests
             Assert.AreEqual(0, blackScorer.getScore());
         }
 
+        [TestMethod] 
+        public void verifyFiftyMoveRule()
+        {
+            Board ourBoard = Board.makeNormalStartPosition();
+            verifyFiftyMoveRule(ourBoard, 0);
+        }
+
+        [TestMethod]
+        public void verifyFiftyMoveRule_afterMoves()
+        {
+            Board ourBoard = Board.makeNormalStartPosition();
+
+            // Play Nf3
+            ourBoard.doMove(new move(ourBoard[6, 0], ourBoard[5, 2]));
+            // Play Nf6
+            ourBoard.doMove(new move(ourBoard[6, 7], ourBoard[5, 5]));
+
+            verifyFiftyMoveRule(ourBoard, 2);
+        }
+
+        [TestMethod]
+        public void verifyFiftyMoveRule_afterPawnMoves()
+        {
+            Board ourBoard = Board.makeNormalStartPosition();
+
+            // Play Nf3
+            ourBoard.doMove(new move(ourBoard[6, 0], ourBoard[5, 2]));
+            // Play Nf6
+            ourBoard.doMove(new move(ourBoard[6, 7], ourBoard[5, 5]));
+            // A4
+            ourBoard.doMove(new move(ourBoard[0, 1], ourBoard[0, 2]));
+            // A6
+            ourBoard.doMove(new move(ourBoard[0, 6], ourBoard[0, 5]));
+
+            verifyFiftyMoveRule(ourBoard, 0);
+        }
+
+        public void verifyFiftyMoveRule(Board ourBoard, int moveOffset)
+        {
+
+            for (int n = 0; n < 100 - moveOffset; n++)
+            {
+                Assert.AreEqual(gameStatus.inProgress, ourBoard.getGameStatus(pieceColour.white), "Game declared drawn at move " + n.ToString());
+
+                switch (n % 4)
+                {
+                    case 0:
+                        // Play Nc3
+                        ourBoard.doMove(new move(ourBoard[1, 0], ourBoard[2, 2]));
+                        break;
+                    case 1:
+                        // Play Nc6
+                        ourBoard.doMove(new move(ourBoard[1, 7], ourBoard[2, 5]));
+                        break;
+                    case 2:
+                        // And move knights back again.
+                        // Nb1
+                        ourBoard.doMove(new move(ourBoard[2, 2], ourBoard[1, 0]));
+                        break;
+                    case 3:
+                        // nb8
+                        ourBoard.doMove(new move(ourBoard[2, 5], ourBoard[1, 7]));
+                        break;
+                    default:
+                        throw new ArgumentException();
+                }
+            }
+            // 50 moves have elapsed! It's a draw!
+            Assert.AreEqual(gameStatus.drawn, ourBoard.getGameStatus(pieceColour.white));
+        }
 
         [TestMethod]
         public void testFinishedGameScore_example1()

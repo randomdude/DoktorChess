@@ -97,12 +97,14 @@ namespace doktorChess
             // Find any dangling pieces, and give them a modifier
             List<square> myPieces = parentBoard.getPiecesForColour(viewpoint);
 
+            danglingDisadvantage = 0;
             foreach (square myPiece in myPieces)
             {
                 if (parentBoard.getCoverLevel(myPiece, viewpoint) < 0)
-                    danglingDisadvantage += (getMaterialAdvantage(myPiece.type));
+                    danglingDisadvantage += getMaterialAdvantage(myPiece.type);
             }
 
+            danglingAdvantage = 0;
             List<square> enemyPieces = parentBoard.getPiecesForColour(Board.getOtherSide(viewpoint));
             foreach (square enemyPiece in enemyPieces)
             {

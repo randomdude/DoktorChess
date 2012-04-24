@@ -18,6 +18,11 @@ namespace doktorChessGameEngine
         public int moveCount;
 
         /// <summary>
+        /// The top element is how many consecutive moves have elapsed without a pawn move or a capture. 
+        /// </summary>
+        public Stack<int> fiftyMoveCounter = new Stack<int>(100);
+
+        /// <summary>
         /// Ruleset in effect for this game
         /// </summary>
         protected gameType _type { get; private set; }
@@ -86,7 +91,7 @@ namespace doktorChessGameEngine
             // ReSharper restore UnusedMember.Local
         }
 
-        protected void makeStartPosition()
+        public void makeStartPosition()
         {
             switch (_type)
             {
@@ -230,6 +235,10 @@ namespace doktorChessGameEngine
             // Now we are certain we have pieces, we can identify our side.
             pieceColour myCol = myPieces[0].colour;
 
+            // If 50 moves have passed without pawn move or check, the game is a stalemate.
+            // A 'move' here is a pair of white/back moves, so this is 100 half-moves
+            if (moveCount > 0 && !(fiftyMoveCounter.Peek() < 100))
+                return gameStatus.drawn;
 #if DEBUG
             // It is nonsensical to move out of check.
             if (playerIsInCheck(getOtherSide(colToMove)))
@@ -350,8 +359,6 @@ namespace doktorChessGameEngine
 
             sizableArray<move> moves = getMoves(getOtherSide(playerPossiblyInCheck));
 
-            IEnumerable<move> captures = moves.Where(a => a.isCapture);
-
             return moves.Exists(a => a.isCapture && a.capturedSquare.type == pieceType.king);
         }
 
@@ -464,6 +471,18 @@ namespace doktorChessGameEngine
             if (this[move.srcPos].colour != colToMove)
                 throw new ArgumentException("Moving peice of wrong colour");
 #endif
+            // If this is a pawn move or a capture, reset the fifty-move rule counter.
+            if (this[move.srcPos].type == pieceType.pawn || move.isCapture)
+            {
+                fiftyMoveCounter.Push(0);
+            }
+            else
+            {
+                if (moveCount > 0)
+                    fiftyMoveCounter.Push(fiftyMoveCounter.Peek() + 1);
+                else
+                    fiftyMoveCounter.Push(1);
+            }
 
             // Update movedness count for the moving piece
             this[move.srcPos].moveNumbers.Push(moveCount);
@@ -563,6 +582,8 @@ namespace doktorChessGameEngine
             if (this[move.dstPos].colour == colToMove)
                 throw new ArgumentException("Unmoving peice of wrong colour");
 #endif
+            // undo our fifty-move counter
+            fiftyMoveCounter.Pop();
 
             // Revert any promotion
             if (move.isPawnPromotion)
@@ -578,7 +599,9 @@ namespace doktorChessGameEngine
             this[move.dstPos].movedCount--;
             if (this[move.dstPos].moveNumbers.Count == 0)
                 this[move.dstPos].moveNumbers = this[move.dstPos].moveNumbers;
-            Debug.Assert(this[move.dstPos].moveNumbers.Pop() == moveCount);
+
+            int popped = this[move.dstPos].moveNumbers.Pop();
+            Debug.Assert(popped == moveCount);
 
             // Dec the rook's move counter if this is a castling
             square castlingRook = null;
@@ -586,7 +609,8 @@ namespace doktorChessGameEngine
             {
                 castlingRook = this[move.castlingRookDstPos];
                 castlingRook.movedCount--;
-                Assert.AreEqual(moveCount, castlingRook.moveNumbers.Pop());
+                int poppedRook = castlingRook.moveNumbers.Pop();
+                Debug.Assert(moveCount == poppedRook);
             }
 
             unmovePiece(move.srcPos, move.dstPos);
@@ -657,5 +681,97 @@ namespace doktorChessGameEngine
         }
 
         public abstract lineAndScore findBestMove();
+
+        public override string ToString()
+        {
+            return ToString_text();
+        }
+
+        public string ToString(boardStringStyle style)
+        {
+            switch (style)
+            {
+                case boardStringStyle.text:
+                    return ToString_text();
+                case boardStringStyle.html:
+                    return ToString_html();
+                default:
+                    throw new ArgumentOutOfRangeException("style");
+            }
+        }
+
+        private string ToString_text()
+        {
+            StringBuilder toRet = new StringBuilder(sizeX * sizeY * 2);
+
+            for (int y = sizeY - 1; y > -1; y--)
+            {
+                for (int x = 0; x < sizeX; x++)
+                    toRet.Append(_squares[x, y].ToString());
+                toRet.Append(Environment.NewLine);
+            }
+            toRet.Append(Environment.NewLine);
+
+            return toRet.ToString();
+        }
+
+        private string ToString_html()
+        {
+            StringBuilder toRet = new StringBuilder(sizeX * sizeY * 10);
+
+            toRet.Append("<table border=\"1\">");
+
+            for (int y = sizeY - 1; y > -1; y--)
+            {
+                toRet.Append("<tr>");
+                // First, append the left-hand row legend
+                toRet.Append("<td>");
+                toRet.Append("<P class=\"legend\">" + (y+1) + "</P>");
+                toRet.Append("</td>");
+
+                for (int x = 0; x < sizeX; x++)
+                {
+                    if (y % 2 == 0)
+                    {
+                        if (x%2 == 0)
+                            toRet.Append("<td class=\"sqlight\">");
+                        else
+                            toRet.Append("<td class=\"sqdark\">");
+                    }
+                    else
+                    {
+                        if (x % 2 != 0)
+                            toRet.Append("<td class=\"sqlight\">");
+                        else
+                            toRet.Append("<td class=\"sqdark\">");                        
+                    }
+
+                    if (_squares[x,y].colour == pieceColour.white)
+                        toRet.Append("<P class=\"piecewhite\">" );
+                    else
+                        toRet.Append("<P class=\"pieceblack\">" );
+
+                    toRet.Append(_squares[x, y].ToString());
+                    toRet.Append("</p>");
+                    toRet.Append("</td>");
+                }
+                toRet.Append("</tr>");
+            }
+
+            // Add the bottom legend
+            toRet.Append("<tr>");
+            foreach (string label in new [] {"", "A", "B", "C", "D", "E", "F", "G", "H"})
+            {
+                toRet.Append("<td>");
+                toRet.Append("<P class=\"legend\">" + label + "</P>");
+                toRet.Append("</td>");
+            }
+            toRet.Append("</tr>");
+
+            toRet.Append("</table>");
+
+            return toRet.ToString();
+        }
+    
     }
 }
