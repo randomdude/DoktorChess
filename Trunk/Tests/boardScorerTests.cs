@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using doktorChess;
 using doktorChessGameEngine;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -124,9 +125,67 @@ namespace Tests
         }
 
         [TestMethod] 
+        public void verifyThreeFoldRepetition_afterMoves()
+        {
+            Board ourBoard = Board.makeNormalStartPosition();
+
+            // Move some pieces, just so we're not verifying the start position (altho that works
+            // too).
+            // Play Nf3
+            ourBoard.doMove(new move(ourBoard[6, 0], ourBoard[5, 2]));
+            // Play Nf6
+            ourBoard.doMove(new move(ourBoard[6, 7], ourBoard[5, 5]));
+
+            doVerifyThreeFoldRepetition(ourBoard);
+        }
+
+        [TestMethod]
+        public void verifyThreeFoldRepetition_fromStart()
+        {
+            Board ourBoard = Board.makeNormalStartPosition();
+
+            doVerifyThreeFoldRepetition(ourBoard);
+        }
+        
+        public void doVerifyThreeFoldRepetition(baseBoard ourBoard)
+        {
+            // Play some useless knight moves. Once the same board situation has occured three
+            // times, the game is a draw.
+            for (int n = 0; n < 8; n++)
+            {
+                Assert.AreEqual(gameStatus.inProgress, ourBoard.getGameStatus(pieceColour.white), "Game declared drawn at move " + n.ToString());
+
+                switch (n % 4)
+                {
+                    case 0:
+                        // Play Nc3
+                        ourBoard.doMove(new move(ourBoard[1, 0], ourBoard[2, 2]));
+                        break;
+                    case 1:
+                        // Play Nc6
+                        ourBoard.doMove(new move(ourBoard[1, 7], ourBoard[2, 5]));
+                        break;
+                    case 2:
+                        // And move knights back again.
+                        // Nb1
+                        ourBoard.doMove(new move(ourBoard[2, 2], ourBoard[1, 0]));
+                        break;
+                    case 3:
+                        // nb8
+                        ourBoard.doMove(new move(ourBoard[2, 5], ourBoard[1, 7]));
+                        break;
+                    default:
+                        throw new ArgumentException();
+                }
+            }
+            Assert.AreEqual(gameStatus.drawn, ourBoard.getGameStatus(pieceColour.white));
+        }
+
+        [TestMethod] 
         public void verifyFiftyMoveRule()
         {
             Board ourBoard = Board.makeNormalStartPosition();
+            ourBoard.disableThreeFoldRule();
             verifyFiftyMoveRule(ourBoard, 0);
         }
 
@@ -134,6 +193,7 @@ namespace Tests
         public void verifyFiftyMoveRule_afterMoves()
         {
             Board ourBoard = Board.makeNormalStartPosition();
+            ourBoard.disableThreeFoldRule();
 
             // Play Nf3
             ourBoard.doMove(new move(ourBoard[6, 0], ourBoard[5, 2]));
@@ -147,6 +207,7 @@ namespace Tests
         public void verifyFiftyMoveRule_afterPawnMoves()
         {
             Board ourBoard = Board.makeNormalStartPosition();
+            ourBoard.disableThreeFoldRule();
 
             // Play Nf3
             ourBoard.doMove(new move(ourBoard[6, 0], ourBoard[5, 2]));

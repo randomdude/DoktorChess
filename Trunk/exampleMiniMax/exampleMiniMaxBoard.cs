@@ -5,38 +5,6 @@ using doktorChessGameEngine;
 
 namespace exampleMiniMax
 {
-    public class exampleRandom : baseBoard
-    {
-        Random rnd = new Random();
-
-        public exampleRandom(gameType newType) : base(newType)
-        {
-        }
-        
-        public override lineAndScore findBestMove()
-        {
-            sizableArray<move> movesToConsider = getMoves(colToMove);
-
-            // Filter out any moves in to check
-            sizableArray<move> movesNotIntoCheck = new sizableArray<move>(movesToConsider.Length);
-            pieceColour movingCol = colToMove;
-            foreach (move consideredMove in movesToConsider)
-            {
-                doMove(consideredMove);
-
-                if (!playerIsInCheck(movingCol))
-                    movesNotIntoCheck.Add(consideredMove);
-
-                undoMove(consideredMove);
-            }
-
-            int rndNum = rnd.Next(movesNotIntoCheck.Length - 0);
-            move randomMove = movesNotIntoCheck[rndNum];
-
-            return new lineAndScore(new move[] { randomMove }, 0, null);
-        }
-    }
-
     public class exampleMiniMaxBoard : baseBoard
     {
         const int searchDepth = 2;

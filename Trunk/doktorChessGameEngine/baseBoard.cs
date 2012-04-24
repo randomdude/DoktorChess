@@ -20,7 +20,12 @@ namespace doktorChessGameEngine
         /// <summary>
         /// The top element is how many consecutive moves have elapsed without a pawn move or a capture. 
         /// </summary>
-        public Stack<int> fiftyMoveCounter = new Stack<int>(100);
+        public Stack<int> fiftyMoveCounter = new Stack<int>(300);
+
+        /// <summary>
+        /// A stack of every board position that has occured in this game
+        /// </summary>
+        private Stack<string> positionsSoFar = new Stack<string>(100);
 
         /// <summary>
         /// Ruleset in effect for this game
@@ -104,6 +109,9 @@ namespace doktorChessGameEngine
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            positionsSoFar.Clear();
+            positionsSoFar.Push(this.ToString());
         }
 
         private void makeQueenAndPawnsStartPosition()
@@ -204,6 +212,9 @@ namespace doktorChessGameEngine
             this[7, 0].excludeFromCastling = !fen.whiteCanCastleKingside;
             this[0, 0].excludeFromCastling = !fen.whiteCanCastleQueenside;
 
+            positionsSoFar.Clear();
+            positionsSoFar.Push(this.ToString()); 
+            
             this.colToMove = fen.toPlay;
         }
 
@@ -239,6 +250,15 @@ namespace doktorChessGameEngine
             // A 'move' here is a pair of white/back moves, so this is 100 half-moves
             if (moveCount > 0 && !(fiftyMoveCounter.Peek() < 100))
                 return gameStatus.drawn;
+
+            // If this position has been seen three times, then the game is a draw.
+            string thisPos = this.ToString();
+            if (positionsSoFar != null && positionsSoFar.Contains(thisPos))
+            {
+                if (positionsSoFar.Count(x => x == thisPos) > 2)
+                    return gameStatus.drawn;
+            }
+
 #if DEBUG
             // It is nonsensical to move out of check.
             if (playerIsInCheck(getOtherSide(colToMove)))
@@ -538,6 +558,10 @@ namespace doktorChessGameEngine
 
             colToMove = getOtherSide(colToMove);
 
+            // Store this new position on our stack
+            if (positionsSoFar != null)
+                positionsSoFar.Push(this.ToString());
+
             sanityCheck();
         }
 
@@ -584,6 +608,13 @@ namespace doktorChessGameEngine
 #endif
             // undo our fifty-move counter
             fiftyMoveCounter.Pop();
+
+            // remove this position from our list of played positions
+            if (positionsSoFar != null)
+            {
+                string oldPos = positionsSoFar.Pop();
+                Debug.Assert(oldPos == this.ToString());
+            }
 
             // Revert any promotion
             if (move.isPawnPromotion)
@@ -684,24 +715,6 @@ namespace doktorChessGameEngine
 
         public override string ToString()
         {
-            return ToString_text();
-        }
-
-        public string ToString(boardStringStyle style)
-        {
-            switch (style)
-            {
-                case boardStringStyle.text:
-                    return ToString_text();
-                case boardStringStyle.html:
-                    return ToString_html();
-                default:
-                    throw new ArgumentOutOfRangeException("style");
-            }
-        }
-
-        private string ToString_text()
-        {
             StringBuilder toRet = new StringBuilder(sizeX * sizeY * 2);
 
             for (int y = sizeY - 1; y > -1; y--)
@@ -715,63 +728,12 @@ namespace doktorChessGameEngine
             return toRet.ToString();
         }
 
-        private string ToString_html()
+        /// <summary>
+        /// Disable the three-fold repetition rule.
+        /// </summary>
+        public void disableThreeFoldRule()
         {
-            StringBuilder toRet = new StringBuilder(sizeX * sizeY * 10);
-
-            toRet.Append("<table border=\"1\">");
-
-            for (int y = sizeY - 1; y > -1; y--)
-            {
-                toRet.Append("<tr>");
-                // First, append the left-hand row legend
-                toRet.Append("<td>");
-                toRet.Append("<P class=\"legend\">" + (y+1) + "</P>");
-                toRet.Append("</td>");
-
-                for (int x = 0; x < sizeX; x++)
-                {
-                    if (y % 2 == 0)
-                    {
-                        if (x%2 == 0)
-                            toRet.Append("<td class=\"sqlight\">");
-                        else
-                            toRet.Append("<td class=\"sqdark\">");
-                    }
-                    else
-                    {
-                        if (x % 2 != 0)
-                            toRet.Append("<td class=\"sqlight\">");
-                        else
-                            toRet.Append("<td class=\"sqdark\">");                        
-                    }
-
-                    if (_squares[x,y].colour == pieceColour.white)
-                        toRet.Append("<P class=\"piecewhite\">" );
-                    else
-                        toRet.Append("<P class=\"pieceblack\">" );
-
-                    toRet.Append(_squares[x, y].ToString());
-                    toRet.Append("</p>");
-                    toRet.Append("</td>");
-                }
-                toRet.Append("</tr>");
-            }
-
-            // Add the bottom legend
-            toRet.Append("<tr>");
-            foreach (string label in new [] {"", "A", "B", "C", "D", "E", "F", "G", "H"})
-            {
-                toRet.Append("<td>");
-                toRet.Append("<P class=\"legend\">" + label + "</P>");
-                toRet.Append("</td>");
-            }
-            toRet.Append("</tr>");
-
-            toRet.Append("</table>");
-
-            return toRet.ToString();
+            positionsSoFar = null;
         }
-    
     }
 }

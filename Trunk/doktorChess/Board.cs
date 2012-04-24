@@ -595,5 +595,6 @@ namespace doktorChess
 
             return base.getGameStatusForNormal(myPieces, enemyPieces);
         }
+
     }
 }
