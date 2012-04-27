@@ -123,7 +123,7 @@ namespace tournament
 
             PermissionSet permissions = new PermissionSet(null);
             permissions.AddPermission(new SecurityPermission(SecurityPermissionFlag.Execution));
-            permissions.AddPermission(new FileIOPermission(PermissionState.Unrestricted));
+//            permissions.AddPermission(new FileIOPermission(PermissionState.Unrestricted));
 
             return AppDomain.CreateDomain(appDomainName, null, setup, permissions);
         }

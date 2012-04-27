@@ -34,7 +34,7 @@ namespace tournament
                             if (contenderWhite == contenderBlack)
                                 continue;
                             // And don't let two house players play.
-                            if (contenderWhite.isHousePlayer == contenderBlack.isHousePlayer)
+                            if (contenderWhite.isHousePlayer && contenderBlack.isHousePlayer)
                                 continue;
 
                             gameQueue.Add(new tournamentGame(contenderWhite, contenderBlack)

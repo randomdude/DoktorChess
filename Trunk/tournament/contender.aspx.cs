@@ -66,10 +66,9 @@ namespace tournament
             // Create the new board instance!
             AssemblyName asmName = AssemblyName.GetAssemblyName(Path.Combine(assemblyPath, assemblyName));
             asmName.CodeBase = null;
-            baseBoard toRet = (baseBoard)appDomain.CreateInstanceAndUnwrap(asmName.FullName, boardType.FullName, false,
-                                                                        BindingFlags.CreateInstance, null,
-                                                                        cstrArgs, null, new object[0], null );
-
+            baseBoard toRet = (baseBoard)appDomain.CreateInstanceAndUnwrap(asmName.FullName, boardType.FullName, true,
+                                                                        0, null, cstrArgs, null, new object[0], null);
+        
             if (!RemotingServices.IsTransparentProxy(toRet))
                 throw new Exception("The unwrapped object is not a proxy!");
 
