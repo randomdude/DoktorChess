@@ -94,6 +94,7 @@
     <Compile Include="login.aspx.designer.cs">
       <DependentUpon>login.aspx</DependentUpon>
     </Compile>
+    <Compile Include="moveWithTimeout.cs" />
     <Compile Include="playedGame.cs" />
     <Compile Include="playerDetail.aspx.cs">
       <DependentUpon>playerDetail.aspx</DependentUpon>

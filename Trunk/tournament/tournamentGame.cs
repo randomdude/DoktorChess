@@ -311,35 +311,4 @@ namespace tournament
         }
 
     }
-
-    public class moveWithTimeout
-    {
-        private baseBoard findBestMoveBoard;
-        private lineAndScore bestLine;
-        private AutoResetEvent evnt;
-
-        public lineAndScore findBestMoveWithTimeout(baseBoard boardToMove, int timeout)
-        {
-            findBestMoveBoard = boardToMove;
-            Thread findThread = new Thread(findBestMoveWithTimeoutThread);
-            evnt = new AutoResetEvent(false);
-            evnt.Reset();
-            findThread.Start();
-            if (evnt.WaitOne(timeout, false))
-            {
-                return bestLine;
-            }
-
-            findThread.Abort();
-            
-            throw new Exception("Player timeout");
-        }
-
-        private void findBestMoveWithTimeoutThread()
-        {
-            bestLine = findBestMoveBoard.findBestMove();
-
-            evnt.Set();
-        }
-    }
 }
