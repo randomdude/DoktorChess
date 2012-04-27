@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Web;
+using System.Web.Security;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using doktorChessGameEngine;
@@ -16,30 +17,53 @@ namespace tournament
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (runningTournament._tournament == null)
-            {
-                results.Visible = false;
-                return;
-            }
-
             lock (runningTournament._tournamentLock)
             {
-                IOrderedEnumerable<contender> containersByScore = runningTournament._tournament.contenders.OrderByDescending(x => x.score);
-                IOrderedEnumerable<contender> containersByName = runningTournament._tournament.contenders.OrderByDescending(x => x.score);
-                IOrderedEnumerable<tournamentGame> gamesByWhiteName = runningTournament._tournament.gameQueue.OrderBy(x => x.white.typeName);
+                if (runningTournament._tournament == null || runningTournament.getPlayerCount() == 0)
+                {
+                    results.Visible = false;
+                    PanelNoTournament.Visible = true;
+                }
+                else
+                {
+                    IOrderedEnumerable<contender> containersByScore =
+                        runningTournament._tournament.contenders.OrderByDescending(x => x.score);
+                    IOrderedEnumerable<contender> containersByName =
+                        runningTournament._tournament.contenders.OrderByDescending(x => x.score);
+                    IOrderedEnumerable<tournamentGame> gamesByWhiteName =
+                        runningTournament._tournament.gameQueue.OrderBy(x => x.white.typeName);
 
-                // fill the top leaderboard
-                fillLeaderBoard(containersByScore);
+                    // fill the top leaderboard
+                    fillLeaderBoard(containersByScore);
 
-                // And then the all-play-all table.
-                fillResultGrid(containersByName);
+                    // And then the all-play-all table.
+                    fillResultGrid(containersByName);
 
-                // Now the league table.
+                    // Now the league table.
+                    fillFixtureList(gamesByWhiteName);
 
-                fillFixtureList(gamesByWhiteName);
+                    // Now, populate the 'tournament status' box
+                    fillTournamentStatus();
+                }
+            }
 
-                // Now, populate the 'tournament status' box
-                fillTournamentStatus();
+            // Don't show the player upload div if the user isn't logged in.
+            if (HttpContext.Current.User == null ||
+                !HttpContext.Current.User.Identity.IsAuthenticated)
+            {
+                lblYouAre.Text = "You not logged in.";
+                UploadPanel.Visible = false;
+                lnkLogin.Visible = true;
+                cmdLogout.Visible = false;
+                authOnly.Visible = false;
+            }
+            else
+            {
+                // User _is_ logged in.
+                lblYouAre.Text = "You are logged in as " + HttpContext.Current.User.Identity.Name;
+                lnkLogin.Visible = false;
+                cmdLogout.Visible = true;
+                authOnly.Visible = true;
             }
         }
 
@@ -267,15 +291,62 @@ namespace tournament
             }
         }
 
+        protected void cmdLogout_Click(object sender, EventArgs e)
+        {
+            FormsAuthentication.SignOut();
+            Response.Redirect("scoreboard.aspx");
+        }
+
+
         protected void cmdEmptyTournament_Click(object sender, EventArgs e)
         {
+            if (HttpContext.Current.User == null ||
+                !HttpContext.Current.User.Identity.IsAuthenticated)
+            {
+                Response.Redirect("/login.aspx");
+                return;
+            }
+
             runningTournament.clearPlayers();
 
             Response.Redirect("/scoreboard.aspx");
         }
 
+        protected void cmdRestartTournament_Click(object sender, EventArgs e)
+        {
+            if (HttpContext.Current.User == null ||
+                !HttpContext.Current.User.Identity.IsAuthenticated)
+            {
+                Response.Redirect("/login.aspx");
+                return;
+            }
+
+            runningTournament.restart();
+
+            Response.Redirect("/scoreboard.aspx");
+        }
+
+        protected void cmdChangePass_Click(object sender, EventArgs e)
+        {
+            if (HttpContext.Current.User == null ||
+                !HttpContext.Current.User.Identity.IsAuthenticated)
+            {
+                Response.Redirect("/login.aspx");
+                return;
+            }
+
+            Response.Redirect("/login.aspx?changepass=true");
+        }
+
         protected void cmdUploadAI_Click(object sender, EventArgs e)
         {
+            if (HttpContext.Current.User == null ||
+                !HttpContext.Current.User.Identity.IsAuthenticated)
+            {
+                Response.Redirect("/login.aspx");
+                return;
+            }
+
             if (!FileUpload.HasFile)
             {
                 Response.Write("No file supplied");

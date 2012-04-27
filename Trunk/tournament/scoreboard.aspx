@@ -72,17 +72,82 @@
     
         <br />
 
-        <div class="roundbox">
-            <p class="title">Player upload</p>
-            <div>
-            AI player upload :
-            <asp:FileUpload ID="FileUpload" runat="server" />
-            <asp:Button ID="cmdUploadAI" runat="server" Text="UploadAI" onclick="cmdUploadAI_Click" /><br />
-            <br/>
-            <br/>
-            <asp:Button ID="cmdEmptyTournament" runat="server" Text="Clear current players" onclick="cmdEmptyTournament_Click" /><br />
-            </div>
-        </div>    
+        <asp:Panel ID="PanelNoTournament" runat="server">
+            <div class="roundbox">
+                <p class="title">No tournament is in progress</p>
+            </div>    
+        </asp:Panel>
+
+        <br />
+
+            <div class="roundbox">
+                <p class="title">Control panel</p>
+                <table style="width: 100%">
+                    <tr>
+                        <td style="width: 33%"></td>
+                        <td style="width: 33%">
+                            <div>
+                                <table class="normalTable" style="width: 100%">
+                                    <tr>
+                                    <th colspan="2">Authentication</th>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <asp:Label ID="lblYouAre" runat="server"></asp:Label>
+                                            <asp:HyperLink ID="lnkLogin" runat="server" NavigateUrl="login.aspx" Text="Login now"></asp:HyperLink>
+                                        </td>
+                                    </tr>
+                                    <asp:Panel ID="authOnly" runat="server">
+                                        <tr>
+                                            <td style="width: 50%">
+                                                <asp:LinkButton ID="cmdLogout" runat="server" Text="Log out" onclick="cmdLogout_Click" />
+                                            </td>
+                                            <td>
+                                                <asp:LinkButton ID="cmdChangePass" runat="server" Text="Change password" onclick="cmdChangePass_Click" />
+                                            </td>
+                                        </tr>
+                                    </asp:Panel>
+                                </table>
+                                
+                                <br />
+                                <br />
+                                
+                                <asp:Panel ID="UploadPanel" runat="server">
+                                    <table class="normalTable" style="width: 100%">
+                                        <tr>
+                                        <th>Upload player</th>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                AI player path :
+                                                <asp:FileUpload ID="FileUpload" runat="server" />
+                                                <br />
+                                                <asp:Button ID="cmdUploadAI" runat="server" Text="UploadAI" onclick="cmdUploadAI_Click" /><br />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <br/>
+                                    <br/>
+                                    <table class="normalTable" style="width: 100%">
+                                        <tr>
+                                            <th colspan="2">Tournament control</th>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <asp:Button ID="cmdEmptyTournament" runat="server" Text="Clear current players" onclick="cmdEmptyTournament_Click" />
+                                            </td>
+                                            <td>
+                                                <asp:Button ID="cmdRestartTournament" runat="server" Text="Restart tournament" onclick="cmdRestartTournament_Click" />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </asp:Panel>
+                            </div>
+                        </td>
+                        <td style="width: 33%"></td>
+                    </tr>
+                </table>
+            </div>    
     </form>
 </body>
 </html>

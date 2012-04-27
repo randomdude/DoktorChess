@@ -74,6 +74,7 @@
     <Content Include="images\tl.gif" />
     <Content Include="images\tr.gif" />
     <Content Include="js\tournament.js" />
+    <Content Include="login.aspx" />
     <Content Include="playerDetail.aspx" />
     <Content Include="scoreboard.aspx" />
     <Content Include="style\roundedbox.css" />
@@ -83,7 +84,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="assemblyNameAndType.aspx.cs" />
+    <Compile Include="authData.aspx.cs" />
+    <Compile Include="authInfo.aspx.cs" />
     <Compile Include="contender.aspx.cs" />
+    <Compile Include="login.aspx.cs">
+      <DependentUpon>login.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="login.aspx.designer.cs">
+      <DependentUpon>login.aspx</DependentUpon>
+    </Compile>
     <Compile Include="playedGame.cs" />
     <Compile Include="playerDetail.aspx.cs">
       <DependentUpon>playerDetail.aspx</DependentUpon>
@@ -151,8 +161,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>40466</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>
-          </IISUrl>
+          <IISUrl>http://localhost/tournament</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
