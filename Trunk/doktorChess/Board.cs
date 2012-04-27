@@ -4,11 +4,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using doktorChessGameEngine;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace doktorChess
 {
     [chessAIAttribute]
+    [Serializable]
     public class Board : baseBoard
     {
         private bool _whiteKingCaptured = false;
@@ -356,7 +356,7 @@ namespace doktorChess
 
                     doMove(thisMove);
 
-                    if (!playerIsInCheck(colToMove))
+                    if (!isPlayerInCheck(colToMove))
                         valid = true;
 
                     undoMove(thisMove);
@@ -389,7 +389,7 @@ namespace doktorChess
 
                 // If this move would leave us in check, we can ignore it
                 // TODO: optimise this.
-                if (playerIsInCheck(movingSide))
+                if (isPlayerInCheck(movingSide))
                 {
                     undoMove(consideredMove);
                     continue;

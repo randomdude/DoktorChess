@@ -6,6 +6,7 @@ using doktorChessGameEngine;
 namespace exampleMiniMax
 {
     [chessAIAttribute]
+    [Serializable]
     public class exampleMiniMaxBoard : baseBoard
     {
         const int searchDepth = 2;
@@ -49,7 +50,7 @@ namespace exampleMiniMax
 
                 // If this move would leave us in check, we can ignore it
                 // TODO: optimise this.
-                if (playerIsInCheck(movingCol))
+                if (isPlayerInCheck(movingCol))
                 {
                     undoMove(consideredMove);
                     continue;

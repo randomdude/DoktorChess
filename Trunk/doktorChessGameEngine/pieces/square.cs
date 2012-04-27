@@ -4,6 +4,7 @@ using doktorChessGameEngine;
 
 namespace doktorChessGameEngine
 {
+    [Serializable]
     public class square
     {
         /// <summary>
@@ -28,6 +29,8 @@ namespace doktorChessGameEngine
         // This array of bools contains a bool for each square, which can be set to 'true' by a 
         // board implementation if it this square covered by this piece.
         // FIXME: Should really be in the theatMap itself!
+        // Additionally, this cannot be serialised - meaning that it cannot pass an appdomain boundary!!
+        [NonSerialized]
         public readonly speedySquareList coveredSquares = new speedySquareList();
 
         public bool excludeFromCastling = false;

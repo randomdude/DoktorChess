@@ -1,5 +1,8 @@
-﻿namespace doktorChess
+﻿using System;
+
+namespace doktorChess
 {
+    [Serializable]
     public class boardSearchConfig
     {
 // ReSharper disable ConvertToConstant.Global

@@ -1,5 +1,8 @@
-﻿namespace doktorChessGameEngine
+﻿using System;
+
+namespace doktorChessGameEngine
 {
+    [Serializable]
     public class squarePosOffset
     {
         public readonly int x;

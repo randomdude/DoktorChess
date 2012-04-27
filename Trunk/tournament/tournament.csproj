@@ -74,7 +74,6 @@
     <Content Include="images\tl.gif" />
     <Content Include="images\tr.gif" />
     <Content Include="js\tournament.js" />
-    <Content Include="overview.aspx" />
     <Content Include="playerDetail.aspx" />
     <Content Include="scoreboard.aspx" />
     <Content Include="style\roundedbox.css" />
@@ -83,14 +82,9 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="assemblyNameAndType.aspx.cs" />
     <Compile Include="contender.aspx.cs" />
-    <Compile Include="overview.aspx.cs">
-      <SubType>ASPXCodeBehind</SubType>
-      <DependentUpon>overview.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="overview.aspx.designer.cs">
-      <DependentUpon>overview.aspx</DependentUpon>
-    </Compile>
+    <Compile Include="playedGame.cs" />
     <Compile Include="playerDetail.aspx.cs">
       <DependentUpon>playerDetail.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -98,8 +92,9 @@
     <Compile Include="playerDetail.aspx.designer.cs">
       <DependentUpon>playerDetail.aspx</DependentUpon>
     </Compile>
+    <Compile Include="playerException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="runningTournament.aspx.cs" />
+    <Compile Include="runningTournament.cs" />
     <Compile Include="scoreboard.aspx.cs">
       <DependentUpon>scoreboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -107,8 +102,9 @@
     <Compile Include="scoreboard.aspx.designer.cs">
       <DependentUpon>scoreboard.aspx</DependentUpon>
     </Compile>
-    <Compile Include="tournamentGame.aspx.cs" />
-    <Compile Include="tournamentThread.aspx.cs" />
+    <Compile Include="tournamentGame.cs" />
+    <Compile Include="tournamentThread.cs" />
+    <Compile Include="utils.cs" />
     <Compile Include="watchGame.aspx.cs">
       <DependentUpon>watchGame.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -153,7 +149,7 @@
         <WebProjectProperties>
           <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>37925</DevelopmentServerPort>
+          <DevelopmentServerPort>40466</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>
           </IISUrl>

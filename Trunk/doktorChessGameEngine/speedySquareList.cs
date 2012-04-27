@@ -1,13 +1,14 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using doktorChessGameEngine;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace doktorChessGameEngine
 {
     /// <summary>
     /// This 'list' contains a grid of squarePos, which are enumerable as flat co-ordinates of set values.
     /// </summary>
+    [Serializable]
     public class speedySquareList : IEnumerable<int>
     {
         // This array of squares contains a each square or null.
@@ -55,7 +56,7 @@ namespace doktorChessGameEngine
         {
 #if DEBUG
             if (squares[flattenedPos] == newVal)
-                throw new AssertFailedException("Speedylist entry duplicated - is that OK?");
+                throw new Exception("Speedylist entry duplicated!");
 #endif
 
             if (newVal)

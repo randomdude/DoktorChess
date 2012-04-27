@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using doktorChessGameEngine;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace doktorChess
 {
+    [Serializable]
     public class threatMap : IEnableableThreatMap
     {
         /// <summary>
@@ -301,10 +302,10 @@ namespace doktorChess
                         else if (sq.colour == pieceColour.black)
                             calculated--;
                         else
-                            throw new AssertFailedException("square threat has strange colour");
+                            throw new Exception("square threat has strange colour");
                     }
                     if (calculated != threats[x,y])
-                        throw new AssertFailedException("Threat map is wrong");
+                        throw new Exception("Threat map is wrong");
                 }
             }
 

@@ -5,7 +5,8 @@ using doktorChessGameEngine;
 
 namespace doktorChess
 {
-    public class BoardScorer
+    [Serializable]
+    public class BoardScorer : baseBoardScorer
     {
         private readonly int _myMaterialAdvantage;
         private readonly int _myMaterialDisadvantage;
@@ -74,7 +75,7 @@ namespace doktorChess
             }
         }
 
-        public int getScore()
+        public override int getScore()
         {
             // If we have won/lost/drawn, return a special value
             switch (_status)
@@ -133,6 +134,7 @@ namespace doktorChess
 
     }
 
+    [Serializable]
     public class scoreModifiers
     {
         public int danglingModifier = 2;

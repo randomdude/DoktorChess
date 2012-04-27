@@ -3,6 +3,7 @@ using doktorChessGameEngine;
 
 namespace doktorChessGameEngine
 {
+    [Serializable]
     public class squarePos
     {
         public readonly int x;

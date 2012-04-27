@@ -3,6 +3,7 @@ using System.Text;
 
 namespace doktorChessGameEngine
 {
+    [Serializable]
     public class lineAndScore
     {
         /// <summary>
@@ -15,9 +16,9 @@ namespace doktorChessGameEngine
         /// </summary>
         public int finalScore;
 
-        public Object _scorer;
+        public baseBoardScorer _scorer;
 
-        public lineAndScore(move[] newLine, int newFinalScore, Object scorer)
+        public lineAndScore(move[] newLine, int newFinalScore, baseBoardScorer scorer)
         {
             line = newLine;
             finalScore = newFinalScore;
@@ -43,4 +44,11 @@ namespace doktorChessGameEngine
             return toRet.ToString();
         }
     }
+
+    [Serializable]
+    public abstract class baseBoardScorer
+    {
+        public abstract int getScore();
+    }
+
 }

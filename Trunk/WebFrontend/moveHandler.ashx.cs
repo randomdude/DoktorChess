@@ -64,7 +64,7 @@ namespace WebFrontend
             if (playersMove.isACastling)
                 resp.forceBoardReload = true;
 
-            resp.moveNum = theBoard.moveCount.ToString();
+            resp.moveNum = theBoard.getMoveCount.ToString();
             resp.whiteMove = playersMove.ToString(moveStringStyle.chessNotation);
 
             // Check that player has not finished the game
@@ -116,48 +116,55 @@ namespace WebFrontend
 
         static public Table makeTable(baseBoard board)
         {
-            Table htmlTable = new Table();
-            htmlTable.CellPadding = 0;
-            htmlTable.CellSpacing = 0;
-
-            for (int y = Board.sizeY - 1; y > -1; y--)
+            try
             {
-                TableRow newRow = new TableRow();
+                Table htmlTable = new Table();
+                htmlTable.CellPadding = 0;
+                htmlTable.CellSpacing = 0;
 
-                for (int x = 0; x < Board.sizeX; x++)
+                for (int y = Board.sizeY - 1; y > -1; y--)
                 {
-                    TableCell newCell = new TableCell();
+                    TableRow newRow = new TableRow();
 
-                    // Fill with our chess piece image if there's a piece there
-                    square piece = board[x, y];
-                    if (piece.type != pieceType.none)
+                    for (int x = 0; x < Board.sizeX; x++)
                     {
-                        Image pieceImage = new Image();
-                        newCell.Controls.Add(pieceImage);
-                        pieceImage.AlternateText = piece.ToString();
-                        pieceImage.ImageUrl = getImageForPiece(piece.type, piece.colour);
-                        pieceImage.CssClass = "piece";
+                        TableCell newCell = new TableCell();
+
+                        // Fill with our chess piece image if there's a piece there
+                        pieceType pieceType = board.getPieceType(x, y);
+                        if (pieceType != pieceType.none)
+                        {
+                            Image pieceImage = new Image();
+                            newCell.Controls.Add(pieceImage);
+                            pieceImage.AlternateText = board.getPieceString(x, y);
+                            pieceImage.ImageUrl = getImageForPiece(pieceType, board.getPieceColour(x, y));
+                            pieceImage.CssClass = "piece";
+                        }
+
+                        // Get our nice checkerboard pattern via CSS. Set all of our cells to
+                        // have the boardSquare CSS, too, so that jQuery can funkerise them.
+                        newCell.CssClass = "boardSquare";
+                        int offx = (y%2 == 1) ? x : x + 1; // offset by 1 on every other row
+                        if ((offx%2 == 0))
+                            newCell.CssClass += " boardSquareOdd";
+                        else
+                            newCell.CssClass += " boardSquareEven";
+
+                        newCell.Attributes["x"] = x.ToString();
+                        newCell.Attributes["y"] = y.ToString();
+
+                        newRow.Cells.Add(newCell);
                     }
 
-                    // Get our nice checkerboard pattern via CSS. Set all of our cells to
-                    // have the boardSquare CSS, too, so that jQuery can funkerise them.
-                    newCell.CssClass = "boardSquare";
-                    int offx = (y%2 == 1) ? x : x + 1;  // offset by 1 on every other row
-                    if ((offx % 2 == 0))
-                        newCell.CssClass += " boardSquareOdd";
-                    else
-                        newCell.CssClass += " boardSquareEven";
-
-                    newCell.Attributes["x"] = x.ToString();
-                    newCell.Attributes["y"] = y.ToString();
-
-                    newRow.Cells.Add(newCell);
+                    htmlTable.Rows.Add(newRow);
                 }
 
-                htmlTable.Rows.Add(newRow);
+                return htmlTable;
             }
-
-            return htmlTable;
+            catch (Exception)
+            {
+                return new Table();
+            }
         }
 
         private static string getImageForPiece(pieceType type, pieceColour colour)

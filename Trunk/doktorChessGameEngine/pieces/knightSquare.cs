@@ -1,7 +1,9 @@
-﻿using doktorChessGameEngine;
+﻿using System;
+using doktorChessGameEngine;
 
 namespace doktorChessGameEngine
 {
+    [Serializable]
     public class knightSquare : square
     {
         // We can move to these squares if they are free.

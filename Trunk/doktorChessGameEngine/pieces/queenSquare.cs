@@ -1,7 +1,9 @@
-﻿using doktorChessGameEngine;
+﻿using System;
+using doktorChessGameEngine;
 
 namespace doktorChessGameEngine
 {
+    [Serializable]
     public class queenSquare : square
     {
         public queenSquare(squarePos newPos, pieceColour newColour)

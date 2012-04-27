@@ -13,7 +13,6 @@ namespace tournament
 {
     public partial class _Default : System.Web.UI.Page
     {
-
         protected void Page_Load(object sender, EventArgs e)
         {
             if (runningTournament._tournament == null)
@@ -51,7 +50,7 @@ namespace tournament
                     lblCurrentGameSummary.Text = thisGame.white.typeName + " vs " + thisGame.black.typeName + " (" + thisGame.moveList.Count + " moves so far)";
 
                     // lol xss
-                    string moveListHTML = makeMoveList(thisGame.moveList);
+                    string moveListHTML = utils.makeMoveList(thisGame.moveList);
                     resp.Append(
                         string.Format("<table><tr><td>{1}</td><td>{0}</td></tr></table>", 
                             moveListHTML, thisGame.boardRepresentation));
@@ -59,29 +58,6 @@ namespace tournament
                 }
             }
 
-        }
-
-        public static string makeMoveList( List<move> gameToExamine)
-        {
-            StringBuilder resp = new StringBuilder();
-
-            int moveIndex = 0;
-            resp.Append("Move list: <br/>");
-            foreach (move thisMove in gameToExamine)
-            {
-                if (moveIndex % 2 == 0)
-                    resp.Append((moveIndex / 2) + 1 + ". ");
-                resp.Append(thisMove.ToString(moveStringStyle.chessNotation));
-                if (moveIndex % 2 == 0)
-                    resp.Append(" ");
-                else
-                    resp.Append("<br/>");
-
-                moveIndex++;
-            }
-            resp.Append("<br/>");
-
-            return resp.ToString();
         }
 
         protected void Button1_Click(object sender, EventArgs e)

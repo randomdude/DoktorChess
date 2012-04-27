@@ -6,9 +6,11 @@ using doktorChessGameEngine;
 
 namespace exampleMiniMax
 {
-    public class boardScorer
+    [Serializable]
+    public class boardScorer : baseBoardScorer
     {
         private int score;
+
         public boardScorer(exampleMiniMaxBoard board, pieceColour viewpoint)
         {
             int whiteMaterial = addUpMaterial(board.whitePieceSquares);
@@ -55,7 +57,7 @@ namespace exampleMiniMax
             return toRet;
         }
 
-        public int getScore()
+        public override int getScore()
         {
             return score;
         }

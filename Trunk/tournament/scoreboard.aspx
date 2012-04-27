@@ -31,8 +31,8 @@
                         <asp:TableHeaderCell ID="TableHeaderCell4" runat="server">Name</asp:TableHeaderCell>
                         <asp:TableHeaderCell ID="TableHeaderCell2" runat="server">Score</asp:TableHeaderCell>
                         <asp:TableHeaderCell ID="TableHeaderCell5" runat="server">Wins</asp:TableHeaderCell>
-                        <asp:TableHeaderCell ID="TableHeaderCell6" runat="server">Losses</asp:TableHeaderCell>
-                        <asp:TableHeaderCell ID="TableHeaderCell7" runat="server">Draws</asp:TableHeaderCell>
+                        <asp:TableHeaderCell ID="TableHeaderCell6" runat="server">Draws</asp:TableHeaderCell>
+                        <asp:TableHeaderCell ID="TableHeaderCell7" runat="server">Losses</asp:TableHeaderCell>
                         <asp:TableHeaderCell ID="TableHeaderCell3" runat="server">Error count</asp:TableHeaderCell>
                     </asp:TableRow>
                 </asp:Table>

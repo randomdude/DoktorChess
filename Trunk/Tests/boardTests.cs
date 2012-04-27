@@ -17,7 +17,7 @@ namespace Tests
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 1, 1);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 3, 1);
 
-            Assert.IsTrue(ourBoard.playerIsInCheck(pieceColour.black));
+            Assert.IsTrue(ourBoard.isPlayerInCheck(pieceColour.black));
         }
 
         [TestMethod]
@@ -27,7 +27,7 @@ namespace Tests
             ourBoard.addPiece(pieceType.rook, pieceColour.black, 1, 1);
             ourBoard.addPiece(pieceType.king, pieceColour.white, 3, 1);
 
-            Assert.IsTrue(ourBoard.playerIsInCheck(pieceColour.white));
+            Assert.IsTrue(ourBoard.isPlayerInCheck(pieceColour.white));
         }
 
         [TestMethod]

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
+using System.Runtime.Remoting;
 using doktorChessGameEngine;
 
 namespace tournament
 {
+    [Serializable]
     public class contender
     {
         private readonly Type boardType;
@@ -14,6 +17,16 @@ namespace tournament
             get { return boardType.Name; }
         }
 
+        /// <summary>
+        /// The name of the contianing assembly
+        /// </summary>
+        public readonly string assemblyName;
+
+        /// <summary>
+        /// The directory path containing the assembly
+        /// </summary>
+        public readonly string assemblyPath;
+
         public bool isErrored = false;
         public string errorMessage = String.Empty;
         public float score = 0;
@@ -22,25 +35,38 @@ namespace tournament
         public int losses;
         public int errorCount = 0;
         public readonly int ID;
-        private static int nextID = 0;
-        private object  nextIDLock = new object();
-        public List<playedGame> gamesPlayed = new List<playedGame>();
+        private static int _nextID = 0;
+        private readonly object  nextIDLock = new object();
+        public readonly List<playedGame> gamesPlayed = new List<playedGame>();
         public Exception exception;
+        public int timeLeft;
 
-        public contender(Type contenderBoardType)
+        public contender(assemblyNameAndType AssAndType)
         {
-            boardType = contenderBoardType;
+            boardType = AssAndType.theType;
+            assemblyName = AssAndType.AssemblyName;
+            assemblyPath = AssAndType.AssemblyFolder;
             lock (nextIDLock)
             {
-                ID = nextID;
-                nextID++;
+                ID = _nextID;
+                _nextID++;
             }
         }
 
-        public baseBoard makeNewBoard()
+        public baseBoard makeNewBoard(AppDomain appDomain)
         {
-            ConstructorInfo cstr = boardType.GetConstructor( new Type[] { typeof(gameType) } );
-            baseBoard toRet = (baseBoard) cstr.Invoke(new object[] {gameType.normal});
+            // Args to pass to the constructor of the board
+            object[] cstrArgs = new object[] {gameType.normal};
+
+            // Create the new board instance!
+            AssemblyName asmName = AssemblyName.GetAssemblyName(Path.Combine(assemblyPath, assemblyName));
+            asmName.CodeBase = null;
+            baseBoard toRet = (baseBoard)appDomain.CreateInstanceAndUnwrap(asmName.FullName, boardType.FullName, false,
+                                                                        BindingFlags.CreateInstance, null,
+                                                                        cstrArgs, null, new object[0], null );
+
+            if (!RemotingServices.IsTransparentProxy(toRet))
+                throw new Exception("The unwrapped object is not a proxy!");
 
             toRet.makeStartPosition();
 
@@ -50,4 +76,5 @@ namespace tournament
             return toRet;
         }
     }
+
 }

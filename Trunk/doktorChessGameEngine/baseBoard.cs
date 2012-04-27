@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace doktorChessGameEngine
 {
@@ -12,9 +12,17 @@ namespace doktorChessGameEngine
         
     }
 
-    public abstract class baseBoard
+    [Serializable]
+    public abstract class baseBoard : System.MarshalByRefObject
     {
+        /// <summary>
+        /// How many squares wide the board is
+        /// </summary>
         public const int sizeX = 8;
+
+        /// <summary>
+        /// How many squares high the board is
+        /// </summary>
         public const int sizeY = 8;
 
         /// <summary>
@@ -38,6 +46,14 @@ namespace doktorChessGameEngine
         protected gameType _type { get; private set; }
 
         /// <summary>
+        /// How many moves have been played on this board
+        /// </summary>
+        public int getMoveCount
+        {
+            get { return moveCount; }
+        }
+
+        /// <summary>
         /// Whose move it is
         /// </summary>
         public pieceColour colToMove = pieceColour.white;
@@ -56,6 +72,16 @@ namespace doktorChessGameEngine
         /// Lookaside list of squares occupied by black pieces
         /// </summary>
         public readonly List<square> blackPieceSquares = new List<square>(20);
+
+        /// <summary>
+        /// How many milliseconds may elapse before the game is declared lost?
+        /// </summary>
+        public int timeLeftMS = Int32.MaxValue;
+
+        /// <summary>
+        /// Create a new empty board using the supplied rule set.
+        /// </summary>
+        /// <param name="newType">gameType to make</param>
         protected baseBoard(gameType newType)
         {
             // Set the game type
@@ -69,6 +95,11 @@ namespace doktorChessGameEngine
             }
         }
 
+        /// <summary>
+        /// Get/Set the square at the given position
+        /// </summary>
+        /// <param name="myPos">Position to examine</param>
+        /// <returns></returns>
         public square this[squarePos myPos]
         {
             // ReSharper disable UnusedMember.Local
@@ -77,6 +108,11 @@ namespace doktorChessGameEngine
             // ReSharper restore UnusedMember.Local
         }
 
+        /// <summary>
+        /// Get/Set the square at the given position
+        /// </summary>
+        /// <param name="flatPos">Flat position to examine ( ie, x+(y*sizeY))</param>
+        /// <returns></returns>
         public square this[int flatPos]
         {
             // ReSharper disable UnusedMember.Local
@@ -93,6 +129,12 @@ namespace doktorChessGameEngine
             // ReSharper restore UnusedMember.Local
         }
 
+        /// <summary>
+        /// Get/Set the square at the given position
+        /// </summary>
+        /// <param name="x">X position to examine</param>
+        /// <param name="y">Y position to examine</param>
+        /// <returns></returns>
         public square this[int x, int y]
         {
             // ReSharper disable UnusedMember.Local
@@ -101,6 +143,9 @@ namespace doktorChessGameEngine
             // ReSharper restore UnusedMember.Local
         }
 
+        /// <summary>
+        /// Create the initial board set up
+        /// </summary>
         public void makeStartPosition()
         {
             switch (_type)
@@ -156,6 +201,10 @@ namespace doktorChessGameEngine
             colToMove = pieceColour.white;
         }
 
+        /// <summary>
+        /// Create a board with the FEN-specified layout
+        /// </summary>
+        /// <param name="FENString">FEN of board to create</param>
         protected void makeFromFEN(string FENString)
         {
             parsedFEN fen = new parsedFEN(FENString);
@@ -223,14 +272,25 @@ namespace doktorChessGameEngine
             this.colToMove = fen.toPlay;
         }
 
-        public gameStatus getGameStatus(pieceColour myPieceColour)
+        /// <summary>
+        /// Is the game won/lost/drawn?
+        /// </summary>
+        /// <param name="toPlay">Side to play</param>
+        /// <returns></returns>
+        public gameStatus getGameStatus(pieceColour toPlay)
         {
-            List<square> myPieces = getPiecesForColour(myPieceColour);
-            List<square> enemyPieces = getPiecesForColour(getOtherSide(myPieceColour));
+            List<square> myPieces = getPiecesForColour(toPlay);
+            List<square> enemyPieces = getPiecesForColour(getOtherSide(toPlay));
 
             return getGameStatus(myPieces, enemyPieces);
         }
 
+        /// <summary>
+        /// Is the game won/lost/drawn?
+        /// </summary>
+        /// <param name="myPieces">The pieces of the side to play</param>
+        /// <param name="enemyPieces">The pieces of the side not to play</param>
+        /// <returns></returns>
         public gameStatus getGameStatus(List<square> myPieces, List<square> enemyPieces)
         {
             if (_type == gameType.queenAndPawns)
@@ -241,6 +301,12 @@ namespace doktorChessGameEngine
                 throw new ArgumentException();
         }
 
+        /// <summary>
+        /// Is the 'normal rule' game won/lost/drawn?
+        /// </summary>
+        /// <param name="myPieces">The pieces of the side to play</param>
+        /// <param name="enemyPieces">The pieces of the side not to play</param>
+        /// <returns></returns>
         protected virtual gameStatus getGameStatusForNormal(List<square> myPieces, List<square> enemyPieces)
         {
 #if DEBUG
@@ -270,7 +336,7 @@ namespace doktorChessGameEngine
 
 #if DEBUG
             // It is nonsensical to move out of check.
-            if (playerIsInCheck(getOtherSide(colToMove)))
+            if (isPlayerInCheck(getOtherSide(colToMove)))
                 throw new chessRuleViolationException("Player has moved in to check");
 #endif
             // Since it is likely that most pieces will have moves, we don't call getMoves, which
@@ -286,7 +352,7 @@ namespace doktorChessGameEngine
                 {
                     doMove(thisMove);
 
-                    if (!playerIsInCheck(movingSide))
+                    if (!isPlayerInCheck(movingSide))
                     {
                         nonCheckMoves = true;
                         undoMove(thisMove);
@@ -303,7 +369,7 @@ namespace doktorChessGameEngine
             {
                 // If  the player to move is in check, then the game is finished if they have no 
                 // moves which get out of check.
-                if (playerIsInCheck(movingSide))
+                if (isPlayerInCheck(movingSide))
                     return (colToMove == myCol) ? gameStatus.lost : gameStatus.won;
 
                 // If the current player cannot move without being in check, then the game is a draw.
@@ -356,6 +422,11 @@ namespace doktorChessGameEngine
             return gameStatus.inProgress;
         }
 
+        /// <summary>
+        /// Retrieve squares containing pieces of the specified colour
+        /// </summary>
+        /// <param name="toMoveColour">Colour of piecs to return</param>
+        /// <returns></returns>
         public List<square> getPiecesForColour(pieceColour toMoveColour)
         {
             if (toMoveColour == pieceColour.white)
@@ -367,6 +438,11 @@ namespace doktorChessGameEngine
 
         }
 
+        /// <summary>
+        /// Return the opponent of the supplied side
+        /// </summary>
+        /// <param name="ofThisSide">Side to return opponent of</param>
+        /// <returns></returns>
         public static pieceColour getOtherSide(pieceColour ofThisSide)
         {
             switch (ofThisSide)
@@ -380,7 +456,12 @@ namespace doktorChessGameEngine
             }
         }
 
-        public bool playerIsInCheck(pieceColour playerPossiblyInCheck)
+        /// <summary>
+        /// TRUE if the player specified is in check, FALSE otherwise.
+        /// </summary>
+        /// <param name="playerPossiblyInCheck">The colour to examine</param>
+        /// <returns></returns>
+        public bool isPlayerInCheck(pieceColour playerPossiblyInCheck)
         {
             // Check does not exist in queen-and-pawns.
             if (_type == gameType.queenAndPawns)
@@ -391,10 +472,16 @@ namespace doktorChessGameEngine
             return moves.Exists(a => a.isCapture && a.capturedSquare.type == pieceType.king);
         }
 
+        /// <summary>
+        /// Would the specified move put the player of the specified colour in to check?
+        /// </summary>
+        /// <param name="playerCol">Colour which may move in ot check</param>
+        /// <param name="playersMove">Move to examine</param>
+        /// <returns></returns>
         public bool wouldMovePutPlayerInCheck(pieceColour playerCol, move playersMove)
         {
             doMove(playersMove);
-            bool toRet = playerIsInCheck(playerCol);
+            bool toRet = isPlayerInCheck(playerCol);
             undoMove(playersMove);
 
             return toRet;
@@ -470,7 +557,7 @@ namespace doktorChessGameEngine
         }
 
         /// <summary>
-        /// Remove the specified piece from the board 
+        /// Remove the specified piece from the board without updating board status arrays
         /// </summary>
         /// <param name="toRemove"></param>
         protected virtual void removePiece(square toRemove)
@@ -490,6 +577,10 @@ namespace doktorChessGameEngine
             }
         }
 
+        /// <summary>
+        /// Perform the specified move
+        /// </summary>
+        /// <param name="move">The move to play</param>
         public virtual void doMove(move move)
         {
             sanityCheck();
@@ -609,7 +700,7 @@ namespace doktorChessGameEngine
 
         public virtual void undoMove(move move)
         {
-            sanityCheck();
+            //sanityCheck();
 
 #if DEBUG
             if (this[move.dstPos].colour == colToMove)
@@ -622,7 +713,10 @@ namespace doktorChessGameEngine
             if (positionsSoFar != null)
             {
                 string oldPos = positionsSoFar.Pop();
-                Debug.Assert(oldPos == this.ToString());
+#if DEBUG
+                if(oldPos != this.ToString())
+                    throw new Exception("positionsSoFar contains incorrect pos");
+#endif
             }
 
             // Revert any promotion
@@ -641,7 +735,10 @@ namespace doktorChessGameEngine
                 this[move.dstPos].moveNumbers = this[move.dstPos].moveNumbers;
 
             int popped = this[move.dstPos].moveNumbers.Pop();
-            Debug.Assert(popped == moveCount);
+#if DEBUG
+            if (popped != moveCount)
+                throw new Exception("moveNumbers contains wrong move count");
+#endif
 
             // Dec the rook's move counter if this is a castling
             square castlingRook = null;
@@ -650,7 +747,10 @@ namespace doktorChessGameEngine
                 castlingRook = this[move.castlingRookDstPos];
                 castlingRook.movedCount--;
                 int poppedRook = castlingRook.moveNumbers.Pop();
-                Debug.Assert(moveCount == poppedRook);
+#if DEBUG
+                if (moveCount != poppedRook)
+                    throw new Exception("moveNumbers contains wrong move count after popping uncastling rook");
+#endif
             }
 
             unmovePiece(move.srcPos, move.dstPos);
@@ -673,7 +773,9 @@ namespace doktorChessGameEngine
                     addPiece(castlingRook, new squarePos(7, castlingRook.position.y));
                 }
                 else
-                    Assert.Fail("While uncastling, could not find castled rook");
+                {
+                    throw new Exception("While uncastling, could not find castled rook");
+                }
             }
 
             // Restore any captured piece
@@ -685,6 +787,12 @@ namespace doktorChessGameEngine
             sanityCheck();
         }
 
+        /// <summary>
+        /// Return a collecetion of all moves one player may be able to make.
+        /// Note that moves in to check will also be returned.
+        /// </summary>
+        /// <param name="toMoveColour">Side to examine</param>
+        /// <returns></returns>
         public sizableArray<move> getMoves(pieceColour toMoveColour)
         {
             List<square> occupiedSquares = getPiecesForColour(toMoveColour);
@@ -720,8 +828,16 @@ namespace doktorChessGameEngine
             return false;
         }
 
+        /// <summary>
+        /// Find the best move for the colour to plau, and return the expected best Line and it's score.
+        /// </summary>
+        /// <returns></returns>
         public abstract lineAndScore findBestMove();
 
+        /// <summary>
+        /// Create an ASCII representation of the board.
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             StringBuilder toRet = new StringBuilder(sizeX * sizeY * 2);
@@ -743,6 +859,50 @@ namespace doktorChessGameEngine
         public void disableThreeFoldRule()
         {
             positionsSoFar = null;
+        }
+
+        // These methods are here so we can avoid exposing the speedySquareList to the remoting boundary.
+
+        /// <summary>
+        /// Get the type of the piece at the specified board location.
+        /// </summary>
+        /// <param name="x">X co-ordinate</param>
+        /// <param name="y">Y co-ordinate</param>
+        /// <returns></returns>
+        public pieceType getPieceType(int x, int y)
+        {
+            return this[x, y].type;
+        }
+
+        /// <summary>
+        /// Get the colour of the piece at the specified board location.
+        /// </summary>
+        /// <param name="x">X co-ordinate</param>
+        /// <param name="y">Y co-ordinate</param>
+        /// <returns></returns>
+        public pieceColour getPieceColour(int x, int y)
+        {
+            return this[x, y].colour;
+        }
+
+        /// <summary>
+        /// Get the string representation of the piece at the specified board location.
+        /// </summary>
+        /// <param name="x">X co-ordinate</param>
+        /// <param name="y">Y co-ordinate</param>
+        /// <returns></returns>
+        public string getPieceString(int x, int y)
+        {
+            return this[x, y].ToString();
+        }
+
+        /// <summary>
+        /// This object should be kept alive forever.
+        /// </summary>
+        /// <returns></returns>
+        public override object InitializeLifetimeService()
+        {
+            return null;
         }
     }
 }

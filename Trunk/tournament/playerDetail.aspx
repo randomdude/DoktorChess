@@ -28,10 +28,11 @@
         <div class="roundbox">
             <asp:Table ID="gameTable" runat="server" class="normalTable">
                 <asp:TableHeaderRow>
-                    <asp:TableHeaderCell Width="25%">Opponent</asp:TableHeaderCell>
-                    <asp:TableHeaderCell Width="25%">Result</asp:TableHeaderCell>
-                    <asp:TableHeaderCell Width="25%">Move count</asp:TableHeaderCell>
-                    <asp:TableHeaderCell Width="25%">Move list</asp:TableHeaderCell>
+                    <asp:TableHeaderCell Width="20%">My colour</asp:TableHeaderCell>
+                    <asp:TableHeaderCell Width="20%">Opponent</asp:TableHeaderCell>
+                    <asp:TableHeaderCell Width="20%">Result</asp:TableHeaderCell>
+                    <asp:TableHeaderCell Width="20%">Move count</asp:TableHeaderCell>
+                    <asp:TableHeaderCell Width="20%">Move list</asp:TableHeaderCell>
                 </asp:TableHeaderRow>
             </asp:Table>
         </div>            

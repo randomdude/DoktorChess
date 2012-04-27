@@ -4,10 +4,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Web.Script.Serialization;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace doktorChessGameEngine
 {
+    [Serializable]
     public class move
     {
         public readonly squarePos srcPos;
@@ -162,26 +162,26 @@ namespace doktorChessGameEngine
                 castlingRookDstPos = new squarePos(dstPos.x + 1, dstPos.y);
             }
             else
-                throw new AssertFailedException("Malformed castling");
+                throw new Exception("Malformed castling");
         }
 
         public rookSquare findCastlingRook(baseBoard theBoard)
         {
             if (!isACastling)
-                throw new AssertFailedException("Asked to find castling rook of a move not a castle");
+                throw new Exception("Asked to find castling rook of a move not a castle");
 
             if (dstPos.x > srcPos.x)
                 return (rookSquare) theBoard[7, dstPos.y];
             else if (srcPos.x > dstPos.x)
                 return (rookSquare) theBoard[0, dstPos.y];
 
-            throw new AssertFailedException("Malformed castling");
+            throw new Exception("Malformed castling");
         }
 
         public squarePos findNewPosForCastlingRook()
         {
             if (!isACastling)
-                throw new AssertFailedException("Asked to find new pos of a castling rook of a move not a castle");
+                throw new Exception("Asked to find new pos of a castling rook of a move not a castle");
 
             // The rook moves one space past the king in the direction of travel.
             if (dstPos.x > srcPos.x)
@@ -189,7 +189,7 @@ namespace doktorChessGameEngine
             else if (srcPos.x > dstPos.x)
                 return dstPos.rightOne();
 
-            throw new AssertFailedException("Malformed castling");
+            throw new Exception("Malformed castling");
         }
 
         public override string ToString()

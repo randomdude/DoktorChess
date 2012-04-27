@@ -9,10 +9,10 @@ namespace tournament
     public class tournamentThread
     {
         private Thread _thread;
-        public readonly List<contender> _contenders = new List<contender>();
+        public readonly List<contender> contenders = new List<contender>();
         public readonly List<tournamentGame> gameQueue = new List<tournamentGame>();
 
-        private tournamentGame currentGame = null;
+        private tournamentGame _currentGame = null;
 
         private static void staticThreadStart(Object instance)
         {
@@ -23,12 +23,12 @@ namespace tournament
         {
             lock (gameQueue)
             {
-                lock (_contenders)
+                lock (contenders)
                 {
                     // Make a queue of potential matches!
-                    foreach (contender contenderWhite in _contenders)
+                    foreach (contender contenderWhite in contenders)
                     {
-                        foreach (contender contenderBlack in _contenders)
+                        foreach (contender contenderBlack in contenders)
                         {
                             // Don't make engines play themselves!
                             if (contenderWhite == contenderBlack)
@@ -43,8 +43,8 @@ namespace tournament
                 tournamentGame[] pendingGames = gameQueue.Where(x => !x.isRunning && !x.isFinished).ToArray();
                 if (pendingGames.Length > 0)
                 {
-                    currentGame = pendingGames[0];
-                    currentGame.startInNewThread();
+                    _currentGame = pendingGames[0];
+                    _currentGame.startInNewThread();
                 }
             }
         }
@@ -55,9 +55,19 @@ namespace tournament
             if (recentlyfinished.isErrored)
             {
                 if (recentlyfinished.white.isErrored)
+                {
                     recentlyfinished.white.errorCount += 1;
+
+                    recentlyfinished.black.score += 1.0f;
+                    recentlyfinished.black.wins++;
+                }
                 if (recentlyfinished.black.isErrored)
+                {
                     recentlyfinished.black.errorCount += 1;
+
+                    recentlyfinished.white.score += 1.0f;
+                    recentlyfinished.white.wins++;
+                }
             }
             else if (recentlyfinished.isDraw)
             {
@@ -89,9 +99,10 @@ namespace tournament
             playedGame gameInfo = new playedGame();
             gameInfo.isDraw = recentlyfinished.isDraw;
             gameInfo.isErrored = recentlyfinished.white.isErrored;
+            gameInfo.erroredSide = recentlyfinished.erroredSide;
             gameInfo.errorMessage = recentlyfinished.white.errorMessage;
             gameInfo.opponentID = recentlyfinished.black.ID;
-            gameInfo.opponentName = recentlyfinished.black.typeName;
+            gameInfo.opponentTypeName = recentlyfinished.black.typeName;
             gameInfo.exception = recentlyfinished.white.exception;
             gameInfo.moveList = recentlyfinished.moveList;
             gameInfo.didWin = recentlyfinished.winningSide == pieceColour.white;
@@ -102,10 +113,11 @@ namespace tournament
             playedGame gameInfoBlack = new playedGame();
             gameInfoBlack.isDraw = recentlyfinished.isDraw;
             gameInfoBlack.isErrored = recentlyfinished.black.isErrored;
+            gameInfoBlack.erroredSide = recentlyfinished.erroredSide;
             gameInfoBlack.errorMessage = recentlyfinished.black.errorMessage;
             gameInfoBlack.exception = recentlyfinished.black.exception;
             gameInfoBlack.opponentID = recentlyfinished.white.ID;
-            gameInfoBlack.opponentName = recentlyfinished.white.typeName;
+            gameInfoBlack.opponentTypeName = recentlyfinished.white.typeName;
             gameInfoBlack.moveList = recentlyfinished.moveList;
             gameInfoBlack.didWin = recentlyfinished.winningSide == pieceColour.black;
             gameInfoBlack.col = pieceColour.black;
@@ -118,12 +130,12 @@ namespace tournament
                 tournamentGame[] pendingGames = gameQueue.Where(x => !x.isRunning && !x.isFinished).ToArray();
                 if (pendingGames.Length > 0)
                 {
-                    currentGame = pendingGames[0];
+                    _currentGame = pendingGames[0];
                     pendingGames[0].startInNewThread();
                 }
                 else
                 {
-                    currentGame = null;
+                    _currentGame = null;
                 }
             }
         }
@@ -137,9 +149,9 @@ namespace tournament
 
         public void addContender(contender contender)
         {
-            lock (_contenders)
+            lock (contenders)
             {
-                _contenders.Add(contender);
+                contenders.Add(contender);
             }
         }
 
@@ -147,26 +159,12 @@ namespace tournament
         {
             lock (gameQueue)
             {
-                if (currentGame != null)
+                if (_currentGame != null)
                 {
-                    currentGame.abort();
-                    currentGame = null;
+                    _currentGame.abort();
+                    _currentGame = null;
                 }
             }
         }
-    }
-
-    public class playedGame
-    {
-        public int opponentID;
-        public bool isErrored;
-        public bool isDraw;
-        public List<move> moveList;
-        public string errorMessage;
-        public string opponentName;
-        public bool didWin;
-        public Exception exception;
-        public pieceColour col;
-        public baseBoard board;
     }
 }

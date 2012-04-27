@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using doktorChessGameEngine;
-using WebFrontend;
 
 namespace tournament
 {
@@ -19,12 +15,12 @@ namespace tournament
             {
                 if (runningTournament._tournament == null)
                 {
-                    Response.Write("No tournament in progress");
+                    // No tournament is in progress!
                     return;
                 }
 
                 int id = Convert.ToInt32(Request.QueryString["playerID"]);
-                contender player = runningTournament._tournament._contenders.Where(x => x.ID == id).First();
+                contender player = runningTournament._tournament.contenders.Where(x => x.ID == id).First();
 
                 lblplayerName.Text = player.typeName;
 
@@ -33,40 +29,46 @@ namespace tournament
                     TableRow row = new TableRow();
                     gameTable.Rows.Add(row);
 
-                    row.Cells.Add(makeCell(gameResult.opponentName));
+                    row.Cells.Add(utils.makeCellAndEscapeContents(gameResult.col.ToString()));
+                    row.Cells.Add(utils.makeCellAndEscapeContents(gameResult.opponentTypeName));
                     if (gameResult.isErrored)
                     {
-                        string errStr = "Error : " + gameResult.errorMessage + Environment.NewLine;
+                        string errStr =  gameResult.errorMessage + Environment.NewLine;
                         if (gameResult.exception != null)
                         {
                             errStr += gameResult.exception.Message;
                             errStr += gameResult.exception.StackTrace;
                         }
-                        row.Cells.Add(makeCell(errStr));
+
+                        string errStrSafe = HttpUtility.HtmlEncode(errStr);
+                        string errlinkCaption = "Error : Click to show details";
+                        string errCellHTML = "<div><a href=\"#\" class=\"expandable\">" + errlinkCaption + "</a><p class=\"expandableChild\">" + errStrSafe + "</p></div>";
+
+                        row.Cells.Add(utils.makeCell(errCellHTML));
                     }
                     else if (gameResult.isDraw)
                     {
-                        row.Cells.Add(makeCell("Draw", "resultCellDraw"));
+                        row.Cells.Add(utils.makeCellAndEscapeContents("Draw", "resultCellDraw"));
                     }
                     else if (gameResult.didWin)
                     {
-                        row.Cells.Add(makeCell("Win", "resultCellWin"));
+                        row.Cells.Add(utils.makeCellAndEscapeContents("Win", "resultCellWin"));
                     }
                     else
                     {
-                        row.Cells.Add(makeCell("Loss", "resultCellLoss"));
+                        row.Cells.Add(utils.makeCellAndEscapeContents("Loss", "resultCellLoss"));
                     }
 
-                    row.Cells.Add(makeCell(gameResult.moveList.Count.ToString()));
+                    row.Cells.Add(utils.makeCellAndEscapeContents(gameResult.moveList.Count.ToString()));
                     TableCell moveList = new TableCell();
                     
                     // Make our collapsed, expandable moves list
-                    string moveText = _Default.makeMoveList(gameResult.moveList);
+                    string moveText = utils.makeMoveListAndEscapeContents(gameResult.moveList);
                     string linkCaption = "Click to expand " + gameResult.moveList.Count + " moves";
                     string moveListFull = "<div><a href=\"#\" class=\"expandable\">" + linkCaption + "</a><p class=\"expandableChild\">" + moveText + "</p></div>";
                     
                     // Make our collapsed end-game position
-                    Table endPositionTable = moveHandler.makeTable(gameResult.board);
+                    Table endPositionTable = utils.makeTableAndEscapeContents(gameResult.board);
                     TextWriter ourTextWriter2 = new StringWriter();
                     HtmlTextWriter ourHtmlWriter2 = new HtmlTextWriter(ourTextWriter2);
                     endPositionTable.RenderControl(ourHtmlWriter2);
@@ -80,20 +82,6 @@ namespace tournament
                 }
             }
 
-        }
-
-        public static TableCell makeCell(string text)
-        {
-            TableCell optCell = new TableCell();
-            optCell.Text = text;
-            return optCell;
-        }
-
-        public static TableCell makeCell(string text, string cssStyle)
-        {
-            TableCell optCell = makeCell(text);
-            optCell.CssClass = cssStyle;
-            return optCell;
         }
     }
 }
