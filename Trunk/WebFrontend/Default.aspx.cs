@@ -17,7 +17,7 @@ namespace WebFrontend
                 boardSearchConfig config = new boardSearchConfig();
                 config.useThreatMap = false;
                 config.searchDepth = 4;
-                baseBoard newBoard = Board.makeNormalStartPosition(config);
+                baseBoard newBoard = DoktorChessAIBoard.makeNormalStartPosition(config);
 
                 Session["playerCol"] = pieceColour.white;
                 Session["board"] = newBoard;

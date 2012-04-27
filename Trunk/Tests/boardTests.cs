@@ -13,7 +13,7 @@ namespace Tests
         [TestMethod]
         public void testCheckDetectionAsBlack()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 1, 1);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 3, 1);
 
@@ -23,7 +23,7 @@ namespace Tests
         [TestMethod]
         public void testCheckDetectionAsWhite()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             ourBoard.addPiece(pieceType.rook, pieceColour.black, 1, 1);
             ourBoard.addPiece(pieceType.king, pieceColour.white, 3, 1);
 
@@ -33,7 +33,7 @@ namespace Tests
         [TestMethod]
         public void testMoveUndoing()
         {
-            Board ourBoard = Board.makeNormalStartPosition(boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeNormalStartPosition(boardSearchConfig.getDebugConfig());
 
             string origBoard = ourBoard.ToString();
 
@@ -59,7 +59,7 @@ namespace Tests
         [TestMethod]
         public void testMoveDoingUndoingWithPawnPromotion()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             ourBoard.addPiece(pieceType.pawn, pieceColour.white, 1, 6);
 
             string origBoard = ourBoard.ToString();
@@ -100,7 +100,7 @@ namespace Tests
         [TestMethod]
         public void testMoveUndoingEnPassant()
         {
-            Board ourBoard = Board.makeFromFEN("8/6p1/8/7P/8/8/8/8 b - - 0 1", gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeFromFEN("8/6p1/8/7P/8/8/8/8 b - - 0 1", gameType.normal, boardSearchConfig.getDebugConfig());
 
             square enemyPawn = ourBoard[6, 6];
 

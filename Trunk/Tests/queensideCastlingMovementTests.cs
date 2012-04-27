@@ -12,7 +12,7 @@ namespace Tests
         [TestMethod]
         public void testPieceCaptureNotation()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig() );
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig() );
             square bish = new bishopSquare(new squarePos(0, 0), pieceColour.black);
             square rook = new rookSquare(new squarePos(0, 1), pieceColour.white);
 
@@ -24,7 +24,7 @@ namespace Tests
         [TestMethod]
         public void testPieceMoveNotation()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square bish = new bishopSquare(new squarePos(0, 0), pieceColour.black);
             square targetSpace = new square( new squarePos(0, 1) );
 
@@ -36,7 +36,7 @@ namespace Tests
         [TestMethod]
         public void testKingsideCastlingNotation()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 7, 0);
 
@@ -48,7 +48,7 @@ namespace Tests
         [TestMethod]
         public void testQueensideCastlingNotation()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 0);
 
@@ -64,7 +64,7 @@ namespace Tests
         [TestMethod]
         public void testQueensideCastlingMoveIsFound()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 0);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 7, 7);
@@ -88,7 +88,7 @@ namespace Tests
         {
             // It is legal to castle queenside if the space next to the rook is covered, since the king
             // does not move through it.
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 0);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 7, 7);
@@ -114,7 +114,7 @@ namespace Tests
         public void testQueensideCastlingMoveIsNotFoundThroughCheck()
         {
             // And we cannot castle through check apart from as noted above.
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 0);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 7, 7);
@@ -131,7 +131,7 @@ namespace Tests
         public void testQueensideCastlingMoveIsNotFoundThroughAPiece()
         {
             // Place an enemy pawn in the way which will prevent us from castling.
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 0);
             ourBoard.addPiece(pieceType.pawn, pieceColour.black, 1, 0);
@@ -147,7 +147,7 @@ namespace Tests
         [TestMethod]
         public void testQueensideCastlingMoveIsExecutedCorrectly()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             square ourRook = ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 0);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 7, 7);
@@ -164,7 +164,7 @@ namespace Tests
         [TestMethod]
         public void testQueensideCastlingMoveIsUnExecutedCorrectly()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 0);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 7, 7);

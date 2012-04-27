@@ -12,7 +12,7 @@ namespace Tests
         [TestMethod]
         public void testKingsideCastlingMoveIsFound()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 7, 0);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 0, 0);
@@ -35,7 +35,7 @@ namespace Tests
         public void testKingsideCastlingMoveIsNotFoundThroughCheck()
         {
             // Place an enemy rook which will prevent us from castling.
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 7, 0);
             ourBoard.addPiece(pieceType.rook, pieceColour.black, 5, 7);
@@ -52,7 +52,7 @@ namespace Tests
         public void testKingsideCastlingMoveIsNotFoundThroughAPiece()
         {
             // Place an enemy pawn in the way which will prevent us from castling.
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 7, 0);
             ourBoard.addPiece(pieceType.pawn, pieceColour.black, 6, 0);
@@ -68,7 +68,7 @@ namespace Tests
         [TestMethod]
         public void testKingsideCastlingMoveIsNotAfterKingHasMoved()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 3, 0);
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 7, 0);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 0, 0);
@@ -87,7 +87,7 @@ namespace Tests
         [TestMethod]
         public void testKingsideCastlingMoveIsNotAfterRookHasMoved()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             square ourRook = ourBoard.addPiece(pieceType.rook, pieceColour.white, 6, 0);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 0, 0);
@@ -106,7 +106,7 @@ namespace Tests
         [TestMethod]
         public void testKingsideCastlingMoveIsExecutedCorrectly()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             square ourRook = ourBoard.addPiece(pieceType.rook, pieceColour.white, 7, 0);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 0, 0);
@@ -123,7 +123,7 @@ namespace Tests
         [TestMethod]
         public void testKingsideCastlingMoveIsUnExecutedCorrectly()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             square ourRook = ourBoard.addPiece(pieceType.rook, pieceColour.white, 7, 0);
             ourBoard.addPiece(pieceType.king, pieceColour.black, 0, 0);

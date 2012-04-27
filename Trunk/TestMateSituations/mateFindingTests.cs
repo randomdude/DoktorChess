@@ -67,7 +67,7 @@ namespace TestMateSituations
         {
             boardSearchConfig cfg = boardSearchConfig.getDebugConfig();
             cfg.searchDepth = (ourmoves + (ourmoves - 1) ) - 1;
-            Board testBoard = Board.makeNormalFromFEN(testFEN, cfg);
+            DoktorChessAIBoard testBoard = DoktorChessAIBoard.makeNormalFromFEN(testFEN, cfg);
 
             testBoard.disableThreeFoldRule();
 

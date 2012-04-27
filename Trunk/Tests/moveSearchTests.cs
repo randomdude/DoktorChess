@@ -28,7 +28,7 @@ namespace Tests
             config.useAlphaBeta = useAlphaBeta;
             config.searchDepth = depth;
             config.scoreConfig.danglingModifier = 0;
-            Board ourBoard = Board.makeQueenAndPawnsStartPosition(config);
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeQueenAndPawnsStartPosition(config);
 
             // We are white, and it is white's move. What is the (our) best move? It should
             // be D3, to prevent the pawn at D2 from being taken. Note that this relies on
@@ -55,7 +55,7 @@ namespace Tests
         {
             boardSearchConfig config = boardSearchConfig.getDebugConfig();
             config.searchDepth = 0;
-            Board ourBoard = Board.makeFromFEN("8/1P6/8/P2q4/8/8/8/8 w - - 0 1", gameType.queenAndPawns, config);
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeFromFEN("8/1P6/8/P2q4/8/8/8/8 w - - 0 1", gameType.queenAndPawns, config);
 
             // We are white, and it is white's move. Analyze a situation in which pushing
             // a pawn will result in a win. Ensure that the AI does not push the wrong pawn.
@@ -78,7 +78,7 @@ namespace Tests
         {
             boardSearchConfig config = boardSearchConfig.getDebugConfig();
             config.searchDepth = 0;
-            Board ourBoard = new Board(gameType.normal, config);
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, config);
             square blackKing = ourBoard.addPiece(pieceType.king, pieceColour.black, 0, 0);
             ourBoard.addPiece(pieceType.rook, pieceColour.white, 1, 7);
             ourBoard.addPiece(pieceType.king, pieceColour.white, 7, 7);

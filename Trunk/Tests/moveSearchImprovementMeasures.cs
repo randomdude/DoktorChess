@@ -107,7 +107,7 @@ namespace Tests
 
         private static moveSearchStats runTest(boardSearchConfig searchConfig)
         {
-            Board ourBoard = Board.makeNormalStartPosition(searchConfig);
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeNormalStartPosition(searchConfig);
 
             ourBoard.findBestMove();
 

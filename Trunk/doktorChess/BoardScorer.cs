@@ -11,7 +11,7 @@ namespace doktorChess
         private readonly int _myMaterialAdvantage;
         private readonly int _myMaterialDisadvantage;
         private readonly gameStatus _status;
-        private readonly Board parentBoard;
+        private readonly DoktorChessAIBoard parentBoard;
         private readonly pieceColour viewpoint;
 
         private int castleAdvantage = 0;
@@ -23,7 +23,7 @@ namespace doktorChess
         public const int lowest = int.MinValue + 1000;
         public const int highest = int.MaxValue - 1000;
      
-        public BoardScorer(Board toScore, pieceColour newViewpoint, scoreModifiers newModifiers)
+        public BoardScorer(DoktorChessAIBoard toScore, pieceColour newViewpoint, scoreModifiers newModifiers)
         {
             modifiers = newModifiers;
             viewpoint = newViewpoint;
@@ -106,10 +106,10 @@ namespace doktorChess
             }
 
             danglingAdvantage = 0;
-            List<square> enemyPieces = parentBoard.getPiecesForColour(Board.getOtherSide(viewpoint));
+            List<square> enemyPieces = parentBoard.getPiecesForColour(DoktorChessAIBoard.getOtherSide(viewpoint));
             foreach (square enemyPiece in enemyPieces)
             {
-                if (parentBoard.getCoverLevel(enemyPiece, Board.getOtherSide(viewpoint)) < 0)
+                if (parentBoard.getCoverLevel(enemyPiece, DoktorChessAIBoard.getOtherSide(viewpoint)) < 0)
                     danglingAdvantage += (getMaterialAdvantage(enemyPiece.type));
             }
 

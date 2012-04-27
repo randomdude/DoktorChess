@@ -9,7 +9,7 @@ namespace doktorChess
 {
     [chessAIAttribute]
     [Serializable]
-    public class Board : baseBoard
+    public class DoktorChessAIBoard : baseBoard
     {
         private bool _whiteKingCaptured = false;
         private bool _blackKingCaptured = false;
@@ -34,7 +34,7 @@ namespace doktorChess
         // Keep some search stats in here
         public moveSearchStats stats;
 
-        public Board(gameType newType)
+        public DoktorChessAIBoard(gameType newType)
             : base(newType)
         {
             boardSearchConfig newSearchConfig = new boardSearchConfig();
@@ -52,7 +52,7 @@ namespace doktorChess
             _searchConfig = newSearchConfig;
         }
 
-        public Board(gameType newType, boardSearchConfig newSearchConfig)
+        public DoktorChessAIBoard(gameType newType, boardSearchConfig newSearchConfig)
             : base(newType)
         {
             // Note that kings are captured, since none exist.
@@ -68,20 +68,20 @@ namespace doktorChess
             _searchConfig = newSearchConfig;
         }
 
-        public static Board makeQueenAndPawnsStartPosition(boardSearchConfig searchConfig)
+        public static DoktorChessAIBoard makeQueenAndPawnsStartPosition(boardSearchConfig searchConfig)
         {
-            Board newBoard = new Board(gameType.queenAndPawns, searchConfig);
+            DoktorChessAIBoard newBoard = new DoktorChessAIBoard(gameType.queenAndPawns, searchConfig);
 
             newBoard.makeStartPosition();
 
             return newBoard;
         }
 
-        public static Board makeNormalStartPosition()
+        public static DoktorChessAIBoard makeNormalStartPosition()
         {
             boardSearchConfig config = new boardSearchConfig();
             config.searchDepth = 2;
-            Board newBoard = new Board(gameType.normal, config);
+            DoktorChessAIBoard newBoard = new DoktorChessAIBoard(gameType.normal, config);
 
             newBoard.makeStartPosition();
 
@@ -92,9 +92,9 @@ namespace doktorChess
             return newBoard;
         }
 
-        public static Board makeNormalStartPosition(boardSearchConfig searchConfig)
+        public static DoktorChessAIBoard makeNormalStartPosition(boardSearchConfig searchConfig)
         {
-            Board newBoard = new Board(gameType.normal, searchConfig);
+            DoktorChessAIBoard newBoard = new DoktorChessAIBoard(gameType.normal, searchConfig);
 
             newBoard.makeStartPosition();
 
@@ -105,16 +105,16 @@ namespace doktorChess
             return newBoard;
         }
 
-        public static Board makeFromFEN(string FENString, gameType newType, boardSearchConfig searchConfig)
+        public static DoktorChessAIBoard makeFromFEN(string FENString, gameType newType, boardSearchConfig searchConfig)
         {
-            Board newBoard = new Board(newType, searchConfig);
+            DoktorChessAIBoard newBoard = new DoktorChessAIBoard(newType, searchConfig);
 
             newBoard.makeFromFEN(FENString);
 
             return newBoard;
         }
 
-        public static Board makeNormalFromFEN(string FENString, boardSearchConfig searchConfig)
+        public static DoktorChessAIBoard makeNormalFromFEN(string FENString, boardSearchConfig searchConfig)
         {
             return makeFromFEN(FENString, gameType.normal, searchConfig);
         }

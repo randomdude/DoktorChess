@@ -9,7 +9,7 @@ namespace doktorChess
 
         public killerMoveStore(int searchDepth)
         {
-            const int boardSqCount = Board.sizeX * Board.sizeY;
+            const int boardSqCount = DoktorChessAIBoard.sizeX * DoktorChessAIBoard.sizeY;
 
             for (int depth = 0; depth < searchDepth + 1; depth++)
             {
@@ -22,7 +22,7 @@ namespace doktorChess
 
         private void initTableAtDepth(int depth)
         {
-            const int boardSqCount = Board.sizeX * Board.sizeY;
+            const int boardSqCount = DoktorChessAIBoard.sizeX * DoktorChessAIBoard.sizeY;
 
             // Then add a list of 64 square lists to each.
             for (int n = 0; n < boardSqCount; n++)

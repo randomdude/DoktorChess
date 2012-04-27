@@ -13,7 +13,7 @@ namespace Tests
         [TestMethod]
         public void testThreatMapDeep_pawn()
         {
-            Board ourBoard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 4, 1);
 
             if (ourBoard.getCoverLevel( new squarePos(3,2), pieceColour.white ) != 1 ||
@@ -65,7 +65,7 @@ namespace Tests
         [TestMethod]
         public void testThreatMapDeep_pawnCapture()
         {
-            Board ourBoard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 4, 1);
             square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 3, 2);
 
@@ -126,7 +126,7 @@ namespace Tests
         [TestMethod]
         public void testThreatMapDeep_discovered()
         {
-            Board ourBoard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig()  );
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.queenAndPawns, boardSearchConfig.getDebugConfig()  );
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 4, 1);
             square ourRook = ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 1);
 
@@ -145,7 +145,7 @@ namespace Tests
         [TestMethod]
         public void testThreatMapDeep_discoveredPromotion()
         {
-            Board ourBoard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 3, 6);
             square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 3, 7);
             square ourRook = ourBoard.addPiece(pieceType.rook, pieceColour.white, 0, 7);
@@ -168,7 +168,7 @@ namespace Tests
         [TestMethod]
         public void testThreatMapDeep_discoveredCapture()
         {
-            Board ourBoard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
 
             square ourPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.white, 0, 1);
             square enemyPawn = ourBoard.addPiece(pieceType.pawn, pieceColour.black, 1, 2);
@@ -203,16 +203,16 @@ namespace Tests
         [TestMethod]
         public void testMoveUndoingThreatmapWithCapture()
         {
-            Board ourBoard = Board.makeFromFEN("8/8/8/8/4p3/5P2/8/8 b - - 0 1", gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeFromFEN("8/8/8/8/4p3/5P2/8/8 b - - 0 1", gameType.normal, boardSearchConfig.getDebugConfig());
             square ourPawn = ourBoard[4, 3];
             square enemyPawn = ourBoard[5, 2];
 
             string origThreatMap = ourBoard.coverLevel.ToString();
 
-            int[,] threatCounts = new int[Board.sizeX,Board.sizeY];
-            for (int x = 0; x < Board.sizeX; x++)
+            int[,] threatCounts = new int[DoktorChessAIBoard.sizeX,DoktorChessAIBoard.sizeY];
+            for (int x = 0; x < DoktorChessAIBoard.sizeX; x++)
             {
-                for (int y = 0; y < Board.sizeY; y++)
+                for (int y = 0; y < DoktorChessAIBoard.sizeY; y++)
                 {
                     threatCounts[x, y] = ourBoard[x, y].coveredSquares.Count;
                 }
@@ -235,9 +235,9 @@ namespace Tests
                 throw new AssertFailedException("After a move undo, the threat map has changed");
             }
 
-            for (int x = 0; x < Board.sizeX; x++)
+            for (int x = 0; x < DoktorChessAIBoard.sizeX; x++)
             {
-                for (int y = 0; y < Board.sizeY; y++)
+                for (int y = 0; y < DoktorChessAIBoard.sizeY; y++)
                 {
                     if (threatCounts[x, y] != ourBoard[x, y].coveredSquares.Count)
                         throw new AssertFailedException("Piece covered count incorrect");
@@ -252,13 +252,13 @@ namespace Tests
             boardSearchConfig cfg = boardSearchConfig.getDebugConfig();
             cfg.checkLots = true;
             cfg.checkThreatMapLots = true;
-            Board ourBoard = Board.makeNormalStartPosition(cfg);
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeNormalStartPosition(cfg);
             string origThreatMap = ourBoard.coverLevel.ToString();
 
-            int[,] threatCounts = new int[Board.sizeX, Board.sizeY];
-            for (int x = 0; x < Board.sizeX; x++)
+            int[,] threatCounts = new int[DoktorChessAIBoard.sizeX, DoktorChessAIBoard.sizeY];
+            for (int x = 0; x < DoktorChessAIBoard.sizeX; x++)
             {
-                for (int y = 0; y < Board.sizeY; y++)
+                for (int y = 0; y < DoktorChessAIBoard.sizeY; y++)
                 {
                     threatCounts[x, y] = ourBoard[x, y].coveredSquares.Count;
                 }
@@ -287,9 +287,9 @@ namespace Tests
                     throw new AssertFailedException("After a move undo, the threat map has changed");
                 }
 
-                for (int x = 0; x < Board.sizeX; x++)
+                for (int x = 0; x < DoktorChessAIBoard.sizeX; x++)
                 {
-                    for (int y = 0; y < Board.sizeY; y++)
+                    for (int y = 0; y < DoktorChessAIBoard.sizeY; y++)
                     {
                         if (threatCounts[x, y] != ourBoard[x, y].coveredSquares.Count)
                         {
@@ -304,7 +304,7 @@ namespace Tests
         [TestMethod]
         public void testMoveUndoingThreatmap_Castling()
         {
-            Board ourBoard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             square ourKing = ourBoard.addPiece(pieceType.king, pieceColour.white, 4, 0);
             square ourRook = ourBoard.addPiece(pieceType.rook, pieceColour.white, 7, 0);
 
@@ -312,10 +312,10 @@ namespace Tests
 
             string origThreatMap = ourBoard.coverLevel.ToString();
 
-            int[,] threatCounts = new int[Board.sizeX,Board.sizeY];
-            for (int x = 0; x < Board.sizeX; x++)
+            int[,] threatCounts = new int[DoktorChessAIBoard.sizeX,DoktorChessAIBoard.sizeY];
+            for (int x = 0; x < DoktorChessAIBoard.sizeX; x++)
             {
-                for (int y = 0; y < Board.sizeY; y++)
+                for (int y = 0; y < DoktorChessAIBoard.sizeY; y++)
                 {
                     threatCounts[x, y] = ourBoard[x, y].coveredSquares.Count;
                 }
@@ -339,9 +339,9 @@ namespace Tests
                 throw new AssertFailedException("After a move undo, the threat map has changed");
             }
 
-            for (int x = 0; x < Board.sizeX; x++)
+            for (int x = 0; x < DoktorChessAIBoard.sizeX; x++)
             {
-                for (int y = 0; y < Board.sizeY; y++)
+                for (int y = 0; y < DoktorChessAIBoard.sizeY; y++)
                 {
                     if (threatCounts[x, y] != ourBoard[x, y].coveredSquares.Count)
                         throw new AssertFailedException("Piece covered count incorrect");
@@ -352,7 +352,7 @@ namespace Tests
         [TestMethod]
         public void testThreatMapQueenPawnsStartPosition()
         {
-            Board ourBoard = Board.makeQueenAndPawnsStartPosition(boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeQueenAndPawnsStartPosition(boardSearchConfig.getDebugConfig());
 
             string expectedThreatString =
                 " -1 -1 -1  0 -1 -1 -1 -1\r\n  0  0 -1 -1 -1  0  0  0\r\n  0 -1  0 -1  0 -1  0  0\r\n -1  0  0 -1  0  0 -1  0\r\n  0  0  0 -1  0  0  0 -1\r\n  1  2  2  1  2  2  2  1\r\n  0  0  0 -1  0  0  0  0\r\n  0  0  0  0  0  0  0  0\r\n";
@@ -366,7 +366,7 @@ namespace Tests
         [TestMethod]
         public void testThreatMapNormalStartPosition()
         {
-            Board ourBoard = Board.makeNormalStartPosition(boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeNormalStartPosition(boardSearchConfig.getDebugConfig());
 
             string expectedThreatString =
                 "  0 -1 -1 -1 -1 -1 -1  0\r\n -1 -1 -1 -4 -4 -1 -1 -1\r\n -2 -2 -3 -2 -2 -3 -2 -2\r\n  0  0  0  0  0  0  0  0\r\n  0  0  0  0  0  0  0  0\r\n  2  2  3  2  2  3  2  2\r\n  1  1  1  4  4  1  1  1\r\n  0  1  1  1  1  1  1  0\r\n";

@@ -12,13 +12,13 @@ namespace doktorChess
         /// <summary>
         /// The actual threat map, from whites POV
         /// </summary>
-        private readonly int[,] threats = new int[Board.sizeX,Board.sizeY];
+        private readonly int[,] threats = new int[DoktorChessAIBoard.sizeX,DoktorChessAIBoard.sizeY];
 
         /// <summary>
         /// 64 lists of squarePos, each holding a list of squares which cover it
         /// </summary>
-        public readonly speedySquareList[,] piecesWhichThreatenSquare = new speedySquareList[Board.sizeX, Board.sizeY];
-        private readonly Board _parentBoard;
+        public readonly speedySquareList[,] piecesWhichThreatenSquare = new speedySquareList[DoktorChessAIBoard.sizeX, DoktorChessAIBoard.sizeY];
+        private readonly DoktorChessAIBoard _parentBoard;
 
         /// <summary>
         /// Check internal consistency frequently if set
@@ -31,13 +31,13 @@ namespace doktorChess
             set { threats[position.x, position.y] = value; }
         }
 
-        public threatMap(Board newBoard)
+        public threatMap(DoktorChessAIBoard newBoard)
         {
             _parentBoard = newBoard;
 
-            for (int y = 0; y < Board.sizeY; y++)
+            for (int y = 0; y < DoktorChessAIBoard.sizeY; y++)
             {
-                for (int x = 0; x < Board.sizeX; x++)
+                for (int x = 0; x < DoktorChessAIBoard.sizeX; x++)
                 {
                     // Spawn lists of pieces which threaten each square
                     piecesWhichThreatenSquare[x, y] = new speedySquareList();
@@ -119,17 +119,17 @@ namespace doktorChess
 
                 // Look right up to the edge for all pieces apart from the king, which can look only
                 // one square in each direction.
-                int limitx = Board.sizeX;
-                int limity = Board.sizeY;
+                int limitx = DoktorChessAIBoard.sizeX;
+                int limity = DoktorChessAIBoard.sizeY;
                 if (toRecalc.type == pieceType.king)
                 {
                     limitx = toRecalc.position.x + (sx * 2);
                     limity = toRecalc.position.x + (sy * 2);
 
-                    if (limitx > Board.sizeX)
-                        limitx = Board.sizeX;
-                    if (limity > Board.sizeY)
-                        limity = Board.sizeY;
+                    if (limitx > DoktorChessAIBoard.sizeX)
+                        limitx = DoktorChessAIBoard.sizeX;
+                    if (limity > DoktorChessAIBoard.sizeY)
+                        limity = DoktorChessAIBoard.sizeY;
                 }
 
                 //Debug.WriteLine( toRecalc.type + toRecalc.position + ":");
@@ -223,17 +223,17 @@ namespace doktorChess
 
                 // Look right up to the edge for all pieces apart from the king, which can look only
                 // one square in each direction.
-                int limitx = Board.sizeX;
-                int limity = Board.sizeY;
+                int limitx = DoktorChessAIBoard.sizeX;
+                int limity = DoktorChessAIBoard.sizeY;
                 if (toRecalc.type == pieceType.king)
                 {
                     limitx = toRecalc.position.x + (2 * sx);
                     limity = toRecalc.position.x + (2 * sx);
 
-                    if (limitx > Board.sizeX)
-                        limitx = Board.sizeX;
-                    if (limity > Board.sizeY)
-                        limity = Board.sizeY;
+                    if (limitx > DoktorChessAIBoard.sizeX)
+                        limitx = DoktorChessAIBoard.sizeX;
+                    if (limity > DoktorChessAIBoard.sizeY)
+                        limity = DoktorChessAIBoard.sizeY;
                 }
 
                 //Debug.WriteLine(toRecalc.type + " @ " + toRecalc.position + ":");
@@ -264,11 +264,11 @@ namespace doktorChess
 
         public override string ToString()
         {
-            StringBuilder toRet = new StringBuilder(Board.sizeY * (Board.sizeY * 2));
+            StringBuilder toRet = new StringBuilder(DoktorChessAIBoard.sizeY * (DoktorChessAIBoard.sizeY * 2));
 
-            for (int y = Board.sizeY - 1; y > -1; y--)
+            for (int y = DoktorChessAIBoard.sizeY - 1; y > -1; y--)
             {
-                for (int x = 0; x < Board.sizeX; x++)
+                for (int x = 0; x < DoktorChessAIBoard.sizeX; x++)
                     toRet.Append(threats[x, y].ToString().PadLeft(3, ' '));
                 toRet.AppendLine();
             }
@@ -280,7 +280,7 @@ namespace doktorChess
         {
             // Return true if the square is covered by at least one enemy piece. Ignore if we are 
             // covering it or not.
-            pieceColour otherSide = Board.getOtherSide(sideToExamine);
+            pieceColour otherSide = DoktorChessAIBoard.getOtherSide(sideToExamine);
             return piecesWhichThreatenSquare[squareToCheck.position.x, squareToCheck.position.y].Any(sp => _parentBoard[squarePos.unflatten(sp)].colour == otherSide);
         }
 
@@ -289,9 +289,9 @@ namespace doktorChess
             if (!checkStuff)
                 return;
 
-            for (int y = Board.sizeY - 1; y > -1; y--)
+            for (int y = DoktorChessAIBoard.sizeY - 1; y > -1; y--)
             {
-                for (int x = 0; x < Board.sizeX; x++)
+                for (int x = 0; x < DoktorChessAIBoard.sizeX; x++)
                 {
                     int calculated = 0;
                     foreach (int flatSqPos in piecesWhichThreatenSquare[x, y])

@@ -16,7 +16,7 @@ namespace Tests
             // Generate a boardScorer and present it with a queen (ours), and two pawns
             // (enemy). Verify the resultant score as 8-2 = 6.
 
-            Board ourboard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourboard = new DoktorChessAIBoard(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
 
             ourboard.addPiece(pieceType.queen, pieceColour.white, 1, 1);
             ourboard.addPiece(pieceType.pawn, pieceColour.black, 3, 4);
@@ -33,7 +33,7 @@ namespace Tests
         [TestMethod]
         public void testScoreWithDangling()
         {
-            Board ourboard = new Board(gameType.normal, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourboard = new DoktorChessAIBoard(gameType.normal, boardSearchConfig.getDebugConfig());
             ourboard.addPiece(pieceType.pawn, pieceColour.black, 3, 3);
             ourboard.addPiece(pieceType.queen, pieceColour.white, 2, 2);
 
@@ -55,7 +55,7 @@ namespace Tests
         {
             // Generate a board which is lost via the 'no pieces remain' rule, and verify
             // we get the correct score.
-            Board ourboard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourboard = new DoktorChessAIBoard(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             ourboard.addPiece(pieceType.pawn, pieceColour.black, 1, 1);
 
             // position is lost for white..
@@ -72,14 +72,14 @@ namespace Tests
         {
             // We make two different boards here to test two different scenarios - if a black
             // pawn is at rank 0 and a white at rank 7.
-            Board pawnAt0 = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard pawnAt0 = new DoktorChessAIBoard(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             pawnAt0.addPiece(pieceType.pawn, pieceColour.black, 1, 0);
 
             // Should be a black win.
             verifyWonForWhite(pawnAt0, pieceColour.black);
 
             // Now the white pawn at rank 7.
-            Board pawnAt7 = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard pawnAt7 = new DoktorChessAIBoard(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             pawnAt7.addPiece(pieceType.pawn, pieceColour.white, 1, 7);
 
             // Should be a white win.
@@ -92,7 +92,7 @@ namespace Tests
             // Generate a board two pawns, deadlocked in front of each other. This should
             // be a draw via stalemate. Add a third pawn to ensure that stalemate is causing
             // the '0' board score, not a materian mismatch.
-            Board ourboard = new Board(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
+            DoktorChessAIBoard ourboard = new DoktorChessAIBoard(gameType.queenAndPawns, boardSearchConfig.getDebugConfig());
             // Two deadlocked pawns
             ourboard.addPiece(pieceType.pawn, pieceColour.white, 1, 2);
             ourboard.addPiece(pieceType.pawn, pieceColour.black, 1, 3);
@@ -112,7 +112,7 @@ namespace Tests
         public void testFinishedGameScoreStalemate_example()
         {
             // Specific situation that was broken. It's black-to-play stalemate.
-            Board ourboard = Board.makeNormalFromFEN("5B2/6P1/8/1p6/1N6/kP6/2K5/8 b - - 0 0",
+            DoktorChessAIBoard ourboard = DoktorChessAIBoard.makeNormalFromFEN("5B2/6P1/8/1p6/1N6/kP6/2K5/8 b - - 0 0",
                                                      boardSearchConfig.getDebugConfig());
 
             Assert.IsTrue(ourboard.getGameStatus(pieceColour.white) == gameStatus.drawn);
@@ -127,7 +127,7 @@ namespace Tests
         [TestMethod] 
         public void verifyThreeFoldRepetition_afterMoves()
         {
-            Board ourBoard = Board.makeNormalStartPosition();
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeNormalStartPosition();
 
             // Move some pieces, just so we're not verifying the start position (altho that works
             // too).
@@ -142,7 +142,7 @@ namespace Tests
         [TestMethod]
         public void verifyThreeFoldRepetition_fromStart()
         {
-            Board ourBoard = Board.makeNormalStartPosition();
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeNormalStartPosition();
 
             doVerifyThreeFoldRepetition(ourBoard);
         }
@@ -184,7 +184,7 @@ namespace Tests
         [TestMethod] 
         public void verifyFiftyMoveRule()
         {
-            Board ourBoard = Board.makeNormalStartPosition();
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeNormalStartPosition();
             ourBoard.disableThreeFoldRule();
             verifyFiftyMoveRule(ourBoard, 0);
         }
@@ -192,7 +192,7 @@ namespace Tests
         [TestMethod]
         public void verifyFiftyMoveRule_afterMoves()
         {
-            Board ourBoard = Board.makeNormalStartPosition();
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeNormalStartPosition();
             ourBoard.disableThreeFoldRule();
 
             // Play Nf3
@@ -206,7 +206,7 @@ namespace Tests
         [TestMethod]
         public void verifyFiftyMoveRule_afterPawnMoves()
         {
-            Board ourBoard = Board.makeNormalStartPosition();
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeNormalStartPosition();
             ourBoard.disableThreeFoldRule();
 
             // Play Nf3
@@ -221,7 +221,7 @@ namespace Tests
             verifyFiftyMoveRule(ourBoard, 0);
         }
 
-        public void verifyFiftyMoveRule(Board ourBoard, int moveOffset)
+        public void verifyFiftyMoveRule(DoktorChessAIBoard ourBoard, int moveOffset)
         {
 
             for (int n = 0; n < 100 - moveOffset; n++)
@@ -272,15 +272,15 @@ namespace Tests
         public void testFinishedGameScore_example(string toTestFEN)
         {
             // Verify a situation is a win for white from a FEN.
-            Board ourBoard = Board.makeNormalFromFEN(toTestFEN, new boardSearchConfig());
+            DoktorChessAIBoard ourBoard = DoktorChessAIBoard.makeNormalFromFEN(toTestFEN, new boardSearchConfig());
 
             // Game should be won for white and lost for black.
             verifyWonForWhite(ourBoard, pieceColour.white);
         }
 
-        private void verifyWonForWhite(Board ourBoard, pieceColour wonCol)
+        private void verifyWonForWhite(DoktorChessAIBoard ourBoard, pieceColour wonCol)
         {
-            pieceColour lostCol = Board.getOtherSide(wonCol);
+            pieceColour lostCol = DoktorChessAIBoard.getOtherSide(wonCol);
 
             // The position should be won/lost for white/black, respectively
             Assert.IsTrue(ourBoard.getGameStatus(wonCol) == gameStatus.won);

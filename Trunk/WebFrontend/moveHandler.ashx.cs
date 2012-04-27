@@ -122,11 +122,11 @@ namespace WebFrontend
                 htmlTable.CellPadding = 0;
                 htmlTable.CellSpacing = 0;
 
-                for (int y = Board.sizeY - 1; y > -1; y--)
+                for (int y = DoktorChessAIBoard.sizeY - 1; y > -1; y--)
                 {
                     TableRow newRow = new TableRow();
 
-                    for (int x = 0; x < Board.sizeX; x++)
+                    for (int x = 0; x < DoktorChessAIBoard.sizeX; x++)
                     {
                         TableCell newCell = new TableCell();
 
