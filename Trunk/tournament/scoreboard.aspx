@@ -29,6 +29,7 @@
                     <asp:TableRow ID="TableRow1" runat="server"> 
                         <asp:TableHeaderCell ID="TableHeaderCell1" runat="server">Rank</asp:TableHeaderCell>
                         <asp:TableHeaderCell ID="TableHeaderCell4" runat="server">Name</asp:TableHeaderCell>
+                        <asp:TableHeaderCell ID="TableHeaderCell8" runat="server">Owner</asp:TableHeaderCell>
                         <asp:TableHeaderCell ID="TableHeaderCell2" runat="server">Score</asp:TableHeaderCell>
                         <asp:TableHeaderCell ID="TableHeaderCell5" runat="server">Wins</asp:TableHeaderCell>
                         <asp:TableHeaderCell ID="TableHeaderCell6" runat="server">Draws</asp:TableHeaderCell>
@@ -134,7 +135,7 @@
                                         </tr>
                                         <tr>
                                             <td>
-                                                <asp:Button ID="cmdEmptyTournament" runat="server" Text="Clear current players" onclick="cmdEmptyTournament_Click" />
+                                                <asp:Button ID="cmdRemoveMyPlayers" runat="server" Text="Remove my players" onclick="cmdRemoveMyPlayers_Click" />
                                             </td>
                                             <td>
                                                 <asp:Button ID="cmdRestartTournament" runat="server" Text="Restart tournament" onclick="cmdRestartTournament_Click" />

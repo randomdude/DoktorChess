@@ -30,9 +30,13 @@ namespace tournament
                     {
                         foreach (contender contenderBlack in contenders)
                         {
-                            // Don't make engines play themselves!
+                            // Don't make AIs play themselves
                             if (contenderWhite == contenderBlack)
                                 continue;
+                            // And don't let two house players play.
+                            if (contenderWhite.isHousePlayer == contenderBlack.isHousePlayer)
+                                continue;
+
                             gameQueue.Add(new tournamentGame(contenderWhite, contenderBlack)
                                               {OnGameFinished = gameFinished});
                         }

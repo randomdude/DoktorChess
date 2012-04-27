@@ -40,12 +40,17 @@ namespace tournament
         public readonly List<playedGame> gamesPlayed = new List<playedGame>();
         public Exception exception;
         public int timeLeft;
+        public bool isHousePlayer;
+        public string ownerName;
 
         public contender(assemblyNameAndType AssAndType)
         {
             boardType = AssAndType.theType;
             assemblyName = AssAndType.AssemblyName;
             assemblyPath = AssAndType.AssemblyFolder;
+            isHousePlayer = AssAndType.isHousePlayer;
+            ownerName = AssAndType.ownerName;
+
             lock (nextIDLock)
             {
                 ID = _nextID;

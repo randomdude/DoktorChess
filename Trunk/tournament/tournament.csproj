@@ -128,10 +128,6 @@
       <Project>{E0E25E55-D11C-4957-856F-3CD291FD1831}</Project>
       <Name>doktorChessGameEngine</Name>
     </ProjectReference>
-    <ProjectReference Include="..\doktorChess\doktorChess.csproj">
-      <Project>{6B583D3F-16E3-4CFB-8B4A-8CE786724534}</Project>
-      <Name>doktorChess</Name>
-    </ProjectReference>
     <ProjectReference Include="..\exampleMiniMax\exampleMiniMax.csproj">
       <Project>{F636E53D-38CA-4201-B514-DEE66B85E5E9}</Project>
       <Name>exampleMiniMax</Name>

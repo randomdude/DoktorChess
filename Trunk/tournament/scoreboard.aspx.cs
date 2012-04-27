@@ -266,17 +266,29 @@ namespace tournament
 
                 TableCell cell0 = new TableCell();
                 cell0.Text = n.ToString();
+                if (thisContender.ownerName == Context.User.Identity.Name)
+                    cell0.CssClass =  "resultCellMyPlayer";
                 newRow.Cells.Add(cell0);
 
                 TableCell cell1 = new TableCell();
                 HyperLink playerDetailLink = new HyperLink();
                 playerDetailLink.NavigateUrl = "/playerDetail.aspx?playerID=" + thisContender.ID;
                 playerDetailLink.Text = thisContender.typeName;
+                if (thisContender.ownerName == Context.User.Identity.Name)
+                    cell1.CssClass = "resultCellMyPlayer";
                 cell1.Controls.Add(playerDetailLink);
                 newRow.Cells.Add(cell1);
 
-                newRow.Cells.Add(utils.makeCellAndEscapeContents(thisContender.score.ToString()));
-
+                if (thisContender.ownerName == Context.User.Identity.Name)
+                {
+                    newRow.Cells.Add(utils.makeCellAndEscapeContents(thisContender.ownerName, "resultCellMyPlayer"));
+                    newRow.Cells.Add(utils.makeCellAndEscapeContents(thisContender.score.ToString(), "resultCellMyPlayer"));
+                }
+                else
+                {
+                    newRow.Cells.Add(utils.makeCellAndEscapeContents(thisContender.ownerName));
+                    newRow.Cells.Add(utils.makeCellAndEscapeContents(thisContender.score.ToString()));
+                }
                 newRow.Cells.Add(utils.makeCellAndEscapeContents(thisContender.wins.ToString(), "resultCellWin"));
                 newRow.Cells.Add(utils.makeCellAndEscapeContents(thisContender.draws.ToString(), "resultCellDraw"));
                 newRow.Cells.Add(utils.makeCellAndEscapeContents(thisContender.losses.ToString(), "resultCellLoss"));
@@ -297,6 +309,19 @@ namespace tournament
             Response.Redirect("scoreboard.aspx");
         }
 
+        protected void cmdRemoveMyPlayers_Click(object sender, EventArgs e)
+        {
+            if (HttpContext.Current.User == null ||
+                !HttpContext.Current.User.Identity.IsAuthenticated)
+            {
+                Response.Redirect("/login.aspx");
+                return;
+            }
+
+            runningTournament.clearPlayers(Context.User.Identity.Name);
+
+            Response.Redirect("/scoreboard.aspx");
+        }
 
         protected void cmdEmptyTournament_Click(object sender, EventArgs e)
         {
@@ -361,13 +386,35 @@ namespace tournament
             string assemblyPath = Path.Combine(assemblyFolder, FileUpload.FileName);
             FileUpload.SaveAs(assemblyPath);
 
+            List<assemblyNameAndType> newPlayerTypes = processFile(assemblyPath, HttpContext.Current.User.Identity.Name);
+
+            if (newPlayerTypes.Count == 0)
+            {
+                Response.Write("No [chessAI]-tagged classes found in the supplied assembly");
+                return;
+            }
+
+            // We have loaded one or more players. We should stop the current tournament and start a new one
+            // including this player.
+            runningTournament.endAndStartWithNewPlayers(newPlayerTypes);
+            
+            Response.Redirect("/scoreboard.aspx");
+        }
+
+        public static List<assemblyNameAndType> processFile(string assemblyPath, string owner)
+        {
+            string assemblyFolder = Path.GetDirectoryName(assemblyPath);
             // Copy the doktorChessGameEngine assembly in to the new folder, since it is referenced by the
             // new assebly
-            string toCopy = Assembly.GetAssembly(typeof (baseBoard)).Location;
-            string dokChessPath = Path.Combine(assemblyFolder, "doktorChessGameEngine.dll");
-            File.Copy(toCopy, dokChessPath );
+            if (!File.Exists(Path.Combine(assemblyFolder, "doktorChessGameEngine.dll")))
+            {
+                string toCopy = Assembly.GetAssembly(typeof (baseBoard)).Location;
+                string dokChessPath = Path.Combine(assemblyFolder, "doktorChessGameEngine.dll");
+                File.Copy(toCopy, dokChessPath);
+            }
 
             // Load the new assembly in to a new AppDomain
+            List<assemblyNameAndType> newPlayerTypes = new List<assemblyNameAndType>(5);
             AppDomain domain = tournamentGame.createAppDomain(assemblyFolder, "AI Interrogation");
             try
             {
@@ -376,35 +423,22 @@ namespace tournament
                 Assembly ass = domain.Load(asmName.FullName);
 
                 // Find types which are tagged with our chessAIAttribute
-                List<assemblyNameAndType> newPlayerTypes = new List<assemblyNameAndType>(5);
                 Module[] modules = ass.GetModules();
                 foreach (Module module in modules)
                 {
                     foreach (Type typeToInterrogate in module.GetTypes())
                     {
-                        if (typeToInterrogate.GetCustomAttributes(typeof(chessAIAttribute), true).Length > 0)
+                        if (typeToInterrogate.GetCustomAttributes(typeof (chessAIAttribute), true).Length > 0)
                         {
-                            newPlayerTypes.Add(new assemblyNameAndType(assemblyPath, assemblyFolder, typeToInterrogate));
+                            newPlayerTypes.Add(new assemblyNameAndType(assemblyPath, assemblyFolder, typeToInterrogate) {ownerName = owner});
                         }
                     }
                 }
-
-                if (newPlayerTypes.Count == 0)
-                {
-                    Response.Write("No [chessAI]-tagged classes found in the supplied assembly");
-                    return;
-                }
-
-                // We have loaded one or more players. We should stop the current tournament and start a new one
-                // including this player.
-                runningTournament.endAndStartWithNewPlayers(newPlayerTypes);
-
-                Response.Redirect("/scoreboard.aspx");
             }
-            //catch(Exception)
-            //{
-            //    // TODO: Nice exception handling (dialogs, etc).
-            //}
+                //catch(Exception)
+                //{
+                //    // TODO: Nice exception handling (dialogs, etc).
+                //}
             finally 
             {
                 try
@@ -415,7 +449,8 @@ namespace tournament
                 {
                     // ... bah.
                 }
-           }
+            }
+            return newPlayerTypes;
         }
     }
 }

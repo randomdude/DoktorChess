@@ -68,6 +68,15 @@ namespace tournament {
         protected global::System.Web.UI.WebControls.TableHeaderCell TableHeaderCell4;
         
         /// <summary>
+        /// TableHeaderCell8 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TableHeaderCell TableHeaderCell8;
+        
+        /// <summary>
         /// TableHeaderCell2 control.
         /// </summary>
         /// <remarks>
@@ -293,13 +302,13 @@ namespace tournament {
         protected global::System.Web.UI.WebControls.Button cmdUploadAI;
         
         /// <summary>
-        /// cmdEmptyTournament control.
+        /// cmdRemoveMyPlayers control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button cmdEmptyTournament;
+        protected global::System.Web.UI.WebControls.Button cmdRemoveMyPlayers;
         
         /// <summary>
         /// cmdRestartTournament control.
